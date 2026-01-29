@@ -10,7 +10,7 @@ This document outlines the development phases for Ghallia, from initial foundati
 
 **Goal:** Establish core project architecture and basic functionality
 
-- [ ] Project setup and architecture
+- [x] Project setup and architecture (TypeScript + React + Vite)
 - [ ] Core game state management
 - [ ] Basic UI framework
 - [ ] Save/load system (local storage)
@@ -293,16 +293,16 @@ All skills follow the same pattern. Examples:
 
 Priority tasks for the next development sprint:
 
-1. [ ] Finalize technology stack decision
-2. [ ] Design XP curve formula (levels 1-999)
-3. [ ] Create skill data structure
+1. [x] Finalize technology stack decision (TypeScript + React + Vite)
+2. [x] Design XP curve formula (levels 1-999) - see GAME_MATH.md
+3. [x] Create skill data structure - see `src/types/game.types.ts`
 4. [ ] Design basic UI wireframes
 5. [ ] Implement core game loop prototype
 6. [ ] Create resource/item database schema
-7. [ ] Design Chaos Point earning formula
+7. [x] Design Chaos Point earning formula - see GAME_MATH.md
 8. [ ] Map out initial talent tree
 9. [ ] Complete tier lists for all 20 skills (every 20 levels)
-10. [ ] Design mid-tier upgrade costs and scaling formula
+10. [x] Design mid-tier upgrade costs and scaling formula - see GAME_MATH.md
 11. [ ] Balance tier unlock requirements vs rewards
 
 ---

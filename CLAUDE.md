@@ -103,10 +103,23 @@ Chaos Points are spent on a vast talent tree providing permanent bonuses:
 
 ---
 
+## Technology Stack
+
+- **Frontend**: TypeScript + React + Vite
+- **Styling**: CSS Modules (TBD)
+- **State**: React Context + useReducer
+- **Storage**: localStorage (cloud sync later)
+- **Hosting**: Static files (any CDN/subdomain)
+
+Project location: `./ghallia-game/`
+
+---
+
 ## Related Documents
 
 - **[ROADMAP.md](./ROADMAP.md)** - Development phases, tech stack, and TODO tasks
 - **[FEATURES.md](./FEATURES.md)** - Comprehensive feature list for stakeholders
+- **[GAME_MATH.md](./GAME_MATH.md)** - All formulas, curves, and balance values
 
 ---
 
