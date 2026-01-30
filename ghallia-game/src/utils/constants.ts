@@ -44,20 +44,41 @@ export const BALANCE: BalanceConfig = {
 };
 
 // ============================================
-// SKILL UNLOCK COSTS
+// SKILL UNLOCK COSTS (Fast early game!)
 // ============================================
 
 export const SKILL_UNLOCK_COSTS = {
-  1: 0,           // Logging (free)
-  2: 1_000,       // Sawmill (required)
-  3: 10_000,
-  4: 50_000,
-  5: 100_000,
-  6: 250_000,
-  7: 500_000,
-  8: 1_000_000,
-  // 9+ calculated dynamically
+  1: 0,           // Logging (free) - instant
+  2: 100,         // Sawmill - ~2 minutes
+  3: 1_000,       // 3rd skill - ~5 minutes
+  4: 5_000,       // 4th skill - ~15 minutes
+  5: 25_000,      // 5th skill - ~45 minutes
+  6: 100_000,     // 6th skill - ~2 hours
+  7: 250_000,     // ~4 hours
+  8: 500_000,     // ~8 hours
+  // 9+ calculated dynamically (doubles each time)
 };
+
+// ============================================
+// EARLY GAME XP MULTIPLIERS
+// ============================================
+
+export const EARLY_GAME_XP_MULTIPLIERS = {
+  1: 3.0,    // Levels 1-10: 3x XP (tutorial)
+  11: 2.0,   // Levels 11-20: 2x XP (engagement)
+  21: 1.5,   // Levels 21-50: 1.5x XP (hook)
+  51: 1.0,   // Levels 51+: normal
+};
+
+/**
+ * Get XP multiplier based on current level (for fast early game)
+ */
+export function getEarlyGameMultiplier(level: number): number {
+  if (level <= 10) return EARLY_GAME_XP_MULTIPLIERS[1];
+  if (level <= 20) return EARLY_GAME_XP_MULTIPLIERS[11];
+  if (level <= 50) return EARLY_GAME_XP_MULTIPLIERS[21];
+  return EARLY_GAME_XP_MULTIPLIERS[51];
+}
 
 // ============================================
 // SUPPORT SKILL COSTS (Chaos Points)

@@ -19,6 +19,7 @@ import {
   COMPLEXITY_GOLD_MULTIPLIERS,
   GATHERING,
   PRESTIGE,
+  getEarlyGameMultiplier,
 } from './constants';
 
 // ============================================
@@ -66,10 +67,17 @@ export function levelFromTotalXp(totalXp: number): number {
 
 /**
  * Calculate XP earned per action based on tier and bonuses
+ * Includes early game multiplier for fast initial progression
  */
-export function xpPerAction(tier: number, xpBonusPercent: number = 0, talentMultiplier: number = 1): number {
+export function xpPerAction(
+  tier: number,
+  currentLevel: number,
+  xpBonusPercent: number = 0,
+  talentMultiplier: number = 1
+): number {
   const baseXp = BALANCE.xp.base * Math.pow(BALANCE.xp.tierScale, tier - 1);
-  return Math.floor(baseXp * (1 + xpBonusPercent / 100) * talentMultiplier);
+  const earlyGameBonus = getEarlyGameMultiplier(currentLevel);
+  return Math.floor(baseXp * earlyGameBonus * (1 + xpBonusPercent / 100) * talentMultiplier);
 }
 
 /**
@@ -115,14 +123,15 @@ export function craftedItemGoldValue(
 
 /**
  * Calculate cost to unlock the nth skill
+ * Fast early game: Sawmill at 100g (~2 min), 3rd skill at 1000g (~5 min)
  */
 export function skillUnlockCost(unlockNumber: number): number {
   if (unlockNumber <= 0) return 0;
   if (unlockNumber <= 8) {
     return SKILL_UNLOCK_COSTS[unlockNumber as keyof typeof SKILL_UNLOCK_COSTS] ?? 0;
   }
-  // After 8th skill, cost doubles each time from 1M base
-  return 250_000 * Math.pow(2, unlockNumber - 6);
+  // After 8th skill, cost doubles each time
+  return 250_000 * Math.pow(2, unlockNumber - 7);
 }
 
 // ============================================

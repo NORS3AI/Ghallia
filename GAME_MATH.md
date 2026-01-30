@@ -120,16 +120,18 @@ craft_multiplier:
 
 ### Base Unlock Costs
 
-| Unlock # | Skill | Cost | Notes |
-|----------|-------|------|-------|
-| 1 | Logging | FREE | Always available |
-| 2 | Sawmill | 1,000g | Required purchase |
-| 3 | Any | 10,000g | Player choice |
-| 4 | Any | 50,000g | Player choice |
-| 5 | Any | 100,000g | Player choice |
-| 6 | Any | 250,000g | Player choice |
-| 7 | Any | 500,000g | Player choice |
-| 8 | Any | 1,000,000g | Player choice |
+Designed for rapid early progression - player should unlock Sawmill within 2 minutes.
+
+| Unlock # | Skill | Cost | Expected Time |
+|----------|-------|------|---------------|
+| 1 | Logging | FREE | Instant |
+| 2 | Sawmill | 100g | ~1-2 minutes |
+| 3 | Any | 1,000g | ~5 minutes |
+| 4 | Any | 5,000g | ~15 minutes |
+| 5 | Any | 25,000g | ~45 minutes |
+| 6 | Any | 100,000g | ~2 hours |
+| 7 | Any | 250,000g | ~4 hours |
+| 8 | Any | 500,000g | ~8 hours |
 | 9+ | Any | Previous × 2 | Continues doubling |
 
 ### Formula
@@ -137,11 +139,12 @@ craft_multiplier:
 ```
 UNLOCK_COST(n) =
   n = 1: 0 (Logging is free)
-  n = 2: 1,000
-  n = 3: 10,000
-  n = 4: 50,000
-  n = 5: 100,000
-  n >= 6: 250,000 × 2^(n-6)
+  n = 2: 100 (Sawmill - fast unlock!)
+  n = 3: 1,000
+  n = 4: 5,000
+  n = 5: 25,000
+  n = 6: 100,000
+  n >= 7: 250,000 × 2^(n-7)
 ```
 
 ### Support Skills (Post-Prestige 1)
@@ -452,23 +455,91 @@ Tier 50: 1,083x
 
 ---
 
+## Early Game Pacing (Critical!)
+
+**Design Goal:** Player should never go more than 30 seconds without a reward in the first 10 minutes.
+
+### First 10 Minutes Timeline
+
+| Time | Event | Reward Type |
+|------|-------|-------------|
+| 0:00 | First click | Resource gathered! |
+| 0:05 | Level 2 | LEVEL UP! |
+| 0:15 | Level 3 | LEVEL UP! |
+| 0:30 | Level 4 | LEVEL UP! |
+| 0:45 | 50g earned | Can sell stack! |
+| 1:00 | Level 5 | LEVEL UP! |
+| 1:30 | 100g saved | **SAWMILL UNLOCKS!** |
+| 2:00 | Level 6 + craft queued | First craft started! |
+| 2:30 | First craft completes | Item crafted! Sell for profit! |
+| 3:00 | Level 7-8 | Two levels! |
+| 4:00 | Level 10 | **MID-TIER UPGRADE AVAILABLE!** |
+| 5:00 | 1,000g saved | **3RD SKILL UNLOCKS!** |
+| 7:00 | Level 15 | Halfway to tier 2! |
+| 10:00 | Level 20 | **NEW TIER! Oak trees unlocked!** |
+
+### Early Level Speed
+
+Levels 1-20 should fly by:
+
+```
+EARLY_GAME_XP_MULTIPLIER:
+  Levels 1-10: 3x XP (tutorial phase)
+  Levels 11-20: 2x XP (engagement phase)
+  Levels 21-50: 1.5x XP (hook phase)
+  Levels 51+: 1x XP (normal)
+```
+
+| Level | XP Needed | Clicks to Level (with bonus) |
+|-------|-----------|------------------------------|
+| 1→2 | 83 | ~3 clicks |
+| 2→3 | 91 | ~3 clicks |
+| 5→6 | 117 | ~4 clicks |
+| 9→10 | 163 | ~6 clicks |
+| 19→20 | 386 | ~20 clicks |
+
+### Dopamine Checklist
+
+Every session should include:
+- [ ] Level up within 30 seconds of starting
+- [ ] New unlock within 2 minutes
+- [ ] Visual feedback on every click (numbers, particles)
+- [ ] Audio feedback (optional but recommended)
+- [ ] Progress bar always visibly moving
+- [ ] "New!" badges on unlocked content
+- [ ] Achievement popups for milestones
+
+---
+
 ## Time Estimates
 
-### Estimated Play Time
+### Estimated Play Time (Revised)
 
 Based on average active play (gathering) and idle time (crafting):
 
 | Milestone | Estimated Time |
 |-----------|---------------|
-| Level 20 (first tier) | 30 minutes |
-| Level 50 | 3 hours |
-| Level 99 (prestige ready) | 20 hours |
-| 5 skills to 99 | 100 hours |
-| First prestige | 100-150 hours |
-| Level 200 | 200 hours |
-| Level 500 | 1,000 hours |
-| Level 999 | 5,000+ hours |
-| All skills 999 | 50,000+ hours |
+| Level 10 (first upgrade) | ~4 minutes |
+| Level 20 (first tier complete) | ~12 minutes |
+| Level 50 | ~2 hours |
+| Level 99 (prestige ready) | ~15 hours |
+| 5 skills to 99 | ~60 hours |
+| First prestige | ~60-80 hours |
+| Level 200 | ~150 hours |
+| Level 500 | ~800 hours |
+| Level 999 | ~4,000+ hours |
+| All skills 999 | ~40,000+ hours |
+
+### Skill Unlock Pacing
+
+| Skills Unlocked | Time Played | Player State |
+|-----------------|-------------|--------------|
+| 1 (Logging) | 0 min | Excited, learning |
+| 2 (Sawmill) | 2 min | "Oh cool, crafting!" |
+| 3 (choice) | 5 min | "I get to choose!" |
+| 4 (choice) | 15 min | Invested, planning ahead |
+| 5 (choice) | 45 min | Ready to prestige eventually |
+| 6+ | 2+ hours | Deep into the game |
 
 ### Daily Progress (Casual Player)
 
@@ -554,14 +625,15 @@ function calculateChaosPoints(skills: Skill[], gold: number): number {
   return Math.floor((100 + skillBonus + goldBonus) * multiplier);
 }
 
-// Skill unlock cost
+// Skill unlock cost (fast early game!)
 function skillUnlockCost(unlockNumber: number): number {
-  if (unlockNumber === 1) return 0;
-  if (unlockNumber === 2) return 1000;
-  if (unlockNumber === 3) return 10000;
-  if (unlockNumber === 4) return 50000;
-  if (unlockNumber === 5) return 100000;
-  return 250000 * Math.pow(2, unlockNumber - 6);
+  if (unlockNumber === 1) return 0;      // Logging free
+  if (unlockNumber === 2) return 100;    // Sawmill ~2 min
+  if (unlockNumber === 3) return 1000;   // ~5 min
+  if (unlockNumber === 4) return 5000;   // ~15 min
+  if (unlockNumber === 5) return 25000;  // ~45 min
+  if (unlockNumber === 6) return 100000; // ~2 hours
+  return 250000 * Math.pow(2, unlockNumber - 7);
 }
 
 // Mid-tier upgrade cost

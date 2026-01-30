@@ -33,16 +33,17 @@ Ghallia is a **hybrid idle/active game** inspired by Old School RuneScape (OSRS)
 
 ### Skill Unlock System
 
-Skills must be purchased with gold (except Logging, which is free).
+Skills must be purchased with gold (except Logging, which is free). Designed for fast early progression!
 
-| Unlock # | Cost | Notes |
-|----------|------|-------|
-| 1st | FREE | Logging (starter skill) |
-| 2nd | 1,000g | Sawmill (forced first purchase) |
-| 3rd | 10,000g | Player's choice |
-| 4th | 50,000g | Player's choice |
-| 5th | 100,000g | Player's choice |
-| 6th+ | TBD | Scaling costs |
+| Unlock # | Cost | Time to Unlock | Notes |
+|----------|------|----------------|-------|
+| 1st | FREE | Instant | Logging (starter skill) |
+| 2nd | 100g | ~2 minutes | Sawmill (required) |
+| 3rd | 1,000g | ~5 minutes | Player's choice |
+| 4th | 5,000g | ~15 minutes | Player's choice |
+| 5th | 25,000g | ~45 minutes | Player's choice |
+| 6th | 100,000g | ~2 hours | Player's choice |
+| 7th+ | 250K+ | Doubles each | Scaling costs |
 
 After purchasing Sawmill, players can unlock any Gathering or Crafting skill they want.
 
