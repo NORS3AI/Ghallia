@@ -3,13 +3,72 @@
  * Medieval idle/active crafting game
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { SkillType, SkillCategory } from './types/game.types';
 import { GameProvider, useGame, SKILL_DEFINITIONS, getUnlockCost } from './store/gameStore';
 import { SkillTable } from './components/skills/SkillTable';
 import { SkillDetail } from './components/skills/SkillDetail';
 import { UnlockPanel } from './components/ui/UnlockPanel';
 import { formatNumber } from './utils/math';
+
+// Error Boundary to catch and display errors
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: '20px',
+          background: '#1a1410',
+          color: '#e8dcc4',
+          minHeight: '100vh',
+          fontFamily: 'system-ui'
+        }}>
+          <h1 style={{ color: '#d4a853' }}>Something went wrong</h1>
+          <pre style={{
+            background: '#2a2218',
+            padding: '10px',
+            borderRadius: '8px',
+            overflow: 'auto',
+            fontSize: '12px'
+          }}>
+            {this.state.error?.message}
+            {'\n\n'}
+            {this.state.error?.stack}
+          </pre>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              background: '#d4a853',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Clear Save & Reload
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 type View = 'skills' | 'detail';
 
@@ -144,9 +203,11 @@ function GameApp() {
 
 function App() {
   return (
-    <GameProvider>
-      <GameApp />
-    </GameProvider>
+    <ErrorBoundary>
+      <GameProvider>
+        <GameApp />
+      </GameProvider>
+    </ErrorBoundary>
   );
 }
 
