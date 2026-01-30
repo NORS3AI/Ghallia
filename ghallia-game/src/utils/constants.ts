@@ -16,8 +16,8 @@ export const BALANCE: BalanceConfig = {
     levelExponent: 7,
   },
   gold: {
-    base: 1,      // 1g per tier 1 resource (realistic medieval economy)
-    tierScale: 1.5, // Faster scaling to compensate for lower base
+    base: 0.1,    // 0.1g per tier 1 resource (grindy medieval economy)
+    tierScale: 1.5, // 1.5x scaling per tier
     qualityMultipliers: {
       [ItemQuality.NORMAL]: 1.0,
       [ItemQuality.UNCOMMON]: 1.5,
@@ -49,13 +49,13 @@ export const BALANCE: BalanceConfig = {
 
 export const SKILL_UNLOCK_COSTS = {
   1: 0,           // Logging (free) - instant
-  2: 100,         // Sawmill - ~2 minutes
-  3: 1_000,       // 3rd skill - ~5 minutes
-  4: 5_000,       // 4th skill - ~15 minutes
-  5: 25_000,      // 5th skill - ~45 minutes
-  6: 100_000,     // 6th skill - ~2 hours
-  7: 250_000,     // ~4 hours
-  8: 500_000,     // ~8 hours
+  2: 1_000,       // Sawmill - grindy unlock
+  3: 10_000,      // 3rd skill
+  4: 50_000,      // 4th skill
+  5: 250_000,     // 5th skill
+  6: 1_000_000,   // 6th skill
+  7: 2_500_000,   // 7th skill
+  8: 5_000_000,   // 8th skill
   // 9+ calculated dynamically (doubles each time)
 };
 

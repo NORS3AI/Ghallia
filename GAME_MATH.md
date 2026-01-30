@@ -77,8 +77,8 @@ ACTUAL_XP = BASE_XP × (1 + xp_bonus_percent/100) × talent_multiplier
 ```
 GOLD_VALUE(tier, quality) = BASE_GOLD × tier_multiplier × quality_multiplier × (1 + gold_bonus/100)
 
-BASE_GOLD = 1 (realistic medieval economy)
-tier_multiplier = 1.5^(tier - 1) (faster scaling to compensate)
+BASE_GOLD = 0.1 (grindy medieval economy)
+tier_multiplier = 1.5^(tier - 1)
 quality_multiplier:
   - Normal: 1.0
   - Uncommon: 1.5
@@ -89,15 +89,15 @@ quality_multiplier:
 
 | Tier | Level Range | Gold per Normal Resource |
 |------|-------------|-------------------------|
-| 1 | 1-20 | 1g |
-| 2 | 21-40 | 1g |
-| 3 | 41-60 | 2g |
-| 5 | 81-100 | 5g |
-| 10 | 181-200 | 38g |
-| 20 | 381-400 | 1,477g |
-| 30 | 581-600 | 57,665g |
-| 40 | 781-800 | 2,250,423g |
-| 50 | 981-999 | 87,826,553g |
+| 1 | 1-20 | 0.1g |
+| 2 | 21-40 | 0.15g |
+| 3 | 41-60 | 0.22g |
+| 5 | 81-100 | 0.5g |
+| 10 | 181-200 | 3.8g |
+| 20 | 381-400 | 147g |
+| 30 | 581-600 | 5,766g |
+| 40 | 781-800 | 225,042g |
+| 50 | 981-999 | 8,782,655g |
 
 ### Selling Crafted Items
 
@@ -120,31 +120,31 @@ craft_multiplier:
 
 ### Base Unlock Costs
 
-Designed for rapid early progression - player should unlock Sawmill within 2 minutes.
+Grindy progression - requires dedication to unlock skills.
 
-| Unlock # | Skill | Cost | Expected Time |
-|----------|-------|------|---------------|
-| 1 | Logging | FREE | Instant |
-| 2 | Sawmill | 100g | ~1-2 minutes |
-| 3 | Any | 1,000g | ~5 minutes |
-| 4 | Any | 5,000g | ~15 minutes |
-| 5 | Any | 25,000g | ~45 minutes |
-| 6 | Any | 100,000g | ~2 hours |
-| 7 | Any | 250,000g | ~4 hours |
-| 8 | Any | 500,000g | ~8 hours |
-| 9+ | Any | Previous × 2 | Continues doubling |
+| Unlock # | Skill | Cost |
+|----------|-------|------|
+| 1 | Logging | FREE |
+| 2 | Sawmill | 1,000g |
+| 3 | Any | 10,000g |
+| 4 | Any | 50,000g |
+| 5 | Any | 250,000g |
+| 6 | Any | 1,000,000g |
+| 7 | Any | 2,500,000g |
+| 8 | Any | 5,000,000g |
+| 9+ | Any | Previous × 2 |
 
 ### Formula
 
 ```
 UNLOCK_COST(n) =
   n = 1: 0 (Logging is free)
-  n = 2: 100 (Sawmill - fast unlock!)
-  n = 3: 1,000
-  n = 4: 5,000
-  n = 5: 25,000
-  n = 6: 100,000
-  n >= 7: 250,000 × 2^(n-7)
+  n = 2: 1,000 (Sawmill)
+  n = 3: 10,000
+  n = 4: 50,000
+  n = 5: 250,000
+  n = 6: 1,000,000
+  n >= 7: 2,500,000 × 2^(n-7)
 ```
 
 ### Support Skills (Post-Prestige 1)
@@ -468,14 +468,11 @@ Tier 50: 1,083x
 | 0:15 | Level 3 | LEVEL UP! |
 | 0:30 | Level 4 | LEVEL UP! |
 | 1:00 | Level 5 | LEVEL UP! |
-| 1:30 | 100g saved (100 logs) | **SAWMILL UNLOCKS!** |
-| 2:00 | Level 6 + craft queued | First craft started! |
-| 2:30 | First craft completes | Item crafted! Sell for profit! |
-| 3:00 | Level 7-8 | Two levels! |
 | 4:00 | Level 10 | **MID-TIER UPGRADE AVAILABLE!** |
-| 8:00 | 1,000g saved | **3RD SKILL UNLOCKS!** |
-| 10:00 | Level 15 | Halfway to tier 2! |
+| 10:00 | Level 15 | Keep grinding! |
 | 15:00 | Level 20 | **NEW TIER! Oak trees unlocked!** |
+| ~2.7 hrs | 1,000g saved (10,000 logs) | **SAWMILL UNLOCKS!** |
+| Many hours | 10,000g saved | **3RD SKILL UNLOCKS!** |
 
 ### Early Level Speed
 
@@ -562,8 +559,8 @@ const BALANCE = {
   XP_TIER_SCALE: 1.15,
   XP_LEVEL_EXPONENT: 7,
 
-  // Gold (realistic medieval economy with faster tier scaling)
-  GOLD_BASE: 1,
+  // Gold (grindy economy)
+  GOLD_BASE: 0.1,
   GOLD_TIER_SCALE: 1.5,
 
   // Time
@@ -609,10 +606,10 @@ function totalXpForLevel(level: number): number {
   return total;
 }
 
-// Gold value of resource (1g base, 1.5x tier scaling)
+// Gold value of resource (0.1g base, 1.5x tier scaling)
 function resourceGoldValue(tier: number, quality: string): number {
   const qualityMult = { normal: 1, uncommon: 1.5, rare: 2.5, epic: 5, legendary: 10 };
-  return Math.floor(1 * Math.pow(1.5, tier - 1) * qualityMult[quality]);
+  return Math.floor(0.1 * Math.pow(1.5, tier - 1) * qualityMult[quality]);
 }
 
 // Chaos Points earned
@@ -624,15 +621,15 @@ function calculateChaosPoints(skills: Skill[], gold: number): number {
   return Math.floor((100 + skillBonus + goldBonus) * multiplier);
 }
 
-// Skill unlock cost (fast early game!)
+// Skill unlock cost (grindy progression)
 function skillUnlockCost(unlockNumber: number): number {
-  if (unlockNumber === 1) return 0;      // Logging free
-  if (unlockNumber === 2) return 100;    // Sawmill ~2 min
-  if (unlockNumber === 3) return 1000;   // ~5 min
-  if (unlockNumber === 4) return 5000;   // ~15 min
-  if (unlockNumber === 5) return 25000;  // ~45 min
-  if (unlockNumber === 6) return 100000; // ~2 hours
-  return 250000 * Math.pow(2, unlockNumber - 7);
+  if (unlockNumber === 1) return 0;         // Logging free
+  if (unlockNumber === 2) return 1000;      // Sawmill
+  if (unlockNumber === 3) return 10000;
+  if (unlockNumber === 4) return 50000;
+  if (unlockNumber === 5) return 250000;
+  if (unlockNumber === 6) return 1000000;
+  return 2500000 * Math.pow(2, unlockNumber - 7);
 }
 
 // Mid-tier upgrade cost
