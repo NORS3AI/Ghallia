@@ -62,10 +62,12 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 
-  /* Animation */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 400ms ease;
+  /* Animation - Floaty & Seamless */
+  --transition-fast: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-normal: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-slow: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-panel: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fade: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Reset & Base */
@@ -233,14 +235,16 @@ h4 { font-size: 1.1rem; }
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
   -webkit-user-select: none;
   user-select: none;
+  transform: scale(1) translateY(0);
 }
 
 .skill-card:active {
-  transform: scale(0.98);
+  transform: scale(0.96) translateY(2px);
   background: var(--color-bg-light);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .skill-card.locked {
@@ -313,17 +317,17 @@ h4 { font-size: 1.1rem; }
 .skill-detail {
   max-width: 600px;
   margin: 0 auto;
-  animation: slideIn var(--transition-normal);
+  animation: slideInFloaty 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes slideIn {
+@keyframes slideInFloaty {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(30px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
   }
 }
 
@@ -445,9 +449,9 @@ h4 { font-size: 1.1rem; }
   border-radius: 50%;
   background: linear-gradient(145deg, var(--color-bg-light), var(--color-bg-dark));
   border: 3px solid var(--color-gold-dark);
-  box-shadow: var(--shadow-lg), inset 0 2px 4px rgba(255,255,255,0.1);
+  box-shadow: var(--shadow-lg), inset 0 2px 4px rgba(255,255,255,0.1), 0 6px 20px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -455,12 +459,14 @@ h4 { font-size: 1.1rem; }
   margin: var(--spacing-md) auto;
   -webkit-user-select: none;
   user-select: none;
+  transform: scale(1) translateY(0);
 }
 
 .gather-button:active {
-  transform: scale(0.95);
-  box-shadow: var(--shadow-sm), inset 0 2px 8px rgba(0,0,0,0.3);
+  transform: scale(0.92) translateY(4px);
+  box-shadow: var(--shadow-sm), inset 0 4px 12px rgba(0,0,0,0.4);
   border-color: var(--color-gold);
+  background: linear-gradient(145deg, var(--color-bg-dark), var(--color-bg-medium));
 }
 
 .gather-hint {
@@ -564,9 +570,10 @@ h4 { font-size: 1.1rem; }
   font-family: var(--font-ui);
   font-size: 0.7rem;
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
   -webkit-user-select: none;
   user-select: none;
+  transform: scale(1) translateY(0);
 }
 
 .nav-button.active {
@@ -574,7 +581,8 @@ h4 { font-size: 1.1rem; }
 }
 
 .nav-button:active {
-  transform: scale(0.95);
+  transform: scale(0.9) translateY(2px);
+  color: var(--color-gold-light);
 }
 
 .nav-icon {
@@ -588,16 +596,19 @@ h4 { font-size: 1.1rem; }
 .unlock-panel-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
   z-index: 200;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--transition-normal);
+  transition: all var(--transition-fade), backdrop-filter var(--transition-panel);
 }
 
 .unlock-panel-overlay.open {
   opacity: 1;
   visibility: visible;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
 }
 
 .unlock-panel {
@@ -607,14 +618,15 @@ h4 { font-size: 1.1rem; }
   right: 0;
   background: var(--color-bg-medium);
   border-top: 2px solid var(--color-gold-dark);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-radius: 20px 20px 0 0;
   padding: var(--spacing-lg);
   padding-bottom: calc(var(--spacing-lg) + var(--safe-bottom));
   z-index: 201;
   transform: translateY(100%);
-  transition: transform var(--transition-normal);
+  transition: transform var(--transition-panel);
   max-height: 70vh;
   overflow-y: auto;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
 }
 
 .unlock-panel.open {
@@ -677,18 +689,23 @@ h4 { font-size: 1.1rem; }
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
   white-space: nowrap;
+  transform: scale(1);
+  box-shadow: 0 2px 8px rgba(212, 168, 83, 0.3);
 }
 
 .unlock-button:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
+  box-shadow: 0 1px 4px rgba(212, 168, 83, 0.2);
 }
 
 .unlock-button:disabled {
   background: var(--color-bg-light);
   color: var(--color-text-muted);
   cursor: not-allowed;
+  box-shadow: none;
+  transform: scale(1);
 }
 
 /* ============================================
@@ -708,12 +725,14 @@ h4 { font-size: 1.1rem; }
   font-size: 0.9rem;
   cursor: pointer;
   margin-bottom: var(--spacing-md);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
+  transform: scale(1) translateX(0);
 }
 
 .back-button:active {
   background: var(--color-bg-light);
   color: var(--color-text-primary);
+  transform: scale(0.95) translateX(-4px);
 }
 
 /* Swipe indicator */
@@ -756,7 +775,7 @@ h4 { font-size: 1.1rem; }
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-gold-dark), var(--color-gold));
   border: none;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), 0 4px 20px rgba(212, 168, 83, 0.3);
   cursor: pointer;
   z-index: 50;
   display: flex;
@@ -764,11 +783,13 @@ h4 { font-size: 1.1rem; }
   justify-content: center;
   font-size: 1.5rem;
   color: var(--color-bg-dark);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
+  transform: scale(1);
 }
 
 .fab-unlock:active {
-  transform: scale(0.95);
+  transform: scale(0.85);
+  box-shadow: var(--shadow-sm), 0 2px 10px rgba(212, 168, 83, 0.2);
 }
 
 .fab-unlock .badge {
