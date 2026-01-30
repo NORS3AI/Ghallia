@@ -14,7 +14,7 @@ import {
   calculateGatherYield,
   formatNumber
 } from '../utils/math';
-import { SKILL_UNLOCK_COSTS, GAME_VERSION } from '../utils/constants';
+import { SKILL_UNLOCK_COSTS, GAME_VERSION, BALANCE } from '../utils/constants';
 
 // ============================================
 // SKILL DEFINITIONS
@@ -209,7 +209,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Calculate gold based on tier (extract from resourceId)
       const tierMatch = action.resourceId.match(/_t(\d+)$/);
       const tier = tierMatch ? parseInt(tierMatch[1]) : 1;
-      const goldPerItem = Math.floor(5 * Math.pow(1.2, tier - 1));
+      const goldPerItem = Math.floor(BALANCE.gold.base * Math.pow(BALANCE.gold.tierScale, tier - 1));
       const goldGained = goldPerItem * action.quantity;
 
       return {

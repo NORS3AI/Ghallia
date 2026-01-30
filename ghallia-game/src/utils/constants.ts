@@ -16,8 +16,8 @@ export const BALANCE: BalanceConfig = {
     levelExponent: 7,
   },
   gold: {
-    base: 5,
-    tierScale: 1.2,
+    base: 1,      // 1g per tier 1 resource (realistic medieval economy)
+    tierScale: 1.5, // Faster scaling to compensate for lower base
     qualityMultipliers: {
       [ItemQuality.NORMAL]: 1.0,
       [ItemQuality.UNCOMMON]: 1.5,

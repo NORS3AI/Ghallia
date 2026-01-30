@@ -77,8 +77,8 @@ ACTUAL_XP = BASE_XP × (1 + xp_bonus_percent/100) × talent_multiplier
 ```
 GOLD_VALUE(tier, quality) = BASE_GOLD × tier_multiplier × quality_multiplier × (1 + gold_bonus/100)
 
-BASE_GOLD = 5
-tier_multiplier = 1.2^(tier - 1)
+BASE_GOLD = 1 (realistic medieval economy)
+tier_multiplier = 1.5^(tier - 1) (faster scaling to compensate)
 quality_multiplier:
   - Normal: 1.0
   - Uncommon: 1.5
@@ -89,15 +89,15 @@ quality_multiplier:
 
 | Tier | Level Range | Gold per Normal Resource |
 |------|-------------|-------------------------|
-| 1 | 1-20 | 5g |
-| 2 | 21-40 | 6g |
-| 3 | 41-60 | 7g |
-| 5 | 81-100 | 10g |
-| 10 | 181-200 | 31g |
-| 20 | 381-400 | 191g |
-| 30 | 581-600 | 1,181g |
-| 40 | 781-800 | 7,306g |
-| 50 | 981-999 | 45,198g |
+| 1 | 1-20 | 1g |
+| 2 | 21-40 | 1g |
+| 3 | 41-60 | 2g |
+| 5 | 81-100 | 5g |
+| 10 | 181-200 | 38g |
+| 20 | 381-400 | 1,477g |
+| 30 | 581-600 | 57,665g |
+| 40 | 781-800 | 2,250,423g |
+| 50 | 981-999 | 87,826,553g |
 
 ### Selling Crafted Items
 
@@ -467,16 +467,15 @@ Tier 50: 1,083x
 | 0:05 | Level 2 | LEVEL UP! |
 | 0:15 | Level 3 | LEVEL UP! |
 | 0:30 | Level 4 | LEVEL UP! |
-| 0:45 | 50g earned | Can sell stack! |
 | 1:00 | Level 5 | LEVEL UP! |
-| 1:30 | 100g saved | **SAWMILL UNLOCKS!** |
+| 1:30 | 100g saved (100 logs) | **SAWMILL UNLOCKS!** |
 | 2:00 | Level 6 + craft queued | First craft started! |
 | 2:30 | First craft completes | Item crafted! Sell for profit! |
 | 3:00 | Level 7-8 | Two levels! |
 | 4:00 | Level 10 | **MID-TIER UPGRADE AVAILABLE!** |
-| 5:00 | 1,000g saved | **3RD SKILL UNLOCKS!** |
-| 7:00 | Level 15 | Halfway to tier 2! |
-| 10:00 | Level 20 | **NEW TIER! Oak trees unlocked!** |
+| 8:00 | 1,000g saved | **3RD SKILL UNLOCKS!** |
+| 10:00 | Level 15 | Halfway to tier 2! |
+| 15:00 | Level 20 | **NEW TIER! Oak trees unlocked!** |
 
 ### Early Level Speed
 
@@ -563,9 +562,9 @@ const BALANCE = {
   XP_TIER_SCALE: 1.15,
   XP_LEVEL_EXPONENT: 7,
 
-  // Gold
-  GOLD_BASE: 5,
-  GOLD_TIER_SCALE: 1.2,
+  // Gold (realistic medieval economy with faster tier scaling)
+  GOLD_BASE: 1,
+  GOLD_TIER_SCALE: 1.5,
 
   // Time
   BASE_GATHER_COOLDOWN: 1.0,
@@ -610,10 +609,10 @@ function totalXpForLevel(level: number): number {
   return total;
 }
 
-// Gold value of resource
+// Gold value of resource (1g base, 1.5x tier scaling)
 function resourceGoldValue(tier: number, quality: string): number {
   const qualityMult = { normal: 1, uncommon: 1.5, rare: 2.5, epic: 5, legendary: 10 };
-  return Math.floor(5 * Math.pow(1.2, tier - 1) * qualityMult[quality]);
+  return Math.floor(1 * Math.pow(1.5, tier - 1) * qualityMult[quality]);
 }
 
 // Chaos Points earned
