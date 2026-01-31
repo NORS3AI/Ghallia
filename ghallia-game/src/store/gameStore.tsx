@@ -237,7 +237,11 @@ type GameAction =
   | { type: 'ADD_EQUIPMENT'; equipment: Equipment }
   | { type: 'EQUIP_ITEM'; equipmentId: string }
   | { type: 'UNEQUIP_ITEM'; slot: EquipmentSlot }
-  | { type: 'SELL_EQUIPMENT'; equipmentId: string };
+  | { type: 'SELL_EQUIPMENT'; equipmentId: string }
+  // Developer tools
+  | { type: 'DEV_ADD_MANA'; amount: number }
+  | { type: 'DEV_ADD_MAX_MANA'; amount: number }
+  | { type: 'DEV_ADD_BONUS_TAPS'; amount: number };
 
 // ============================================
 // INITIAL STATE
@@ -713,6 +717,28 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    // Developer tools
+    case 'DEV_ADD_MANA': {
+      return {
+        ...state,
+        mana: Math.min(state.maxMana, state.mana + action.amount),
+      };
+    }
+
+    case 'DEV_ADD_MAX_MANA': {
+      return {
+        ...state,
+        maxMana: state.maxMana + action.amount,
+      };
+    }
+
+    case 'DEV_ADD_BONUS_TAPS': {
+      return {
+        ...state,
+        bonusTaps: state.bonusTaps + action.amount,
+      };
+    }
+
     case 'LOAD_GAME': {
       // Merge loaded state with defaults for any missing fields
       const loadedState = {
@@ -769,6 +795,11 @@ interface GameContextType {
   equipItem: (equipmentId: string) => void;
   unequipItem: (slot: EquipmentSlot) => void;
   sellEquipment: (equipmentId: string) => void;
+  // Developer tools
+  devAddGold: (amount: number) => void;
+  devAddMana: (amount: number) => void;
+  devAddMaxMana: (amount: number) => void;
+  devAddBonusTaps: (amount: number) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -865,6 +896,23 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SELL_EQUIPMENT', equipmentId });
   }, []);
 
+  // Developer tools
+  const devAddGold = useCallback((amount: number) => {
+    dispatch({ type: 'ADD_GOLD', amount });
+  }, []);
+
+  const devAddMana = useCallback((amount: number) => {
+    dispatch({ type: 'DEV_ADD_MANA', amount });
+  }, []);
+
+  const devAddMaxMana = useCallback((amount: number) => {
+    dispatch({ type: 'DEV_ADD_MAX_MANA', amount });
+  }, []);
+
+  const devAddBonusTaps = useCallback((amount: number) => {
+    dispatch({ type: 'DEV_ADD_BONUS_TAPS', amount });
+  }, []);
+
   return (
     <GameContext.Provider value={{
       state,
@@ -880,7 +928,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       addEquipment,
       equipItem,
       unequipItem,
-      sellEquipment
+      sellEquipment,
+      devAddGold,
+      devAddMana,
+      devAddMaxMana,
+      devAddBonusTaps,
     }}>
       {children}
     </GameContext.Provider>
