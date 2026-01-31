@@ -353,11 +353,12 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
                   const now = Date.now();
                   const progress = Math.min(100, ((now - item.startTime) / (item.endTime - item.startTime)) * 100);
                   const remaining = Math.max(0, Math.ceil((item.endTime - now) / 1000));
+                  const qty = item.quantity || 1;
                   return (
                     <div key={item.id} className="queue-item">
                       <span className="queue-icon">{recipe.icon}</span>
                       <div className="queue-info">
-                        <span className="queue-name">{recipe.name}</span>
+                        <span className="queue-name">{recipe.name} {qty > 1 && <span className="queue-qty">x{qty}</span>}</span>
                         <div className="queue-progress-bar">
                           <div className="queue-progress-fill" style={{ width: `${progress}%` }} />
                         </div>

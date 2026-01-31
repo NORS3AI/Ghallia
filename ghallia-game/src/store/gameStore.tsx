@@ -362,17 +362,19 @@ const TIER_NAMES = {
 // =============================================
 
 // Base value per tier for raw materials (logs, ores, fish, etc.)
-// Tier 1 raw = 0.01g, Tier 2 = 0.02g, etc.
+// Tier 1 raw = 0.01g each (10 logs = 0.10g), Tier 2 = 0.02g, etc.
 const RAW_VALUE_PER_TIER = 0.01;
+// Processed material markup (2.5x so T1 plank = 0.25g from 10 raw @ 0.10g)
+const PROCESSED_MARKUP = 2.5;
 
 const generateProcessingRecipes = (): CraftingRecipe[] => {
   const recipes: CraftingRecipe[] = [];
 
-  // SAWMILL: 10 Logs → 1 Plank (worth ~0.20g at T1)
+  // SAWMILL: 10 Logs → 1 Plank (worth ~0.25g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.logging[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2; // 10 materials * 2x markup
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * PROCESSED_MARKUP; // 10 materials * 2.5x markup
     recipes.push({
       id: `sawmill_plank_t${tier}`,
       name: `${tierName} Plank`,
@@ -387,11 +389,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // SMITHING: 10 Ores → 1 Ingot (worth ~0.20g at T1)
+  // SMITHING: 10 Ores → 1 Ingot (worth ~0.25g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.mining[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * PROCESSED_MARKUP;
     recipes.push({
       id: `smithing_ingot_t${tier}`,
       name: `${tierName} Ingot`,
@@ -406,11 +408,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // SMITHING: 10 Ingots → 1 Plate (worth ~0.40g at T1)
+  // SMITHING: 10 Ingots → 1 Plate (worth ~0.625g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.mining[tier - 1];
     const tierLevel = (tier - 1) * 10 + 5;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * 2; // 10 ingots (each from 10 ore) * 2x
+    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * PROCESSED_MARKUP; // 10 ingots (each from 10 ore) * 2.5x
     recipes.push({
       id: `smithing_plate_t${tier}`,
       name: `${tierName} Plate`,
@@ -425,11 +427,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // COOKING: 10 Fish → 1 Fillet (worth ~0.20g at T1)
+  // COOKING: 10 Fish → 1 Fillet (worth ~0.25g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.fishing[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * PROCESSED_MARKUP;
     recipes.push({
       id: `cooking_fillet_t${tier}`,
       name: `${tierName} Fillet`,
@@ -444,11 +446,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // ALCHEMY: 10 Herbs → 1 Extract (worth ~0.20g at T1)
+  // ALCHEMY: 10 Herbs → 1 Extract (worth ~0.25g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.herbalism[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * PROCESSED_MARKUP;
     recipes.push({
       id: `alchemy_extract_t${tier}`,
       name: `${tierName} Extract`,
@@ -463,11 +465,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // LEATHERWORKING: 10 Hides → 1 Leather (worth ~0.20g at T1)
+  // LEATHERWORKING: 10 Hides → 1 Leather (worth ~0.25g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.skinning[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * PROCESSED_MARKUP;
     recipes.push({
       id: `leatherworking_leather_t${tier}`,
       name: `${tierName} Leather`,
@@ -482,11 +484,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // TAILORING: 10 Fibers → 1 Cloth (worth ~0.20g at T1)
+  // TAILORING: 10 Fibers → 1 Cloth (worth ~0.25g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.foraging[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * PROCESSED_MARKUP;
     recipes.push({
       id: `tailoring_cloth_t${tier}`,
       name: `${tierName} Cloth`,
@@ -501,11 +503,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // JEWELCRAFTING: 10 Hunting materials → 1 Setting (worth ~0.20g at T1)
+  // JEWELCRAFTING: 10 Hunting materials → 1 Setting (worth ~0.25g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.hunting[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * PROCESSED_MARKUP;
     recipes.push({
       id: `jewelcrafting_setting_t${tier}`,
       name: `${tierName} Setting`,
@@ -520,11 +522,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // ENCHANTING: 10 Extracts → 1 Essence (worth ~0.40g at T1, extracts are processed)
+  // ENCHANTING: 10 Extracts → 1 Essence (worth ~0.625g at T1, extracts are processed)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.herbalism[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * 2; // 10 extracts (each from 10 raw) * 2x
+    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * PROCESSED_MARKUP; // 10 extracts (each from 10 raw) * 2.5x
     recipes.push({
       id: `enchanting_essence_t${tier}`,
       name: `${tierName} Essence`,
@@ -539,11 +541,11 @@ const generateProcessingRecipes = (): CraftingRecipe[] => {
     });
   }
 
-  // ENGINEERING: 10 Ingots → 1 Part (worth ~0.40g at T1, ingots are processed)
+  // ENGINEERING: 10 Ingots → 1 Part (worth ~0.625g at T1, ingots are processed)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.mining[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * 2; // 10 ingots (each from 10 ore) * 2x
+    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * PROCESSED_MARKUP; // 10 ingots (each from 10 ore) * 2.5x
     recipes.push({
       id: `engineering_part_t${tier}`,
       name: `${tierName} Parts`,
@@ -904,12 +906,13 @@ interface SpellState {
   cooldownUntil: number; // timestamp when spell can be cast again
 }
 
-// Crafting queue item
+// Crafting queue item (batched - single entry for multiple items)
 export interface CraftingQueueItem {
   id: string; // unique instance id
   recipeId: string; // recipe being crafted
+  quantity: number; // number of items in this batch
   startTime: number; // timestamp when started
-  endTime: number; // timestamp when complete
+  endTime: number; // timestamp when complete (total time for all items)
 }
 
 // ============================================
@@ -1648,22 +1651,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       for (const completed of completedCrafts) {
         const recipe = CRAFTING_RECIPES.find(r => r.id === completed.recipeId);
         if (recipe) {
+          const batchQty = completed.quantity || 1;
+
           // If recipe produces a resource, add to resources; otherwise add to crafted items
           if (recipe.produces) {
             newResources[recipe.produces.resourceId] =
-              (newResources[recipe.produces.resourceId] || 0) + recipe.produces.quantity;
+              (newResources[recipe.produces.resourceId] || 0) + (recipe.produces.quantity * batchQty);
           } else {
-            newCraftedItems[recipe.id] = (newCraftedItems[recipe.id] || 0) + 1;
+            newCraftedItems[recipe.id] = (newCraftedItems[recipe.id] || 0) + batchQty;
             // Unlock character when crafting equipment (final items from equipment skills)
             if (equipmentSkills.includes(recipe.craftingSkill)) {
               shouldUnlockCharacter = true;
             }
           }
 
-          // Add XP to crafting skill
+          // Add XP to crafting skill (multiplied by batch quantity)
           const skillState = newSkills[recipe.craftingSkill];
           if (skillState) {
-            const newTotalXp = skillState.totalXp + recipe.xpReward;
+            const newTotalXp = skillState.totalXp + (recipe.xpReward * batchQty);
             const newLevel = levelFromTotalXp(newTotalXp);
             newSkills = {
               ...newSkills,
@@ -1903,23 +1908,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) - (mat.quantity * quantity);
       }
 
-      // Add items to crafting queue
+      // Add single batched item to crafting queue (total time = craftTime * quantity)
       const now = Date.now();
-      const newQueueItems: CraftingQueueItem[] = [];
-      for (let i = 0; i < quantity; i++) {
-        const startTime = now + (i * recipe.craftTime * 1000);
-        newQueueItems.push({
-          id: `craft_${now}_${i}_${Math.random().toString(36).substr(2, 9)}`,
-          recipeId: action.recipeId,
-          startTime,
-          endTime: startTime + (recipe.craftTime * 1000),
-        });
-      }
+      const totalCraftTime = recipe.craftTime * quantity * 1000;
+      const newQueueItem: CraftingQueueItem = {
+        id: `craft_${now}_${Math.random().toString(36).substr(2, 9)}`,
+        recipeId: action.recipeId,
+        quantity,
+        startTime: now,
+        endTime: now + totalCraftTime,
+      };
 
       return {
         ...state,
         resources: newResources,
-        craftingQueue: [...state.craftingQueue, ...newQueueItems],
+        craftingQueue: [...state.craftingQueue, newQueueItem],
       };
     }
 
@@ -1927,13 +1930,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const itemToCancel = state.craftingQueue.find(item => item.id === action.queueItemId);
       if (!itemToCancel) return state;
 
-      // Refund materials
+      // Refund materials for full batch quantity
       const recipe = CRAFTING_RECIPES.find(r => r.id === itemToCancel.recipeId);
       if (!recipe) return state;
 
       const newResources = { ...state.resources };
       for (const mat of recipe.materials) {
-        newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) + mat.quantity;
+        newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) + (mat.quantity * itemToCancel.quantity);
       }
 
       return {
