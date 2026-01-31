@@ -1072,6 +1072,42 @@ h4 { font-size: 1.1rem; }
   transform: scale(1);
 }
 
+/* Support Skills Section */
+.support-skills-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--color-border);
+  color: #a875c8;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.unlock-skill-item.support-skill {
+  background: rgba(107, 74, 124, 0.1);
+  border-color: rgba(107, 74, 124, 0.3);
+}
+
+.unlock-skill-cost {
+  margin-top: 4px;
+}
+
+.cp-cost {
+  font-size: 0.85rem;
+  color: #a875c8;
+  font-weight: 500;
+}
+
+.unlock-button.cp-unlock {
+  background: linear-gradient(135deg, #6b4a7c 0%, #a875c8 100%);
+}
+
+.unlock-button.cp-unlock:disabled {
+  background: var(--color-bg-light);
+}
+
 /* ============================================
    BACK BUTTON & NAVIGATION
    ============================================ */

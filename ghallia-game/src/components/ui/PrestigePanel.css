@@ -295,3 +295,218 @@
   color: var(--color-text-muted, #6b5d4d);
   cursor: not-allowed;
 }
+
+.prestige-button.confirm {
+  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+  animation: pulse-warning 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-warning {
+  from { box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4); }
+  to { box-shadow: 0 4px 30px rgba(231, 76, 60, 0.7); }
+}
+
+.cancel-prestige-button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: var(--color-bg-light, #3d3228);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 8px;
+  color: var(--color-text-secondary, #a89880);
+  cursor: pointer;
+}
+
+/* Tab Navigation */
+.prestige-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border, #4a3f32);
+  background: var(--color-bg-medium, #2a2218);
+}
+
+.prestige-tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--color-text-secondary, #a89880);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.prestige-tab.active {
+  color: var(--color-accent-purple, #a875c8);
+  border-bottom-color: var(--color-accent-purple, #a875c8);
+  background: rgba(168, 117, 200, 0.1);
+}
+
+.prestige-tab:hover:not(.active) {
+  background: rgba(168, 117, 200, 0.05);
+}
+
+/* Chaos Points Display */
+.chaos-points-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #3a2845 0%, #2a1a35 100%);
+  border: 2px solid var(--color-accent-purple, #6b4a7c);
+  border-radius: 16px;
+}
+
+.chaos-icon {
+  font-size: 2rem;
+}
+
+.chaos-amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #a875c8;
+  text-shadow: 0 2px 10px rgba(168, 117, 200, 0.5);
+}
+
+.chaos-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #a89880);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Talent Tiers */
+.talent-tier {
+  margin-bottom: 24px;
+}
+
+.talent-tier.locked {
+  opacity: 0.5;
+}
+
+.tier-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: var(--color-gold, #d4a853);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tier-requirement {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b5d4d);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* Talent Grid */
+.talent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.talent-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-panel, #252015);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 10px;
+  transition: all 200ms ease;
+}
+
+.talent-card:hover:not(.locked):not(.maxed) {
+  border-color: var(--color-accent-purple, #6b4a7c);
+  background: rgba(107, 74, 124, 0.1);
+}
+
+.talent-card.locked {
+  opacity: 0.4;
+}
+
+.talent-card.maxed {
+  border-color: var(--color-gold, #d4a853);
+  background: rgba(212, 168, 83, 0.1);
+}
+
+.talent-card.cannot-afford {
+  opacity: 0.7;
+}
+
+.talent-icon {
+  font-size: 2rem;
+  width: 40px;
+  text-align: center;
+}
+
+.talent-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.talent-name {
+  font-weight: 600;
+  color: var(--color-text-primary, #e8dcc4);
+  margin-bottom: 2px;
+}
+
+.talent-rank {
+  font-size: 0.8rem;
+  color: var(--color-accent-purple, #a875c8);
+  margin-bottom: 4px;
+}
+
+.talent-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #a89880);
+}
+
+.talent-current {
+  font-size: 0.75rem;
+  color: var(--color-gold, #d4a853);
+  margin-top: 4px;
+}
+
+.talent-buy-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #6b4a7c 0%, #a875c8 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 200ms ease;
+}
+
+.talent-buy-btn:disabled {
+  background: var(--color-bg-light, #3d3228);
+  color: var(--color-text-muted, #6b5d4d);
+  cursor: not-allowed;
+}
+
+.talent-buy-btn:not(:disabled):hover {
+  transform: scale(1.05);
+}
+
+.talent-buy-btn:not(:disabled):active {
+  transform: scale(0.95);
+}
+
+.talent-maxed-badge {
+  padding: 6px 12px;
+  background: var(--color-gold, #d4a853);
+  border-radius: 6px;
+  color: #1a1410;
+  font-size: 0.75rem;
+  font-weight: 700;
+}

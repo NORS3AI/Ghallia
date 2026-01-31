@@ -3,7 +3,7 @@
  * Medieval idle/active crafting game
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { SkillType, SkillCategory } from './types/game.types';
 import { GameProvider, useGame, SKILL_DEFINITIONS, getUnlockCost } from './store/gameStore';
 import { SkillTable } from './components/skills/SkillTable';
@@ -17,6 +17,7 @@ import { SpellsPanel } from './components/ui/SpellsPanel';
 import { InventoryPanel } from './components/ui/InventoryPanel';
 import { CharacterPanel } from './components/ui/CharacterPanel';
 import { AchievementsPanel } from './components/ui/AchievementsPanel';
+import { TutorialOverlay, useTutorial } from './components/ui/TutorialOverlay';
 import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
@@ -87,6 +88,20 @@ function GameApp() {
   const [view, setView] = useState<View>('skills');
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [activePanel, setActivePanel] = useState<PanelType>('none');
+
+  // Tutorial state
+  const { showTutorial, tutorialComplete, startTutorial, completeTutorial } = useTutorial();
+
+  // Show tutorial for brand new players
+  useEffect(() => {
+    if (!tutorialComplete && state.stats.totalTaps === 0 && state.stats.totalPlayTime < 5) {
+      // Small delay to let the app render first
+      const timer = setTimeout(() => {
+        startTutorial();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [tutorialComplete, state.stats.totalTaps, state.stats.totalPlayTime, startTutorial]);
 
   // Helper to open a panel (closes any other open panel, or toggles if same panel)
   const openPanel = useCallback((panel: PanelType) => {
@@ -305,6 +320,11 @@ function GameApp() {
           </button>
         </div>
       </nav>
+
+      {/* Tutorial Overlay */}
+      {showTutorial && (
+        <TutorialOverlay onComplete={completeTutorial} />
+      )}
     </div>
   );
 }

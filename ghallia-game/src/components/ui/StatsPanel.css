@@ -239,3 +239,75 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Dev Panel Lock */
+.dev-locked {
+  text-align: center;
+  padding: 20px;
+}
+
+.dev-locked-text {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #a89880);
+  margin-bottom: 12px;
+}
+
+.dev-passcode-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+}
+
+.dev-passcode-input {
+  width: 120px;
+  padding: 10px 14px;
+  background: var(--color-bg-dark, #1a1410);
+  border: 2px solid var(--color-border, #4a3f32);
+  border-radius: 8px;
+  color: var(--color-text-primary, #e8dcc4);
+  font-size: 1.1rem;
+  text-align: center;
+  letter-spacing: 4px;
+  font-family: monospace;
+}
+
+.dev-passcode-input:focus {
+  outline: none;
+  border-color: #ff6b6b;
+}
+
+.dev-passcode-input.error {
+  border-color: #ff4444;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.dev-passcode-error {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.dev-lock-button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 16px;
+  background: transparent;
+  border: 1px dashed var(--color-border, #4a3f32);
+  border-radius: 8px;
+  color: var(--color-text-muted, #6b5d4d);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.dev-lock-button:hover {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
