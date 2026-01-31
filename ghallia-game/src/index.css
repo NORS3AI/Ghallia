@@ -801,6 +801,45 @@ h4 { font-size: 1.1rem; }
   color: #ff4444;
 }
 
+/* Quantity Selector */
+.quantity-selector {
+  display: flex;
+  gap: 4px;
+  margin-top: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.qty-btn {
+  padding: 4px 8px;
+  background: var(--color-bg-medium);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 32px;
+}
+
+.qty-btn:hover:not(:disabled) {
+  border-color: var(--color-gold-dark);
+  color: var(--color-text-primary);
+}
+
+.qty-btn.active {
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  color: var(--color-bg-dark);
+  font-weight: 600;
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .recipe-actions {
   display: flex;
   flex-direction: column;

@@ -357,187 +357,202 @@ const TIER_NAMES = {
 
 // =============================================
 // PROCESSING RECIPES (Raw → Processed materials)
+// 10 raw materials → 1 processed material
 // These produce resources that are used in advanced recipes
 // =============================================
+
+// Base value per tier for raw materials (logs, ores, fish, etc.)
+// Tier 1 raw = 0.01g, Tier 2 = 0.02g, etc.
+const RAW_VALUE_PER_TIER = 0.01;
 
 const generateProcessingRecipes = (): CraftingRecipe[] => {
   const recipes: CraftingRecipe[] = [];
 
-  // SAWMILL: Logs → Planks
+  // SAWMILL: 10 Logs → 1 Plank (worth ~0.20g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.logging[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2; // 10 materials * 2x markup
     recipes.push({
       id: `sawmill_plank_t${tier}`,
       name: `${tierName} Plank`,
       craftingSkill: SkillType.SAWMILL,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `logging_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(2 + tier * 0.5),
-      xpReward: Math.floor(5 * tier),
-      sellValue: 0, // Processing recipes don't sell directly
+      materials: [{ resourceId: `logging_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(3 + tier * 0.5),
+      xpReward: Math.floor(10 * tier),
+      sellValue: Math.round(baseValue * 100) / 100, // Can sell planks directly
       icon: '🪵',
       produces: { resourceId: `plank_t${tier}`, quantity: 1 },
     });
   }
 
-  // SMITHING: Ores → Ingots
+  // SMITHING: 10 Ores → 1 Ingot (worth ~0.20g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.mining[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
     recipes.push({
       id: `smithing_ingot_t${tier}`,
       name: `${tierName} Ingot`,
       craftingSkill: SkillType.SMITHING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `mining_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(3 + tier * 0.5),
-      xpReward: Math.floor(5 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `mining_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(4 + tier * 0.5),
+      xpReward: Math.floor(10 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '🧱',
       produces: { resourceId: `ingot_t${tier}`, quantity: 1 },
     });
   }
 
-  // SMITHING: Ingots → Plates (advanced processing)
+  // SMITHING: 10 Ingots → 1 Plate (worth ~0.40g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.mining[tier - 1];
     const tierLevel = (tier - 1) * 10 + 5;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * 2; // 10 ingots (each from 10 ore) * 2x
     recipes.push({
       id: `smithing_plate_t${tier}`,
       name: `${tierName} Plate`,
       craftingSkill: SkillType.SMITHING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `ingot_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(4 + tier * 0.5),
-      xpReward: Math.floor(8 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `ingot_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(6 + tier * 0.5),
+      xpReward: Math.floor(20 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '🛡️',
       produces: { resourceId: `plate_t${tier}`, quantity: 1 },
     });
   }
 
-  // COOKING: Fish → Fillets
+  // COOKING: 10 Fish → 1 Fillet (worth ~0.20g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.fishing[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
     recipes.push({
       id: `cooking_fillet_t${tier}`,
       name: `${tierName} Fillet`,
       craftingSkill: SkillType.COOKING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `fishing_t${tier}`, quantity: 1 }],
-      craftTime: Math.floor(2 + tier * 0.3),
-      xpReward: Math.floor(4 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `fishing_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(3 + tier * 0.3),
+      xpReward: Math.floor(10 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '🍣',
       produces: { resourceId: `fillet_t${tier}`, quantity: 1 },
     });
   }
 
-  // ALCHEMY: Herbs → Extracts
+  // ALCHEMY: 10 Herbs → 1 Extract (worth ~0.20g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.herbalism[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
     recipes.push({
       id: `alchemy_extract_t${tier}`,
       name: `${tierName} Extract`,
       craftingSkill: SkillType.ALCHEMY,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `herbalism_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(3 + tier * 0.4),
-      xpReward: Math.floor(5 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `herbalism_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(4 + tier * 0.4),
+      xpReward: Math.floor(10 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '💧',
       produces: { resourceId: `extract_t${tier}`, quantity: 1 },
     });
   }
 
-  // LEATHERWORKING: Hides → Leather
+  // LEATHERWORKING: 10 Hides → 1 Leather (worth ~0.20g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.skinning[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
     recipes.push({
       id: `leatherworking_leather_t${tier}`,
       name: `${tierName} Leather`,
       craftingSkill: SkillType.LEATHERWORKING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `skinning_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(3 + tier * 0.5),
-      xpReward: Math.floor(5 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `skinning_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(4 + tier * 0.5),
+      xpReward: Math.floor(10 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '📜',
       produces: { resourceId: `leather_t${tier}`, quantity: 1 },
     });
   }
 
-  // TAILORING: Fibers → Cloth
+  // TAILORING: 10 Fibers → 1 Cloth (worth ~0.20g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.foraging[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
     recipes.push({
       id: `tailoring_cloth_t${tier}`,
       name: `${tierName} Cloth`,
       craftingSkill: SkillType.TAILORING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `foraging_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(3 + tier * 0.4),
-      xpReward: Math.floor(5 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `foraging_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(4 + tier * 0.4),
+      xpReward: Math.floor(10 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '🧵',
       produces: { resourceId: `cloth_t${tier}`, quantity: 1 },
     });
   }
 
-  // JEWELCRAFTING: Hunting materials → Settings (bones, teeth, etc.)
+  // JEWELCRAFTING: 10 Hunting materials → 1 Setting (worth ~0.20g at T1)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.hunting[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 10 * 2;
     recipes.push({
       id: `jewelcrafting_setting_t${tier}`,
       name: `${tierName} Setting`,
       craftingSkill: SkillType.JEWELCRAFTING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `hunting_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(3 + tier * 0.4),
-      xpReward: Math.floor(5 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `hunting_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(4 + tier * 0.4),
+      xpReward: Math.floor(10 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '💎',
       produces: { resourceId: `setting_t${tier}`, quantity: 1 },
     });
   }
 
-  // ENCHANTING: Uses Extracts from Alchemy → Essences
+  // ENCHANTING: 10 Extracts → 1 Essence (worth ~0.40g at T1, extracts are processed)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.herbalism[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * 2; // 10 extracts (each from 10 raw) * 2x
     recipes.push({
       id: `enchanting_essence_t${tier}`,
       name: `${tierName} Essence`,
       craftingSkill: SkillType.ENCHANTING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `extract_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(4 + tier * 0.5),
-      xpReward: Math.floor(6 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `extract_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(5 + tier * 0.5),
+      xpReward: Math.floor(20 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '✨',
       produces: { resourceId: `essence_t${tier}`, quantity: 1 },
     });
   }
 
-  // ENGINEERING: Uses Ingots from Smithing → Parts
+  // ENGINEERING: 10 Ingots → 1 Part (worth ~0.40g at T1, ingots are processed)
   for (let tier = 1; tier <= 10; tier++) {
     const tierName = TIER_NAMES.mining[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
+    const baseValue = tier * RAW_VALUE_PER_TIER * 100 * 2; // 10 ingots (each from 10 ore) * 2x
     recipes.push({
       id: `engineering_part_t${tier}`,
       name: `${tierName} Parts`,
       craftingSkill: SkillType.ENGINEERING,
       requiredLevel: tierLevel,
-      materials: [{ resourceId: `ingot_t${tier}`, quantity: 2 }],
-      craftTime: Math.floor(3 + tier * 0.4),
-      xpReward: Math.floor(5 * tier),
-      sellValue: 0,
+      materials: [{ resourceId: `ingot_t${tier}`, quantity: 10 }],
+      craftTime: Math.floor(5 + tier * 0.4),
+      xpReward: Math.floor(20 * tier),
+      sellValue: Math.round(baseValue * 100) / 100,
       icon: '⚙️',
       produces: { resourceId: `part_t${tier}`, quantity: 1 },
     });
@@ -992,7 +1007,7 @@ type GameAction =
   // Prestige
   | { type: 'PRESTIGE'; chaosPointsEarned: number }
   // Crafting
-  | { type: 'START_CRAFT'; recipeId: string }
+  | { type: 'START_CRAFT'; recipeId: string; quantity: number }
   | { type: 'CANCEL_CRAFT'; queueItemId: string }
   | { type: 'COLLECT_CRAFTED'; recipeId: string; quantity: number };
 
@@ -1805,10 +1820,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const recipe = CRAFTING_RECIPES.find(r => r.id === action.recipeId);
       if (!recipe) return state;
 
-      // Check if player has required materials
+      const quantity = action.quantity || 1;
+
+      // Check if player has required materials for all items
       for (const mat of recipe.materials) {
         const have = state.resources[mat.resourceId] || 0;
-        if (have < mat.quantity) {
+        if (have < mat.quantity * quantity) {
           return state; // Not enough materials
         }
       }
@@ -1819,25 +1836,29 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return state; // Level too low
       }
 
-      // Deduct materials
+      // Deduct materials for all items
       const newResources = { ...state.resources };
       for (const mat of recipe.materials) {
-        newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) - mat.quantity;
+        newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) - (mat.quantity * quantity);
       }
 
-      // Add to crafting queue
+      // Add items to crafting queue
       const now = Date.now();
-      const queueItem: CraftingQueueItem = {
-        id: `craft_${now}_${Math.random().toString(36).substr(2, 9)}`,
-        recipeId: action.recipeId,
-        startTime: now,
-        endTime: now + (recipe.craftTime * 1000),
-      };
+      const newQueueItems: CraftingQueueItem[] = [];
+      for (let i = 0; i < quantity; i++) {
+        const startTime = now + (i * recipe.craftTime * 1000);
+        newQueueItems.push({
+          id: `craft_${now}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+          recipeId: action.recipeId,
+          startTime,
+          endTime: startTime + (recipe.craftTime * 1000),
+        });
+      }
 
       return {
         ...state,
         resources: newResources,
-        craftingQueue: [...state.craftingQueue, queueItem],
+        craftingQueue: [...state.craftingQueue, ...newQueueItems],
       };
     }
 
@@ -1972,7 +1993,7 @@ interface GameContextType {
   // Prestige
   prestige: (chaosPointsEarned: number) => void;
   // Crafting
-  startCraft: (recipeId: string) => void;
+  startCraft: (recipeId: string, quantity?: number) => void;
   cancelCraft: (queueItemId: string) => void;
   collectCrafted: (recipeId: string, quantity: number) => void;
 }
@@ -2121,8 +2142,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Crafting functions
-  const startCraft = useCallback((recipeId: string) => {
-    dispatch({ type: 'START_CRAFT', recipeId });
+  const startCraft = useCallback((recipeId: string, quantity: number = 1) => {
+    dispatch({ type: 'START_CRAFT', recipeId, quantity });
   }, []);
 
   const cancelCraft = useCallback((queueItemId: string) => {
