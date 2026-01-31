@@ -297,7 +297,7 @@ export interface CraftingRecipe {
   icon: string;
 }
 
-// Recipe template types for Sawmill (15 types as requested)
+// Recipe template types for each crafting skill (15 types each)
 const SAWMILL_RECIPE_TYPES = [
   { suffix: 'Plank', icon: '🪵', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
   { suffix: 'Board', icon: '📋', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
@@ -316,35 +316,183 @@ const SAWMILL_RECIPE_TYPES = [
   { suffix: 'Cathedral Frame', icon: '⛪', timeMultiplier: 60, materialMultiplier: 200, valueMultiplier: 180 },
 ];
 
-// Wood tier names for recipes
-const WOOD_TIERS = [
-  'Maple', 'Oak', 'Birch', 'Pine', 'Willow', 'Cedar', 'Ash', 'Elm', 'Spruce', 'Redwood',
-  'Mahogany', 'Teak', 'Ebony', 'Ironwood', 'Bloodwood', 'Ghostwood', 'Petrified',
-  'Crystalbark', 'Moonbark', 'Sunwood', 'Stormoak', 'Frostpine', 'Emberbark', 'Voidwood',
-  'Mythril', 'Dragon', 'Phoenix', 'Titan', 'Cosmic', 'Nebula',
-  'Starfall', 'Quantum', 'Temporal', 'Ethereal', 'Celestial',
-  'Divine', 'Astral', 'Primal', 'Giving', 'Infinity',
-  'Schrödinger', 'Meme', 'Plot Armor', 'Lag Spike', 'Fourth Wall',
-  'Error 404', 'Gigachad', 'Final Boss', 'Prestige', 'World Tree'
+const SMITHING_RECIPE_TYPES = [
+  { suffix: 'Ingot', icon: '🧱', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
+  { suffix: 'Nails', icon: '📍', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
+  { suffix: 'Chain', icon: '⛓️', timeMultiplier: 1.5, materialMultiplier: 5, valueMultiplier: 3 },
+  { suffix: 'Dagger', icon: '🗡️', timeMultiplier: 2, materialMultiplier: 6, valueMultiplier: 4 },
+  { suffix: 'Sword', icon: '⚔️', timeMultiplier: 3, materialMultiplier: 10, valueMultiplier: 7 },
+  { suffix: 'Shield', icon: '🛡️', timeMultiplier: 4, materialMultiplier: 12, valueMultiplier: 10 },
+  { suffix: 'Helmet', icon: '⛑️', timeMultiplier: 3.5, materialMultiplier: 8, valueMultiplier: 6 },
+  { suffix: 'Chestplate', icon: '🦺', timeMultiplier: 6, materialMultiplier: 20, valueMultiplier: 16 },
+  { suffix: 'Gauntlets', icon: '🧤', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 8 },
+  { suffix: 'Greaves', icon: '🦿', timeMultiplier: 5, materialMultiplier: 15, valueMultiplier: 12 },
+  { suffix: 'Battleaxe', icon: '🪓', timeMultiplier: 8, materialMultiplier: 25, valueMultiplier: 20 },
+  { suffix: 'Warhammer', icon: '🔨', timeMultiplier: 10, materialMultiplier: 30, valueMultiplier: 25 },
+  { suffix: 'Greatsword', icon: '⚔️', timeMultiplier: 15, materialMultiplier: 50, valueMultiplier: 40 },
+  { suffix: 'Full Armor', icon: '🛡️', timeMultiplier: 25, materialMultiplier: 80, valueMultiplier: 70 },
+  { suffix: 'Legendary Blade', icon: '✨', timeMultiplier: 60, materialMultiplier: 200, valueMultiplier: 180 },
 ];
 
-// Generate sawmill recipes
-const generateSawmillRecipes = (): CraftingRecipe[] => {
-  const recipes: CraftingRecipe[] = [];
+const COOKING_RECIPE_TYPES = [
+  { suffix: 'Fillet', icon: '🍣', timeMultiplier: 1, materialMultiplier: 1, valueMultiplier: 1.5 },
+  { suffix: 'Steak', icon: '🥩', timeMultiplier: 1.2, materialMultiplier: 2, valueMultiplier: 2 },
+  { suffix: 'Soup', icon: '🍲', timeMultiplier: 1.5, materialMultiplier: 3, valueMultiplier: 2.5 },
+  { suffix: 'Sushi', icon: '🍱', timeMultiplier: 2, materialMultiplier: 2, valueMultiplier: 4 },
+  { suffix: 'Pie', icon: '🥧', timeMultiplier: 3, materialMultiplier: 4, valueMultiplier: 5 },
+  { suffix: 'Stew', icon: '🍛', timeMultiplier: 4, materialMultiplier: 5, valueMultiplier: 7 },
+  { suffix: 'Roast', icon: '🍗', timeMultiplier: 5, materialMultiplier: 6, valueMultiplier: 9 },
+  { suffix: 'Casserole', icon: '🥘', timeMultiplier: 6, materialMultiplier: 8, valueMultiplier: 12 },
+  { suffix: 'Gourmet Dish', icon: '🍽️', timeMultiplier: 8, materialMultiplier: 10, valueMultiplier: 16 },
+  { suffix: 'Feast Platter', icon: '🍱', timeMultiplier: 10, materialMultiplier: 15, valueMultiplier: 22 },
+  { suffix: 'Chef Special', icon: '👨‍🍳', timeMultiplier: 15, materialMultiplier: 20, valueMultiplier: 30 },
+  { suffix: 'Royal Banquet', icon: '👑', timeMultiplier: 20, materialMultiplier: 30, valueMultiplier: 45 },
+  { suffix: 'Divine Cuisine', icon: '✨', timeMultiplier: 30, materialMultiplier: 50, valueMultiplier: 70 },
+  { suffix: 'Legendary Meal', icon: '🌟', timeMultiplier: 45, materialMultiplier: 75, valueMultiplier: 100 },
+  { suffix: 'Ambrosia', icon: '🏆', timeMultiplier: 60, materialMultiplier: 100, valueMultiplier: 150 },
+];
 
-  // Generate 15 recipes per tier (first 10 tiers for now)
+const ALCHEMY_RECIPE_TYPES = [
+  { suffix: 'Extract', icon: '💧', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
+  { suffix: 'Essence', icon: '✨', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
+  { suffix: 'Tincture', icon: '🧪', timeMultiplier: 1.5, materialMultiplier: 4, valueMultiplier: 3 },
+  { suffix: 'Salve', icon: '🏺', timeMultiplier: 2, materialMultiplier: 5, valueMultiplier: 4 },
+  { suffix: 'Potion', icon: '🧴', timeMultiplier: 3, materialMultiplier: 6, valueMultiplier: 6 },
+  { suffix: 'Elixir', icon: '⚗️', timeMultiplier: 4, materialMultiplier: 8, valueMultiplier: 9 },
+  { suffix: 'Draught', icon: '🍶', timeMultiplier: 5, materialMultiplier: 10, valueMultiplier: 12 },
+  { suffix: 'Philter', icon: '💝', timeMultiplier: 6, materialMultiplier: 12, valueMultiplier: 15 },
+  { suffix: 'Brew', icon: '🫖', timeMultiplier: 8, materialMultiplier: 15, valueMultiplier: 20 },
+  { suffix: 'Concoction', icon: '🧫', timeMultiplier: 10, materialMultiplier: 20, valueMultiplier: 28 },
+  { suffix: 'Transmutation', icon: '🔮', timeMultiplier: 15, materialMultiplier: 30, valueMultiplier: 40 },
+  { suffix: 'Philosopher\'s Brew', icon: '💎', timeMultiplier: 20, materialMultiplier: 50, valueMultiplier: 60 },
+  { suffix: 'Panacea', icon: '🌈', timeMultiplier: 30, materialMultiplier: 75, valueMultiplier: 90 },
+  { suffix: 'Immortality Elixir', icon: '⚱️', timeMultiplier: 45, materialMultiplier: 100, valueMultiplier: 130 },
+  { suffix: 'Philosopher\'s Stone', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 180 },
+];
+
+const LEATHERWORKING_RECIPE_TYPES = [
+  { suffix: 'Strips', icon: '📜', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
+  { suffix: 'Patch', icon: '🩹', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
+  { suffix: 'Belt', icon: '👔', timeMultiplier: 1.5, materialMultiplier: 4, valueMultiplier: 3 },
+  { suffix: 'Gloves', icon: '🧤', timeMultiplier: 2, materialMultiplier: 5, valueMultiplier: 4 },
+  { suffix: 'Boots', icon: '👢', timeMultiplier: 3, materialMultiplier: 8, valueMultiplier: 6 },
+  { suffix: 'Cap', icon: '🧢', timeMultiplier: 2.5, materialMultiplier: 6, valueMultiplier: 5 },
+  { suffix: 'Vest', icon: '🦺', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 8 },
+  { suffix: 'Jacket', icon: '🧥', timeMultiplier: 5, materialMultiplier: 12, valueMultiplier: 11 },
+  { suffix: 'Armor', icon: '🛡️', timeMultiplier: 7, materialMultiplier: 18, valueMultiplier: 16 },
+  { suffix: 'Satchel', icon: '👜', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 9 },
+  { suffix: 'Backpack', icon: '🎒', timeMultiplier: 8, materialMultiplier: 20, valueMultiplier: 22 },
+  { suffix: 'Saddle', icon: '🐴', timeMultiplier: 12, materialMultiplier: 35, valueMultiplier: 35 },
+  { suffix: 'War Armor', icon: '⚔️', timeMultiplier: 20, materialMultiplier: 60, valueMultiplier: 55 },
+  { suffix: 'Dragon Armor', icon: '🐉', timeMultiplier: 40, materialMultiplier: 100, valueMultiplier: 100 },
+  { suffix: 'Legendary Hide', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 160 },
+];
+
+const TAILORING_RECIPE_TYPES = [
+  { suffix: 'Thread', icon: '🧵', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
+  { suffix: 'Bandage', icon: '🩹', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
+  { suffix: 'Scarf', icon: '🧣', timeMultiplier: 1.5, materialMultiplier: 4, valueMultiplier: 3 },
+  { suffix: 'Hat', icon: '🎩', timeMultiplier: 2, materialMultiplier: 5, valueMultiplier: 4 },
+  { suffix: 'Shirt', icon: '👕', timeMultiplier: 3, materialMultiplier: 8, valueMultiplier: 6 },
+  { suffix: 'Pants', icon: '👖', timeMultiplier: 3.5, materialMultiplier: 10, valueMultiplier: 8 },
+  { suffix: 'Dress', icon: '👗', timeMultiplier: 4, materialMultiplier: 12, valueMultiplier: 10 },
+  { suffix: 'Robe', icon: '🥻', timeMultiplier: 5, materialMultiplier: 15, valueMultiplier: 13 },
+  { suffix: 'Cloak', icon: '🧥', timeMultiplier: 6, materialMultiplier: 18, valueMultiplier: 16 },
+  { suffix: 'Bag', icon: '👜', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 9 },
+  { suffix: 'Tapestry', icon: '🖼️', timeMultiplier: 10, materialMultiplier: 25, valueMultiplier: 25 },
+  { suffix: 'Royal Garb', icon: '👑', timeMultiplier: 15, materialMultiplier: 40, valueMultiplier: 40 },
+  { suffix: 'Wizard Robe', icon: '🧙', timeMultiplier: 20, materialMultiplier: 60, valueMultiplier: 60 },
+  { suffix: 'Archmage Vestment', icon: '✨', timeMultiplier: 40, materialMultiplier: 100, valueMultiplier: 100 },
+  { suffix: 'Celestial Raiment', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 160 },
+];
+
+const JEWELCRAFTING_RECIPE_TYPES = [
+  { suffix: 'Dust', icon: '✨', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 2 },
+  { suffix: 'Shard', icon: '💎', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 3 },
+  { suffix: 'Gem', icon: '💠', timeMultiplier: 2, materialMultiplier: 4, valueMultiplier: 5 },
+  { suffix: 'Ring', icon: '💍', timeMultiplier: 3, materialMultiplier: 5, valueMultiplier: 8 },
+  { suffix: 'Earring', icon: '👂', timeMultiplier: 2.5, materialMultiplier: 4, valueMultiplier: 6 },
+  { suffix: 'Pendant', icon: '📿', timeMultiplier: 4, materialMultiplier: 6, valueMultiplier: 10 },
+  { suffix: 'Bracelet', icon: '⌚', timeMultiplier: 5, materialMultiplier: 8, valueMultiplier: 14 },
+  { suffix: 'Necklace', icon: '📿', timeMultiplier: 6, materialMultiplier: 10, valueMultiplier: 18 },
+  { suffix: 'Circlet', icon: '👑', timeMultiplier: 8, materialMultiplier: 15, valueMultiplier: 25 },
+  { suffix: 'Amulet', icon: '🔮', timeMultiplier: 10, materialMultiplier: 20, valueMultiplier: 35 },
+  { suffix: 'Crown', icon: '👑', timeMultiplier: 15, materialMultiplier: 35, valueMultiplier: 55 },
+  { suffix: 'Scepter', icon: '🏆', timeMultiplier: 20, materialMultiplier: 50, valueMultiplier: 80 },
+  { suffix: 'Royal Regalia', icon: '✨', timeMultiplier: 30, materialMultiplier: 75, valueMultiplier: 120 },
+  { suffix: 'Artifact', icon: '🏺', timeMultiplier: 45, materialMultiplier: 100, valueMultiplier: 170 },
+  { suffix: 'Legendary Gem', icon: '🌟', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 220 },
+];
+
+const ENCHANTING_RECIPE_TYPES = [
+  { suffix: 'Dust', icon: '✨', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 2 },
+  { suffix: 'Essence', icon: '💫', timeMultiplier: 1.5, materialMultiplier: 3, valueMultiplier: 3 },
+  { suffix: 'Glyph', icon: '📜', timeMultiplier: 2, materialMultiplier: 4, valueMultiplier: 5 },
+  { suffix: 'Rune', icon: '🔮', timeMultiplier: 3, materialMultiplier: 5, valueMultiplier: 7 },
+  { suffix: 'Sigil', icon: '⚜️', timeMultiplier: 4, materialMultiplier: 7, valueMultiplier: 10 },
+  { suffix: 'Ward', icon: '🛡️', timeMultiplier: 5, materialMultiplier: 9, valueMultiplier: 14 },
+  { suffix: 'Charm', icon: '🍀', timeMultiplier: 6, materialMultiplier: 12, valueMultiplier: 18 },
+  { suffix: 'Enchantment', icon: '✨', timeMultiplier: 8, materialMultiplier: 15, valueMultiplier: 24 },
+  { suffix: 'Blessing', icon: '🙏', timeMultiplier: 10, materialMultiplier: 20, valueMultiplier: 32 },
+  { suffix: 'Hex', icon: '🔯', timeMultiplier: 12, materialMultiplier: 25, valueMultiplier: 42 },
+  { suffix: 'Curse', icon: '💀', timeMultiplier: 15, materialMultiplier: 35, valueMultiplier: 55 },
+  { suffix: 'Prophecy', icon: '📖', timeMultiplier: 20, materialMultiplier: 50, valueMultiplier: 75 },
+  { suffix: 'Divine Rune', icon: '⚡', timeMultiplier: 30, materialMultiplier: 75, valueMultiplier: 110 },
+  { suffix: 'Celestial Mark', icon: '🌟', timeMultiplier: 45, materialMultiplier: 100, valueMultiplier: 150 },
+  { suffix: 'World Enchantment', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 200 },
+];
+
+const ENGINEERING_RECIPE_TYPES = [
+  { suffix: 'Screw', icon: '🔩', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
+  { suffix: 'Gear', icon: '⚙️', timeMultiplier: 1.5, materialMultiplier: 3, valueMultiplier: 2.5 },
+  { suffix: 'Spring', icon: '🌀', timeMultiplier: 2, materialMultiplier: 4, valueMultiplier: 4 },
+  { suffix: 'Mechanism', icon: '🔧', timeMultiplier: 3, materialMultiplier: 6, valueMultiplier: 6 },
+  { suffix: 'Clock', icon: '⏰', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 10 },
+  { suffix: 'Compass', icon: '🧭', timeMultiplier: 5, materialMultiplier: 12, valueMultiplier: 13 },
+  { suffix: 'Telescope', icon: '🔭', timeMultiplier: 6, materialMultiplier: 15, valueMultiplier: 17 },
+  { suffix: 'Music Box', icon: '🎵', timeMultiplier: 8, materialMultiplier: 20, valueMultiplier: 24 },
+  { suffix: 'Automaton', icon: '🤖', timeMultiplier: 12, materialMultiplier: 30, valueMultiplier: 38 },
+  { suffix: 'Bomb', icon: '💣', timeMultiplier: 10, materialMultiplier: 25, valueMultiplier: 30 },
+  { suffix: 'Cannon', icon: '🔫', timeMultiplier: 18, materialMultiplier: 50, valueMultiplier: 60 },
+  { suffix: 'Flying Machine', icon: '🚁', timeMultiplier: 25, materialMultiplier: 75, valueMultiplier: 90 },
+  { suffix: 'War Machine', icon: '⚔️', timeMultiplier: 35, materialMultiplier: 100, valueMultiplier: 125 },
+  { suffix: 'Mech Suit', icon: '🦾', timeMultiplier: 50, materialMultiplier: 150, valueMultiplier: 175 },
+  { suffix: 'World Engine', icon: '🏆', timeMultiplier: 60, materialMultiplier: 200, valueMultiplier: 230 },
+];
+
+// Tier name arrays for recipes (10 tiers each)
+const RECIPE_TIER_NAMES = {
+  logging: ['Maple', 'Oak', 'Birch', 'Pine', 'Willow', 'Cedar', 'Ash', 'Elm', 'Spruce', 'Redwood'],
+  mining: ['Copper', 'Tin', 'Bronze', 'Iron', 'Coal', 'Silver', 'Gold', 'Steel', 'Platinum', 'Mithril'],
+  fishing: ['Minnow', 'Sardine', 'Trout', 'Salmon', 'Tuna', 'Cod', 'Bass', 'Perch', 'Pike', 'Catfish'],
+  herbalism: ['Dandelion', 'Clover', 'Mint', 'Basil', 'Sage', 'Thyme', 'Rosemary', 'Lavender', 'Chamomile', 'Ginseng'],
+  skinning: ['Rabbit', 'Deer', 'Wolf', 'Bear', 'Boar', 'Elk', 'Bison', 'Tiger', 'Lion', 'Rhino'],
+  foraging: ['Cotton', 'Flax', 'Hemp', 'Silk', 'Spider Silk', 'Wool', 'Mohair', 'Cashmere', 'Alpaca', 'Angora'],
+  hunting: ['Rabbit', 'Pheasant', 'Duck', 'Goose', 'Turkey', 'Venison', 'Boar', 'Elk', 'Buffalo', 'Bear'],
+};
+
+// Generic recipe generator function
+const generateRecipes = (
+  skillType: SkillType,
+  gatheringSkill: string,
+  recipeTypes: typeof SAWMILL_RECIPE_TYPES,
+  skillPrefix: string
+): CraftingRecipe[] => {
+  const recipes: CraftingRecipe[] = [];
+  const tierNames = RECIPE_TIER_NAMES[gatheringSkill as keyof typeof RECIPE_TIER_NAMES] || RECIPE_TIER_NAMES.logging;
+
   for (let tier = 1; tier <= 10; tier++) {
-    const woodName = WOOD_TIERS[tier - 1];
-    const resourceId = `logging_t${tier}`;
-    const tierLevel = (tier - 1) * 20 + 1;
+    const tierName = tierNames[tier - 1];
+    const resourceId = `${gatheringSkill}_t${tier}`;
+    const tierLevel = (tier - 1) * 10 + 1;
     const baseValue = tier * 5;
 
-    SAWMILL_RECIPE_TYPES.forEach((type, typeIdx) => {
+    recipeTypes.forEach((type, typeIdx) => {
       const requiredLevel = tierLevel + typeIdx;
       recipes.push({
-        id: `sawmill_${tier}_${typeIdx}`,
-        name: `${woodName} ${type.suffix}`,
-        craftingSkill: SkillType.SAWMILL,
+        id: `${skillPrefix}_${tier}_${typeIdx}`,
+        name: `${tierName} ${type.suffix}`,
+        craftingSkill: skillType,
         requiredLevel,
         materials: [{ resourceId, quantity: type.materialMultiplier }],
         craftTime: Math.floor(type.timeMultiplier * (1 + tier * 0.5)),
@@ -358,8 +506,17 @@ const generateSawmillRecipes = (): CraftingRecipe[] => {
   return recipes;
 };
 
+// Generate all recipes
 export const CRAFTING_RECIPES: CraftingRecipe[] = [
-  ...generateSawmillRecipes(),
+  ...generateRecipes(SkillType.SAWMILL, 'logging', SAWMILL_RECIPE_TYPES, 'sawmill'),
+  ...generateRecipes(SkillType.SMITHING, 'mining', SMITHING_RECIPE_TYPES, 'smithing'),
+  ...generateRecipes(SkillType.COOKING, 'fishing', COOKING_RECIPE_TYPES, 'cooking'),
+  ...generateRecipes(SkillType.ALCHEMY, 'herbalism', ALCHEMY_RECIPE_TYPES, 'alchemy'),
+  ...generateRecipes(SkillType.LEATHERWORKING, 'skinning', LEATHERWORKING_RECIPE_TYPES, 'leatherworking'),
+  ...generateRecipes(SkillType.TAILORING, 'foraging', TAILORING_RECIPE_TYPES, 'tailoring'),
+  ...generateRecipes(SkillType.JEWELCRAFTING, 'mining', JEWELCRAFTING_RECIPE_TYPES, 'jewelcrafting'),
+  ...generateRecipes(SkillType.ENCHANTING, 'herbalism', ENCHANTING_RECIPE_TYPES, 'enchanting'),
+  ...generateRecipes(SkillType.ENGINEERING, 'mining', ENGINEERING_RECIPE_TYPES, 'engineering'),
 ];
 
 // Helper to get recipes for a specific crafting skill
@@ -619,20 +776,102 @@ const initialState: GameState = {
 
 const LOGGING_TIERS = [
   'Maple', 'Oak', 'Birch', 'Pine', 'Willow', 'Cedar', 'Ash', 'Elm', 'Spruce', 'Redwood',
-  'Mahogany', 'Teak', 'Ebony', 'Ironwood', 'Bloodwood', 'Ghostwood', 'Petrified Oak',
+  'Mahogany', 'Teak', 'Ebony', 'Ironwood', 'Bloodwood', 'Ghostwood', 'Petrified',
   'Crystalbark', 'Moonbark', 'Sunwood', 'Stormoak', 'Frostpine', 'Emberbark', 'Voidwood',
-  'Mythril Birch', 'Dragon Oak', 'Phoenix Ash', 'Titan Elm', 'Cosmic Cedar', 'Nebula Maple',
-  'Starfall Willow', 'Quantum Pine', 'Temporal Spruce', 'Ethereal Redwood', 'Celestial Teak',
-  'Divine Mahogany', 'Astral Ebony', 'Primal Ironwood', 'The Giving Tree', 'Infinity Oak',
-  'Schrödinger\'s Birch', 'Meme Wood', 'Plot Armor Tree', 'Lag Spike Pine', 'Fourth Wall Willow',
-  'Error 404 Cedar', 'Gigachad Oak', 'Final Boss Elm', 'Prestige Redwood', 'The World Tree'
+  'Mythril', 'Dragon', 'Phoenix', 'Titan', 'Cosmic', 'Nebula',
+  'Starfall', 'Quantum', 'Temporal', 'Ethereal', 'Celestial',
+  'Divine', 'Astral', 'Primal', 'Infinity', 'World Tree'
+];
+
+const MINING_TIERS = [
+  'Copper', 'Tin', 'Bronze', 'Iron', 'Coal', 'Silver', 'Gold', 'Steel', 'Platinum', 'Mithril',
+  'Adamantite', 'Runite', 'Dragonite', 'Obsidian', 'Starmetal', 'Moonstone', 'Sunstone',
+  'Voidstone', 'Crystite', 'Aetherium', 'Orichalcum', 'Celestium', 'Eternium', 'Infinitum',
+  'Primordium', 'Cosmium', 'Dimensium', 'Quantum Ore', 'Chrono Metal', 'Omega Ore',
+  'Alpha Stone', 'Genesis Ore', 'Apex Metal', 'Ultima Ore', 'Legendary Ore',
+  'Mythical Ore', 'Divine Ore', 'Godly Ore', 'Supreme Ore', 'World\'s Core'
+];
+
+const FISHING_TIERS = [
+  'Minnow', 'Sardine', 'Trout', 'Salmon', 'Tuna', 'Cod', 'Bass', 'Perch', 'Pike', 'Catfish',
+  'Swordfish', 'Shark', 'Marlin', 'Barracuda', 'Anglerfish', 'Ghostfish', 'Crystal Koi',
+  'Moonfish', 'Sunfish', 'Starfish', 'Voidfish', 'Leviathan', 'Kraken Spawn', 'Dragon Eel',
+  'Phoenix Fish', 'Titan Bass', 'Cosmic Carp', 'Nebula Ray', 'Quantum Trout', 'Time Salmon',
+  'Ethereal Pike', 'Celestial Cod', 'Divine Marlin', 'Astral Shark', 'Primal Tuna',
+  'Infinity Koi', 'World Serpent', 'Mythic Whale', 'God Fish', 'The One That Got Away'
+];
+
+const HERBALISM_TIERS = [
+  'Dandelion', 'Clover', 'Mint', 'Basil', 'Sage', 'Thyme', 'Rosemary', 'Lavender', 'Chamomile', 'Ginseng',
+  'Nightshade', 'Wolfsbane', 'Mandrake', 'Bloodroot', 'Ghostweed', 'Moonpetal', 'Sunbloom',
+  'Starleaf', 'Voidmoss', 'Crystalwort', 'Dragonvine', 'Phoenix Flower', 'Titan Root', 'Cosmic Bloom',
+  'Nebula Moss', 'Quantum Herb', 'Time Blossom', 'Ethereal Fern', 'Celestial Lotus', 'Divine Lily',
+  'Astral Rose', 'Primal Vine', 'Infinity Orchid', 'World Flower', 'Genesis Bloom',
+  'Mythic Herb', 'God\'s Breath', 'Supreme Petal', 'Ultimate Root', 'The First Seed'
+];
+
+const SKINNING_TIERS = [
+  'Rabbit', 'Deer', 'Wolf', 'Bear', 'Boar', 'Elk', 'Bison', 'Tiger', 'Lion', 'Rhino',
+  'Dragon', 'Wyvern', 'Griffin', 'Basilisk', 'Hydra', 'Phoenix', 'Chimera', 'Manticore',
+  'Kraken', 'Leviathan', 'Behemoth', 'Titan Beast', 'Cosmic Serpent', 'Void Walker',
+  'Starborn', 'Moon Beast', 'Sun Lion', 'Nebula Drake', 'Quantum Chimera', 'Time Beast',
+  'Ethereal Wolf', 'Celestial Tiger', 'Divine Bear', 'Astral Dragon', 'Primal Titan',
+  'Infinity Beast', 'World Serpent', 'Mythic Horror', 'God Beast', 'The Last Monster'
+];
+
+const FORAGING_TIERS = [
+  'Cotton', 'Flax', 'Hemp', 'Silk Worm', 'Spider Silk', 'Wool', 'Mohair', 'Cashmere', 'Alpaca', 'Angora',
+  'Shadowcloth', 'Moonweave', 'Sunthread', 'Starsilk', 'Voidfiber', 'Crystal Thread', 'Dragon Silk',
+  'Phoenix Down', 'Titan Wool', 'Cosmic Cotton', 'Nebula Silk', 'Quantum Fiber', 'Time Thread',
+  'Ethereal Weave', 'Celestial Cloth', 'Divine Silk', 'Astral Cotton', 'Primal Fiber',
+  'Infinity Thread', 'World Weave', 'Genesis Silk', 'Mythic Cloth', 'God Thread',
+  'Supreme Weave', 'Ultimate Fiber', 'Alpha Silk', 'Omega Cotton', 'The First Thread'
+];
+
+const HUNTING_TIERS = [
+  'Rabbit', 'Pheasant', 'Duck', 'Goose', 'Turkey', 'Venison', 'Boar', 'Elk', 'Buffalo', 'Bear',
+  'Exotic Bird', 'Wild Ox', 'Mountain Lion', 'Snow Leopard', 'White Tiger', 'Golden Eagle',
+  'Shadow Panther', 'Moon Stag', 'Sun Phoenix', 'Star Hawk', 'Void Raven', 'Crystal Beast',
+  'Dragon Game', 'Titan Prey', 'Cosmic Hunt', 'Nebula Fowl', 'Quantum Game', 'Time Beast',
+  'Ethereal Prey', 'Celestial Stag', 'Divine Game', 'Astral Hunt', 'Primal Trophy',
+  'Infinity Game', 'World Beast', 'Mythic Prey', 'God\'s Quarry', 'The Ultimate Hunt'
 ];
 
 export function getResourceName(skillType: SkillType, tier: number): string {
-  if (skillType === SkillType.LOGGING) {
-    return LOGGING_TIERS[Math.min(tier - 1, LOGGING_TIERS.length - 1)] + ' Wood';
+  const idx = Math.min(tier - 1, 39);
+  switch (skillType) {
+    case SkillType.LOGGING:
+      return LOGGING_TIERS[idx] + ' Wood';
+    case SkillType.MINING:
+      return MINING_TIERS[idx] + ' Ore';
+    case SkillType.FISHING:
+      return FISHING_TIERS[idx];
+    case SkillType.HERBALISM:
+      return HERBALISM_TIERS[idx];
+    case SkillType.SKINNING:
+      return SKINNING_TIERS[idx] + ' Hide';
+    case SkillType.FORAGING:
+      return FORAGING_TIERS[idx];
+    case SkillType.HUNTING:
+      return HUNTING_TIERS[idx] + ' Meat';
+    default:
+      return 'Resource';
   }
-  return 'Resource';
+}
+
+// Helper to get tier name without suffix
+export function getTierName(skillType: SkillType, tier: number): string {
+  const idx = Math.min(tier - 1, 39);
+  switch (skillType) {
+    case SkillType.LOGGING: return LOGGING_TIERS[idx];
+    case SkillType.MINING: return MINING_TIERS[idx];
+    case SkillType.FISHING: return FISHING_TIERS[idx];
+    case SkillType.HERBALISM: return HERBALISM_TIERS[idx];
+    case SkillType.SKINNING: return SKINNING_TIERS[idx];
+    case SkillType.FORAGING: return FORAGING_TIERS[idx];
+    case SkillType.HUNTING: return HUNTING_TIERS[idx];
+    default: return 'Unknown';
+  }
 }
 
 // ============================================
