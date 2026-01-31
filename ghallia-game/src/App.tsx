@@ -20,7 +20,7 @@ import { AchievementsPanel } from './components/ui/AchievementsPanel';
 import { AccountPanel } from './components/ui/AccountPanel';
 import { TutorialOverlay, useTutorial } from './components/ui/TutorialOverlay';
 import { AuthProvider } from './contexts/AuthContext';
-import { formatNumber, formatGold } from './utils/math';
+import { formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
 class ErrorBoundary extends React.Component<

@@ -3,7 +3,7 @@
  * Displays a single skill in the skill table grid
  */
 
-import { SkillType, SkillCategory } from '../../types/game.types';
+import { SkillType } from '../../types/game.types';
 import { useGame, SKILL_DEFINITIONS, getXpProgress } from '../../store/gameStore';
 
 interface SkillCardProps {

@@ -3,7 +3,7 @@
  * Slide-up panel for game settings including reset and text size
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { NumberNotation, getNumberNotation, setNumberNotation } from '../../utils/math';
 import { useGame } from '../../store/gameStore';
 import './SettingsPanel.css';
@@ -128,11 +128,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   };
 
   // Calculate actual font size
-  const getActualFontSize = () => {
+  const getActualFontSize = useCallback(() => {
     const sizeConfig = TEXT_SIZES.find(s => s.value === textSize);
     const baseSize = sizeConfig?.size || 12;
     return Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, baseSize + customOffset));
-  };
+  }, [textSize, customOffset]);
 
   // Apply text size to document
   useEffect(() => {
@@ -141,7 +141,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     document.documentElement.style.fontSize = `${actualSize}px`;
     localStorage.setItem('infinity_text_size', textSize);
     localStorage.setItem('infinity_font_offset', customOffset.toString());
-  }, [textSize, customOffset]);
+  }, [textSize, customOffset, getActualFontSize]);
 
   const handleIncreaseFont = () => {
     if (getActualFontSize() < MAX_FONT_SIZE) {

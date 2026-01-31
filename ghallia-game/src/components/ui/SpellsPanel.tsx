@@ -105,26 +105,26 @@ interface SpellItemProps {
 }
 
 function SpellItem({ spell, spellState, mana, onCast }: SpellItemProps) {
-  const now = Date.now();
-  const isActive = spellState && spellState.activeUntil > now;
-  const isOnCooldown = spellState && spellState.cooldownUntil > now && !isActive;
+  const [currentTime, setCurrentTime] = React.useState(() => Date.now());
+
+  const isActive = spellState && spellState.activeUntil > currentTime;
+  const isOnCooldown = spellState && spellState.cooldownUntil > currentTime && !isActive;
   const canCast = mana >= spell.manaCost && !isActive && !isOnCooldown;
 
   const timeRemaining = useMemo(() => {
     if (isActive && spellState) {
-      return Math.ceil((spellState.activeUntil - now) / 1000);
+      return Math.ceil((spellState.activeUntil - currentTime) / 1000);
     }
     if (isOnCooldown && spellState) {
-      return Math.ceil((spellState.cooldownUntil - now) / 1000);
+      return Math.ceil((spellState.cooldownUntil - currentTime) / 1000);
     }
     return 0;
-  }, [isActive, isOnCooldown, spellState, now]);
+  }, [isActive, isOnCooldown, spellState, currentTime]);
 
-  // Force re-render every second for countdown
-  const [, forceUpdate] = React.useState(0);
+  // Update current time every second for countdown
   React.useEffect(() => {
     if (isActive || isOnCooldown) {
-      const interval = setInterval(() => forceUpdate(v => v + 1), 1000);
+      const interval = setInterval(() => setCurrentTime(Date.now()), 1000);
       return () => clearInterval(interval);
     }
   }, [isActive, isOnCooldown]);

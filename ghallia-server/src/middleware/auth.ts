@@ -6,9 +6,16 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Secret key for JWT (in production, use environment variable)
-export const JWT_SECRET = process.env.JWT_SECRET || 'infinity-game-secret-key-2026';
+// Secret key for JWT - MUST be set in production via environment variable
+const DEFAULT_SECRET = 'infinity-game-dev-secret-2026';
+export const JWT_SECRET = process.env.JWT_SECRET || DEFAULT_SECRET;
 export const JWT_EXPIRES_IN = '7d';
+
+// Warn if using default secret in production
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  console.error('⚠️  WARNING: JWT_SECRET environment variable not set! Using insecure default.');
+  console.error('⚠️  Set JWT_SECRET for production deployment.');
+}
 
 export interface JWTPayload {
   userId: string;

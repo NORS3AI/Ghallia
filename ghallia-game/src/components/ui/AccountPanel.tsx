@@ -19,7 +19,8 @@ export function AccountPanel({ isOpen, onClose }: AccountPanelProps) {
   const { user, isAuthenticated, serverOnline, error, login, register, logout, clearError, syncToCloud, loadFromCloud, getCloudSaveInfo } = useAuth();
   const { state, loadCloudSave } = useGame();
 
-  const [viewMode, setViewMode] = useState<ViewMode>(isAuthenticated ? 'account' : 'login');
+  // Track auth form mode (login vs register) - only used when not authenticated
+  const [authFormMode, setAuthFormMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,31 +30,38 @@ export function AccountPanel({ isOpen, onClose }: AccountPanelProps) {
   const [cloudSaveInfo, setCloudSaveInfo] = useState<{ hasSave: boolean; savedAt?: string } | null>(null);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
 
+  // Derive view mode from auth state and form mode
+  const viewMode: ViewMode = isAuthenticated ? 'account' : authFormMode;
+
   // Load cloud save info
   const loadCloudInfo = useCallback(async () => {
     const info = await getCloudSaveInfo();
     setCloudSaveInfo(info);
   }, [getCloudSaveInfo]);
 
-  // Update view mode when auth state changes
+  // Load cloud info when authenticated
   useEffect(() => {
-    setViewMode(isAuthenticated ? 'account' : 'login');
     if (isAuthenticated) {
       loadCloudInfo();
     }
   }, [isAuthenticated, loadCloudInfo]);
 
-  // Clear errors when closing
+  // Clear form when closing
+  const clearForm = useCallback(() => {
+    setLocalError(null);
+    clearError();
+    setUsername('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+  }, [clearError]);
+
+  // Clear form when panel closes
   useEffect(() => {
     if (!isOpen) {
-      setLocalError(null);
-      clearError();
-      setUsername('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
+      clearForm();
     }
-  }, [isOpen, clearError]);
+  }, [isOpen, clearForm]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,7 +137,7 @@ export function AccountPanel({ isOpen, onClose }: AccountPanelProps) {
 
   const handleLogout = () => {
     logout();
-    setViewMode('login');
+    setAuthFormMode('login');
   };
 
   const displayError = localError || error;
@@ -200,7 +208,7 @@ export function AccountPanel({ isOpen, onClose }: AccountPanelProps) {
 
               <div className="auth-switch">
                 Don't have an account?{' '}
-                <button type="button" onClick={() => setViewMode('register')}>
+                <button type="button" onClick={() => setAuthFormMode('register')}>
                   Register
                 </button>
               </div>
@@ -271,7 +279,7 @@ export function AccountPanel({ isOpen, onClose }: AccountPanelProps) {
 
               <div className="auth-switch">
                 Already have an account?{' '}
-                <button type="button" onClick={() => setViewMode('login')}>
+                <button type="button" onClick={() => setAuthFormMode('login')}>
                   Login
                 </button>
               </div>

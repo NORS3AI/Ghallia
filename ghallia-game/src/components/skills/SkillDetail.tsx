@@ -49,6 +49,7 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
   const [pops, setPops] = useState<NumberPop[]>([]);
   const [selectedQuantities, setSelectedQuantities] = useState<Record<string, number>>({});
   const [glitter, setGlitter] = useState<GlitterParticle[]>([]);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
   const popIdRef = useRef(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -87,10 +88,18 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
     onSwipeRight: onSwipeToPrev || onBack,
   });
 
+  // Update current time for crafting progress display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+
   // Get the last gather result for this skill
   const lastGather = state.lastGatherResult;
 
-  const handleGather = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  const handleGather = useCallback(() => {
     gather(skillType);
   }, [gather, skillType]);
 
@@ -308,7 +317,7 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
             onClick={handleGather}
             onTouchEnd={(e) => {
               e.preventDefault();
-              handleGather(e);
+              handleGather();
             }}
           >
             {skillDef.icon}
@@ -350,9 +359,8 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
                 {craftingQueue.slice(0, 5).map(item => {
                   const recipe = CRAFTING_RECIPES.find(r => r.id === item.recipeId);
                   if (!recipe) return null;
-                  const now = Date.now();
-                  const progress = Math.min(100, ((now - item.startTime) / (item.endTime - item.startTime)) * 100);
-                  const remaining = Math.max(0, Math.ceil((item.endTime - now) / 1000));
+                  const progress = Math.min(100, ((currentTime - item.startTime) / (item.endTime - item.startTime)) * 100);
+                  const remaining = Math.max(0, Math.ceil((item.endTime - currentTime) / 1000));
                   const qty = item.quantity || 1;
                   return (
                     <div key={item.id} className="queue-item">

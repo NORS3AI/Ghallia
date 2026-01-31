@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useGame } from '../../store/gameStore';
-import { EquipmentSlot, Equipment, Rarity } from '../../types/game.types';
+import { EquipmentSlot, Rarity } from '../../types/game.types';
 import { RARITY_DATA } from '../../data/items';
 import { formatGold } from '../../utils/math';
 import './CharacterPanel.css';
