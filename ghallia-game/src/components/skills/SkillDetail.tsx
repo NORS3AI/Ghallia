@@ -56,6 +56,9 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
     onSwipeRight: onSwipeToPrev || onBack,
   });
 
+  // Calculate actual taps per click (1 base + bonus from upgrades)
+  const tapsPerClick = 1 + state.bonusTaps;
+
   const handleGather = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     gather(skillType);
 
@@ -64,17 +67,17 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
     if (rect) {
       const newPop: NumberPop = {
         id: ++popIdRef.current,
-        value: '+1',
+        value: `+${tapsPerClick}`,
         type: 'resource',
         x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 30,
-        y: rect.top - 20, // Position above the button
+        y: rect.top - 40, // Position well above the button
       };
       setPops(prev => [...prev, newPop]);
       setTimeout(() => {
         setPops(prev => prev.filter(p => p.id !== newPop.id));
       }, 800);
     }
-  }, [gather, skillType]);
+  }, [gather, skillType, tapsPerClick]);
 
   const handleSellAll = useCallback(() => {
     if (resourceCount > 0) {

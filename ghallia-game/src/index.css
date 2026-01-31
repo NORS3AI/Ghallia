@@ -18,9 +18,9 @@
   --color-bronze: #cd7f32;
   --color-silver: #c0c0c0;
 
-  --color-text-primary: #e8dcc4;
-  --color-text-secondary: #a89880;
-  --color-text-muted: #6b5d4d;
+  --color-text-primary: #f5efe6;  /* Brighter off-white for better readability */
+  --color-text-secondary: #c4b8a0; /* Lighter secondary text */
+  --color-text-muted: #8a7d6d;     /* Slightly brighter muted text */
 
   --color-accent-green: #4a7c59;
   --color-accent-red: #8b3a3a;
