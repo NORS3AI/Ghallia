@@ -9,6 +9,7 @@ import { GameProvider, useGame, SKILL_DEFINITIONS, getUnlockCost } from './store
 import { SkillTable } from './components/skills/SkillTable';
 import { SkillDetail } from './components/skills/SkillDetail';
 import { UnlockPanel } from './components/ui/UnlockPanel';
+import { SettingsPanel } from './components/ui/SettingsPanel';
 import { formatNumber } from './utils/math';
 
 // Error Boundary to catch and display errors
@@ -77,6 +78,7 @@ function GameApp() {
   const [view, setView] = useState<View>('skills');
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [unlockPanelOpen, setUnlockPanelOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Get list of unlocked skills for swipe navigation
   const unlockedSkills = useMemo(() => {
@@ -170,6 +172,12 @@ function GameApp() {
         onClose={() => setUnlockPanelOpen(false)}
       />
 
+      {/* Settings Panel */}
+      <SettingsPanel
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
+
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
@@ -191,7 +199,7 @@ function GameApp() {
             <span>Prestige</span>
           </button>
 
-          <button className="nav-button">
+          <button className="nav-button" onClick={() => setSettingsOpen(true)}>
             <span className="nav-icon">⚙️</span>
             <span>Settings</span>
           </button>
