@@ -1726,7 +1726,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const hasDoubleGold = (state.spells['double_gold']?.activeUntil || 0) > now;
       const goldMultiplier = hasDoubleGold ? 2 : 1;
 
-      let goldGained = goldPerItem * action.quantity * (1 + state.goldBonus / 100) * goldMultiplier;
+      // Chaos points bonus: +0.1% gold per chaos point
+      const chaosGoldBonus = state.chaosPoints * 0.1;
+
+      let goldGained = goldPerItem * action.quantity * (1 + state.goldBonus / 100 + chaosGoldBonus / 100) * goldMultiplier;
 
       return {
         ...state,

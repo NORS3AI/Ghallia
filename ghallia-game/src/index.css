@@ -180,6 +180,16 @@ h4 { font-size: 1.1rem; }
   font-size: 1rem;
 }
 
+.header-chaos {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: #9b59b6;
+  font-size: 1rem;
+}
+
 .gold-icon {
   width: 20px;
   height: 20px;
@@ -1396,7 +1406,8 @@ h4 { font-size: 1.1rem; }
   }
 
   .header-gold,
-  .header-mana {
+  .header-mana,
+  .header-chaos {
     font-size: 0.85rem;
     padding: var(--spacing-xs) var(--spacing-sm);
   }
