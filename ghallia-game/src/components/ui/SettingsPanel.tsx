@@ -1,9 +1,9 @@
 /**
  * Settings Panel Component
- * Slide-up panel for game settings including reset
+ * Slide-up panel for game settings including reset and text size
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './SettingsPanel.css';
 
 interface SettingsPanelProps {
@@ -11,8 +11,30 @@ interface SettingsPanelProps {
   onClose: () => void;
 }
 
+type TextSize = 'small' | 'medium' | 'large' | 'huge';
+
+const TEXT_SIZES: { value: TextSize; label: string; size: string }[] = [
+  { value: 'small', label: 'Small', size: '10px' },
+  { value: 'medium', label: 'Medium', size: '12px' },
+  { value: 'large', label: 'Large', size: '14px' },
+  { value: 'huge', label: 'Huge', size: '16px' },
+];
+
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [confirmReset, setConfirmReset] = useState(false);
+  const [textSize, setTextSize] = useState<TextSize>(() => {
+    return (localStorage.getItem('ghallia_text_size') as TextSize) || 'medium';
+  });
+
+  // Apply text size to document
+  useEffect(() => {
+    const sizeConfig = TEXT_SIZES.find(s => s.value === textSize);
+    if (sizeConfig) {
+      document.documentElement.style.setProperty('--base-font-size', sizeConfig.size);
+      document.documentElement.style.fontSize = sizeConfig.size;
+      localStorage.setItem('ghallia_text_size', textSize);
+    }
+  }, [textSize]);
 
   const handleReset = () => {
     if (!confirmReset) {
@@ -48,8 +70,24 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </div>
 
         <div className="settings-content">
-          {/* Reset Section */}
+          {/* Text Size Section */}
           <div className="settings-section">
+            <h3>Text Size</h3>
+            <div className="text-size-options">
+              {TEXT_SIZES.map(size => (
+                <button
+                  key={size.value}
+                  className={`text-size-button ${textSize === size.value ? 'active' : ''}`}
+                  onClick={() => setTextSize(size.value)}
+                >
+                  {size.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Reset Section */}
+          <div className="settings-section danger">
             <h3>Danger Zone</h3>
             <p className="settings-warning">
               This will permanently delete all your progress. This cannot be undone.

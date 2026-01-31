@@ -132,6 +132,185 @@ Spend Chaos Points on permanent, account-wide bonuses:
 
 ---
 
+## Inventory System
+
+### Inventory Tab
+- **Centralized Storage** - All gathered and crafted items in one place
+- **Category Filters** - Filter by resource type, equipment, consumables
+- **Stack Display** - Resources stack with quantity indicators
+- **Sell Interface** - Quick-sell individual items or bulk sell
+- **Item Details** - View stats, value, and source of each item
+
+### Resource Categories
+- **Wood** - From Logging (Maple, Oak, Birch, etc.)
+- **Ore & Gems** - From Mining (Copper, Iron, Silver, Gold, etc.)
+- **Fish** - From Fishing (Minnow, Trout, Salmon, etc.)
+- **Herbs** - From Herbalism (Dandelion, Lavender, Sage, etc.)
+- **Leather & Hides** - From Skinning (Rabbit, Deer, Wolf, etc.)
+- **Scavenged Goods** - From Foraging (random materials, rare gear finds)
+
+---
+
+## Character System
+
+### Character Tab
+- **Visual Character Display** - See your equipped gear
+- **Equipment Slots** - 12 gear slots for customization
+- **Stat Summary** - View total stats from all equipment
+- **Combat Readiness** - HP display and combat stats
+
+### Equipment Slots (12 Slots)
+| Slot | Item Type | Primary Source |
+|------|-----------|----------------|
+| Head | Helmets | Smithing, Leatherworking, Tailoring |
+| Shoulders | Pauldrons | Smithing, Leatherworking, Tailoring |
+| Chest | Chestpieces | Smithing, Leatherworking, Tailoring |
+| Back | Cloaks | Tailoring |
+| Bracers | Wrist Guards | Smithing, Leatherworking, Tailoring |
+| Gloves | Gauntlets | Smithing, Leatherworking, Tailoring |
+| Pants | Legguards | Smithing, Leatherworking, Tailoring |
+| Boots | Footwear | Smithing, Leatherworking, Tailoring |
+| Main Hand | Weapons | Smithing, Sawmill |
+| Off Hand | Shields/Orbs | Smithing, Tailoring |
+| Ring 1 | Rings | Jewelcrafting |
+| Ring 2 | Rings | Jewelcrafting |
+| Necklace | Necklaces | Jewelcrafting |
+| Trinket | Trinkets | Jewelcrafting |
+
+---
+
+## Stat System
+
+### Primary Stats
+| Stat | Effect | Primary Source |
+|------|--------|----------------|
+| **Strength** | +% Tap Power per point | Plate/Mail Armor, Weapons |
+| **Intellect** | +% Mana Regeneration per point | Cloth Armor |
+| **Agility** | +% Luck and Dodge per point | Leather Armor |
+| **Stamina** | +HP per point (base 10 HP) | All armor types, Jewelry |
+
+### Stat Calculations
+- **Tap Power Bonus**: Strength × 1% per point
+- **Mana Regen Bonus**: Intellect × 2% per point
+- **Luck Bonus**: Agility × 0.5% per point
+- **Dodge Chance**: Agility × 0.25% per point
+- **Max HP**: 10 + (Stamina × 5)
+
+---
+
+## Equipment & Gear System
+
+### Armor Classes
+| Class | Stats Focus | Crafting Skill | Appearance |
+|-------|-------------|----------------|------------|
+| **Plate** | Strength, Stamina | Smithing | Heavy metal armor |
+| **Mail** | Strength, Stamina | Smithing | Chain link armor |
+| **Leather** | Agility, Stamina | Leatherworking | Hide and leather |
+| **Cloth** | Intellect, Stamina | Tailoring | Robes and fabric |
+
+### Weapon Types
+| Weapon | Hands | Stats | Crafting |
+|--------|-------|-------|----------|
+| Sword | 1H | Strength | Smithing |
+| Broadsword | 2H | Strength | Smithing |
+| Mace | 1H | Strength | Smithing |
+| Axe | 1H | Strength | Smithing |
+| Dagger | 1H | Agility | Smithing |
+| Staff | 2H | Intellect | Sawmill |
+| Wand | 1H | Intellect | Sawmill |
+
+### Material Tiers (Rarity Progression)
+| Tier | Material | Rarity | Drop Rate (Foraging) |
+|------|----------|--------|---------------------|
+| 1 | Copper | Common | 40% |
+| 2 | Bronze | Common | 25% |
+| 3 | Iron | Uncommon | 15% |
+| 4 | Silver | Uncommon | 8% |
+| 5 | Mithril | Rare | 5% |
+| 6 | Gold | Rare | 3% |
+| 7 | Platinum | Epic | 2% |
+| 8 | Diamond | Epic | 1.5% |
+| 9 | Dragon | Legendary | 0.5% |
+
+### Rarity System
+| Rarity | Color | Stat Bonus | Drop Chance Modifier |
+|--------|-------|------------|---------------------|
+| Common | White | +0% | 60% |
+| Uncommon | Green | +10% | 25% |
+| Rare | Blue | +25% | 10% |
+| Epic | Purple | +50% | 4% |
+| Legendary | Orange | +100% | 1% |
+
+### Jewelry Stats
+| Type | Possible Stats |
+|------|---------------|
+| Rings | Strength, Agility, Intellect, Stamina |
+| Necklaces | Strength, Agility, Intellect, Stamina |
+| Trinkets | Mixed stats, special effects |
+
+---
+
+## Crafting Skill Details
+
+### Smithing (Plate & Mail Armor, Metal Weapons)
+- **Products**: Helmets, Chestpieces, Pauldrons, Bracers, Gauntlets, Legguards, Boots
+- **Weapons**: Swords, Broadswords, Maces, Axes, Daggers
+- **Materials**: Ore from Mining, Leather from Skinning (for straps)
+- **Primary Stats**: Strength, Stamina
+
+### Leatherworking (Leather Armor)
+- **Products**: Leather versions of all armor slots
+- **Materials**: Hides from Skinning
+- **Primary Stats**: Agility, Stamina
+
+### Tailoring (Cloth Armor)
+- **Products**: Robes, Hoods, Cloth versions of all slots, Cloaks
+- **Off-hand**: Orbs, Tomes
+- **Materials**: Cloth from various sources
+- **Primary Stats**: Intellect, Stamina
+
+### Jewelcrafting (Accessories)
+- **Products**: Rings, Necklaces, Trinkets
+- **Materials**: Gems and precious metals from Mining
+- **Stats**: All primary stats available
+
+### Sawmill (Wooden Items)
+- **Weapons**: Staffs, Wands
+- **Furniture**: Chairs, Beds, Tables, Portraits (sellable)
+- **Materials**: Wood from Logging
+- **Stats**: Intellect (for weapons)
+
+### Future Crafting (To Be Fleshed Out)
+- **Engineering** - Gadgets and mechanical devices
+- **Enchanting** - Magical enhancements for gear
+- **Alchemy** - Potions and consumables
+- **Cooking** - Food buffs
+
+---
+
+## Foraging Special Mechanics
+
+### Scavenging System
+Foraging is unique - it provides random finds from all categories:
+
+- **Random Resources**: Small amounts of wood, ore, fish, herbs
+- **Scrap Materials**: Metal scraps for Smithing, cloth scraps for Tailoring
+- **Equipment Drops**: Rare chance to find weapons and armor
+  - Mostly low-tier (Copper, Bronze, Iron)
+  - Extremely rare high-tier finds (Dragon gear = jackpot!)
+- **Quality varies by Foraging level**
+
+### Foraging Drop Table
+| Category | Chance | Notes |
+|----------|--------|-------|
+| Common Resources | 50% | Random wood, ore, fish, herbs |
+| Scrap Materials | 30% | Smithing/Tailoring crafting materials |
+| Equipment (Common) | 15% | Copper-Silver tier gear |
+| Equipment (Rare+) | 4% | Mithril-Platinum tier gear |
+| Equipment (Legendary) | 1% | Diamond-Dragon tier gear |
+
+---
+
 ## Quality of Life Features
 
 ### Save System

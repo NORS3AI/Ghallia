@@ -14,6 +14,8 @@ import { PrestigePanel } from './components/ui/PrestigePanel';
 import { StatsPanel } from './components/ui/StatsPanel';
 import { UpgradesPanel } from './components/ui/UpgradesPanel';
 import { SpellsPanel } from './components/ui/SpellsPanel';
+import { InventoryPanel } from './components/ui/InventoryPanel';
+import { CharacterPanel } from './components/ui/CharacterPanel';
 import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
@@ -77,16 +79,22 @@ class ErrorBoundary extends React.Component<
 
 type View = 'skills' | 'detail';
 
+type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character';
+
 function GameApp() {
   const { state } = useGame();
   const [view, setView] = useState<View>('skills');
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
-  const [unlockPanelOpen, setUnlockPanelOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [prestigeOpen, setPrestigeOpen] = useState(false);
-  const [statsOpen, setStatsOpen] = useState(false);
-  const [upgradesOpen, setUpgradesOpen] = useState(false);
-  const [spellsOpen, setSpellsOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState<PanelType>('none');
+
+  // Helper to open a panel (closes any other open panel)
+  const openPanel = useCallback((panel: PanelType) => {
+    setActivePanel(panel);
+  }, []);
+
+  const closePanel = useCallback(() => {
+    setActivePanel('none');
+  }, []);
 
   // Get list of unlocked skills for swipe navigation
   const unlockedSkills = useMemo(() => {
@@ -175,7 +183,7 @@ function GameApp() {
       {lockedCount > 0 && (
         <button
           className="fab-unlock"
-          onClick={() => setUnlockPanelOpen(true)}
+          onClick={() => openPanel('unlock')}
         >
           +
           {canUnlock && <span className="badge">!</span>}
@@ -184,38 +192,50 @@ function GameApp() {
 
       {/* Unlock Panel */}
       <UnlockPanel
-        isOpen={unlockPanelOpen}
-        onClose={() => setUnlockPanelOpen(false)}
+        isOpen={activePanel === 'unlock'}
+        onClose={closePanel}
       />
 
       {/* Settings Panel */}
       <SettingsPanel
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
+        isOpen={activePanel === 'settings'}
+        onClose={closePanel}
       />
 
       {/* Prestige Panel */}
       <PrestigePanel
-        isOpen={prestigeOpen}
-        onClose={() => setPrestigeOpen(false)}
+        isOpen={activePanel === 'prestige'}
+        onClose={closePanel}
       />
 
       {/* Stats Panel */}
       <StatsPanel
-        isOpen={statsOpen}
-        onClose={() => setStatsOpen(false)}
+        isOpen={activePanel === 'stats'}
+        onClose={closePanel}
       />
 
       {/* Upgrades Panel */}
       <UpgradesPanel
-        isOpen={upgradesOpen}
-        onClose={() => setUpgradesOpen(false)}
+        isOpen={activePanel === 'upgrades'}
+        onClose={closePanel}
       />
 
       {/* Spells Panel */}
       <SpellsPanel
-        isOpen={spellsOpen}
-        onClose={() => setSpellsOpen(false)}
+        isOpen={activePanel === 'spells'}
+        onClose={closePanel}
+      />
+
+      {/* Inventory Panel */}
+      <InventoryPanel
+        isOpen={activePanel === 'inventory'}
+        onClose={closePanel}
+      />
+
+      {/* Character Panel */}
+      <CharacterPanel
+        isOpen={activePanel === 'character'}
+        onClose={closePanel}
       />
 
       {/* Bottom Navigation */}
@@ -223,33 +243,43 @@ function GameApp() {
         <div className="bottom-nav-content">
           <button
             className={`nav-button ${view === 'skills' ? 'active' : ''}`}
-            onClick={() => { setView('skills'); setSelectedSkill(null); }}
+            onClick={() => { setView('skills'); setSelectedSkill(null); closePanel(); }}
           >
             <span className="nav-icon">📜</span>
             <span>Skills</span>
           </button>
 
-          <button className="nav-button" onClick={() => setStatsOpen(true)}>
-            <span className="nav-icon">📊</span>
+          <button className="nav-button" onClick={() => openPanel('inventory')}>
+            <span className="nav-icon">🎒</span>
+            <span>Bag</span>
+          </button>
+
+          <button className="nav-button" onClick={() => openPanel('character')}>
+            <span className="nav-icon">🧙</span>
+            <span>Char</span>
+          </button>
+
+          <button className="nav-button" onClick={() => openPanel('stats')}>
+            <span className="nav-icon">📖</span>
             <span>Stats</span>
           </button>
 
-          <button className="nav-button" onClick={() => setUpgradesOpen(true)}>
-            <span className="nav-icon">⬆️</span>
-            <span>Upgrades</span>
+          <button className="nav-button" onClick={() => openPanel('upgrades')}>
+            <span className="nav-icon">⚔️</span>
+            <span>Power</span>
           </button>
 
-          <button className="nav-button" onClick={() => setSpellsOpen(true)}>
-            <span className="nav-icon">✨</span>
-            <span>Spells</span>
+          <button className="nav-button" onClick={() => openPanel('spells')}>
+            <span className="nav-icon">🔮</span>
+            <span>Magic</span>
           </button>
 
-          <button className="nav-button" onClick={() => setPrestigeOpen(true)}>
-            <span className="nav-icon">🏆</span>
+          <button className="nav-button" onClick={() => openPanel('prestige')}>
+            <span className="nav-icon">👑</span>
             <span>Prestige</span>
           </button>
 
-          <button className="nav-button" onClick={() => setSettingsOpen(true)}>
+          <button className="nav-button" onClick={() => openPanel('settings')}>
             <span className="nav-icon">⚙️</span>
             <span>Settings</span>
           </button>

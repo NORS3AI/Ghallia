@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
-import { SkillType, SkillCategory, ItemQuality } from '../types/game.types';
+import { SkillType, SkillCategory, ItemQuality, Equipment, EquipmentSlot, CharacterEquipment, EquipmentStats, Rarity, MaterialTier, EquipmentType, ArmorClass, WeaponType } from '../types/game.types';
 import {
   xpPerAction,
   totalXpForLevel,
@@ -175,6 +175,22 @@ interface SpellState {
   cooldownUntil: number; // timestamp when spell can be cast again
 }
 
+// ============================================
+// CHARACTER STATS
+// ============================================
+
+interface CharacterState {
+  equipment: CharacterEquipment;
+  // Computed total stats from all equipment
+  totalStrength: number;
+  totalIntellect: number;
+  totalAgility: number;
+  totalStamina: number;
+  // Derived stats
+  maxHp: number;
+  currentHp: number;
+}
+
 export interface GameState {
   gold: number;
   mana: number;
@@ -198,6 +214,9 @@ export interface GameState {
   critDamage: number;
   luck: number;
   goldBonus: number;
+  // Equipment & Character
+  equipmentInventory: Equipment[]; // unequipped gear
+  character: CharacterState;
 }
 
 // ============================================
@@ -214,7 +233,11 @@ type GameAction =
   | { type: 'CAST_SPELL'; spellId: string }
   | { type: 'TICK'; deltaMs: number }
   | { type: 'LOAD_GAME'; state: GameState }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+  | { type: 'ADD_EQUIPMENT'; equipment: Equipment }
+  | { type: 'EQUIP_ITEM'; equipmentId: string }
+  | { type: 'UNEQUIP_ITEM'; slot: EquipmentSlot }
+  | { type: 'SELL_EQUIPMENT'; equipmentId: string };
 
 // ============================================
 // INITIAL STATE
@@ -244,6 +267,33 @@ const initialStats: StatsState = {
   playTime: 0,
 };
 
+const initialCharacterEquipment: CharacterEquipment = {
+  [EquipmentSlot.HEAD]: null,
+  [EquipmentSlot.SHOULDERS]: null,
+  [EquipmentSlot.CHEST]: null,
+  [EquipmentSlot.BACK]: null,
+  [EquipmentSlot.BRACERS]: null,
+  [EquipmentSlot.GLOVES]: null,
+  [EquipmentSlot.PANTS]: null,
+  [EquipmentSlot.BOOTS]: null,
+  [EquipmentSlot.MAIN_HAND]: null,
+  [EquipmentSlot.OFF_HAND]: null,
+  [EquipmentSlot.RING_1]: null,
+  [EquipmentSlot.RING_2]: null,
+  [EquipmentSlot.NECKLACE]: null,
+  [EquipmentSlot.TRINKET]: null,
+};
+
+const initialCharacter: CharacterState = {
+  equipment: initialCharacterEquipment,
+  totalStrength: 0,
+  totalIntellect: 0,
+  totalAgility: 0,
+  totalStamina: 0,
+  maxHp: 10, // Base HP
+  currentHp: 10,
+};
+
 const initialState: GameState = {
   gold: 0,
   mana: 0,
@@ -265,6 +315,8 @@ const initialState: GameState = {
   critDamage: 100, // 100% = 2x damage
   luck: 0,
   goldBonus: 0,
+  equipmentInventory: [],
+  character: initialCharacter,
 };
 
 // ============================================
@@ -292,6 +344,38 @@ export function getResourceName(skillType: SkillType, tier: number): string {
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
+
+function recalculateCharacterStats(state: GameState): CharacterState {
+  const { equipment } = state.character;
+  let totalStrength = 0;
+  let totalIntellect = 0;
+  let totalAgility = 0;
+  let totalStamina = 0;
+
+  // Sum stats from all equipped items
+  const slots = Object.values(EquipmentSlot);
+  for (const slot of slots) {
+    const item = equipment[slot as EquipmentSlot];
+    if (item) {
+      totalStrength += item.stats.strength;
+      totalIntellect += item.stats.intellect;
+      totalAgility += item.stats.agility;
+      totalStamina += item.stats.stamina;
+    }
+  }
+
+  const maxHp = 10 + (totalStamina * 5);
+
+  return {
+    ...state.character,
+    totalStrength,
+    totalIntellect,
+    totalAgility,
+    totalStamina,
+    maxHp,
+    currentHp: Math.min(state.character.currentHp, maxHp),
+  };
+}
 
 function recalculateBonuses(state: GameState): GameState {
   let bonusTaps = 0;
@@ -333,6 +417,12 @@ function recalculateBonuses(state: GameState): GameState {
       }
     }
   }
+
+  // Add bonuses from character stats (equipment)
+  const charStats = state.character;
+  bonusTaps += Math.floor(charStats.totalStrength * 0.01 * bonusTaps); // Strength adds % tap power
+  manaRegen *= 1 + (charStats.totalIntellect * 0.02); // Intellect adds % mana regen
+  luck += charStats.totalAgility * 0.5; // Agility adds luck
 
   return {
     ...state,
@@ -542,9 +632,95 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'ADD_EQUIPMENT': {
+      return {
+        ...state,
+        equipmentInventory: [...state.equipmentInventory, action.equipment],
+      };
+    }
+
+    case 'EQUIP_ITEM': {
+      const itemIndex = state.equipmentInventory.findIndex(e => e.id === action.equipmentId);
+      if (itemIndex === -1) return state;
+
+      const item = state.equipmentInventory[itemIndex];
+      const currentlyEquipped = state.character.equipment[item.slot];
+
+      // Remove item from inventory
+      const newInventory = state.equipmentInventory.filter((_, i) => i !== itemIndex);
+
+      // If there's already an item in that slot, move it to inventory
+      if (currentlyEquipped) {
+        newInventory.push(currentlyEquipped);
+      }
+
+      const newEquipment = {
+        ...state.character.equipment,
+        [item.slot]: item,
+      };
+
+      const newCharacter = recalculateCharacterStats({
+        ...state,
+        character: { ...state.character, equipment: newEquipment },
+      });
+
+      const newState = {
+        ...state,
+        equipmentInventory: newInventory,
+        character: newCharacter,
+      };
+
+      return recalculateBonuses(newState);
+    }
+
+    case 'UNEQUIP_ITEM': {
+      const equipped = state.character.equipment[action.slot];
+      if (!equipped) return state;
+
+      const newEquipment = {
+        ...state.character.equipment,
+        [action.slot]: null,
+      };
+
+      const newCharacter = recalculateCharacterStats({
+        ...state,
+        character: { ...state.character, equipment: newEquipment },
+      });
+
+      const newState = {
+        ...state,
+        equipmentInventory: [...state.equipmentInventory, equipped],
+        character: newCharacter,
+      };
+
+      return recalculateBonuses(newState);
+    }
+
+    case 'SELL_EQUIPMENT': {
+      const itemIndex = state.equipmentInventory.findIndex(e => e.id === action.equipmentId);
+      if (itemIndex === -1) return state;
+
+      const item = state.equipmentInventory[itemIndex];
+
+      return {
+        ...state,
+        gold: state.gold + item.sellValue,
+        equipmentInventory: state.equipmentInventory.filter((_, i) => i !== itemIndex),
+        stats: {
+          ...state.stats,
+          totalGoldEarned: state.stats.totalGoldEarned + item.sellValue,
+        },
+      };
+    }
+
     case 'LOAD_GAME': {
       // Merge loaded state with defaults for any missing fields
-      const loadedState = { ...initialState, ...action.state };
+      const loadedState = {
+        ...initialState,
+        ...action.state,
+        character: action.state.character || initialCharacter,
+        equipmentInventory: action.state.equipmentInventory || [],
+      };
       return recalculateBonuses(loadedState);
     }
 
@@ -589,6 +765,10 @@ interface GameContextType {
   unlockSpells: () => void;
   castSpell: (spellId: string) => void;
   saveGame: () => void;
+  addEquipment: (equipment: Equipment) => void;
+  equipItem: (equipmentId: string) => void;
+  unequipItem: (slot: EquipmentSlot) => void;
+  sellEquipment: (equipmentId: string) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -669,6 +849,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(SAVE_KEY, JSON.stringify({ ...state, lastSaveTime: Date.now() }));
   }, [state]);
 
+  const addEquipment = useCallback((equipment: Equipment) => {
+    dispatch({ type: 'ADD_EQUIPMENT', equipment });
+  }, []);
+
+  const equipItem = useCallback((equipmentId: string) => {
+    dispatch({ type: 'EQUIP_ITEM', equipmentId });
+  }, []);
+
+  const unequipItem = useCallback((slot: EquipmentSlot) => {
+    dispatch({ type: 'UNEQUIP_ITEM', slot });
+  }, []);
+
+  const sellEquipment = useCallback((equipmentId: string) => {
+    dispatch({ type: 'SELL_EQUIPMENT', equipmentId });
+  }, []);
+
   return (
     <GameContext.Provider value={{
       state,
@@ -680,7 +876,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       buyUpgrade,
       unlockSpells,
       castSpell,
-      saveGame
+      saveGame,
+      addEquipment,
+      equipItem,
+      unequipItem,
+      sellEquipment
     }}>
       {children}
     </GameContext.Provider>
