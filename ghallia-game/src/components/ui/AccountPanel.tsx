@@ -3,7 +3,7 @@
  * Handles login, registration, and cloud save sync
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGame } from '../../store/gameStore';
 import './AccountPanel.css';
@@ -29,13 +29,19 @@ export function AccountPanel({ isOpen, onClose }: AccountPanelProps) {
   const [cloudSaveInfo, setCloudSaveInfo] = useState<{ hasSave: boolean; savedAt?: string } | null>(null);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
 
+  // Load cloud save info
+  const loadCloudInfo = useCallback(async () => {
+    const info = await getCloudSaveInfo();
+    setCloudSaveInfo(info);
+  }, [getCloudSaveInfo]);
+
   // Update view mode when auth state changes
   useEffect(() => {
     setViewMode(isAuthenticated ? 'account' : 'login');
     if (isAuthenticated) {
       loadCloudInfo();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loadCloudInfo]);
 
   // Clear errors when closing
   useEffect(() => {
@@ -48,11 +54,6 @@ export function AccountPanel({ isOpen, onClose }: AccountPanelProps) {
       setConfirmPassword('');
     }
   }, [isOpen, clearError]);
-
-  const loadCloudInfo = async () => {
-    const info = await getCloudSaveInfo();
-    setCloudSaveInfo(info);
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

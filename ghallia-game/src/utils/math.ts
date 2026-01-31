@@ -1,5 +1,5 @@
 /**
- * Ghallia Game Math Utilities
+ * Infinity Game Math Utilities
  * All formulas and calculations for game mechanics
  */
 

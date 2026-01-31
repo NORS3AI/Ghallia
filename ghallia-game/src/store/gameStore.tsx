@@ -1,5 +1,5 @@
 /**
- * Ghallia Game State Store
+ * Infinity Game State Store
  * React Context + useReducer for state management
  */
 

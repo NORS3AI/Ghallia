@@ -1,5 +1,5 @@
 /**
- * Ghallia Game Constants
+ * Infinity Game Constants
  * All balance values and configuration constants
  */
 
