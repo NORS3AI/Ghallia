@@ -175,7 +175,7 @@ h4 { font-size: 1.1rem; }
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--spacing-md);
-  padding-bottom: calc(var(--spacing-md) + 70px); /* Space for bottom nav */
+  padding-bottom: calc(100px + var(--safe-bottom)); /* Space for bottom nav + FAB */
 }
 
 /* ============================================

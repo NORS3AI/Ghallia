@@ -74,10 +74,15 @@
 
 .settings-content {
   padding: 20px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 20px));
 }
 
 .settings-section {
   margin-bottom: 24px;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
 }
 
 .settings-section h3 {
