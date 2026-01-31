@@ -154,6 +154,12 @@ h4 { font-size: 1.1rem; }
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.header-currencies {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
 .header-gold {
   display: flex;
   align-items: center;
@@ -161,6 +167,16 @@ h4 { font-size: 1.1rem; }
   font-family: var(--font-ui);
   font-weight: 600;
   color: var(--color-gold-light);
+  font-size: 1rem;
+}
+
+.header-mana {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: #4ecdc4;
   font-size: 1rem;
 }
 
@@ -563,17 +579,19 @@ h4 { font-size: 1.1rem; }
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: transparent;
   border: none;
   color: var(--color-text-muted);
   font-family: var(--font-ui);
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   cursor: pointer;
   transition: all var(--transition-fast);
   -webkit-user-select: none;
   user-select: none;
   transform: scale(1) translateY(0);
+  flex: 1;
+  min-width: 0;
 }
 
 .nav-button.active {
@@ -586,7 +604,7 @@ h4 { font-size: 1.1rem; }
 }
 
 .nav-icon {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 /* ============================================

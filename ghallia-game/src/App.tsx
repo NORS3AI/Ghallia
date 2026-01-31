@@ -11,6 +11,9 @@ import { SkillDetail } from './components/skills/SkillDetail';
 import { UnlockPanel } from './components/ui/UnlockPanel';
 import { SettingsPanel } from './components/ui/SettingsPanel';
 import { PrestigePanel } from './components/ui/PrestigePanel';
+import { StatsPanel } from './components/ui/StatsPanel';
+import { UpgradesPanel } from './components/ui/UpgradesPanel';
+import { SpellsPanel } from './components/ui/SpellsPanel';
 import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
@@ -75,12 +78,15 @@ class ErrorBoundary extends React.Component<
 type View = 'skills' | 'detail';
 
 function GameApp() {
-  const { state, sellAllResources } = useGame();
+  const { state } = useGame();
   const [view, setView] = useState<View>('skills');
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [unlockPanelOpen, setUnlockPanelOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [prestigeOpen, setPrestigeOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [upgradesOpen, setUpgradesOpen] = useState(false);
+  const [spellsOpen, setSpellsOpen] = useState(false);
 
   // Get list of unlocked skills for swipe navigation
   const unlockedSkills = useMemo(() => {
@@ -134,9 +140,17 @@ function GameApp() {
       <header className="header">
         <div className="header-content">
           <h1 className="header-title">Ghallia</h1>
-          <div className="header-gold">
-            <span>💰</span>
-            <span>{formatGold(state.gold)}g</span>
+          <div className="header-currencies">
+            {state.spellsUnlocked && (
+              <div className="header-mana">
+                <span>💧</span>
+                <span>{Math.floor(state.mana)}</span>
+              </div>
+            )}
+            <div className="header-gold">
+              <span>💰</span>
+              <span>{formatGold(state.gold)}g</span>
+            </div>
           </div>
         </div>
       </header>
@@ -186,6 +200,24 @@ function GameApp() {
         onClose={() => setPrestigeOpen(false)}
       />
 
+      {/* Stats Panel */}
+      <StatsPanel
+        isOpen={statsOpen}
+        onClose={() => setStatsOpen(false)}
+      />
+
+      {/* Upgrades Panel */}
+      <UpgradesPanel
+        isOpen={upgradesOpen}
+        onClose={() => setUpgradesOpen(false)}
+      />
+
+      {/* Spells Panel */}
+      <SpellsPanel
+        isOpen={spellsOpen}
+        onClose={() => setSpellsOpen(false)}
+      />
+
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
@@ -197,9 +229,19 @@ function GameApp() {
             <span>Skills</span>
           </button>
 
-          <button className="nav-button" onClick={sellAllResources}>
-            <span className="nav-icon">💰</span>
-            <span>Sell All</span>
+          <button className="nav-button" onClick={() => setStatsOpen(true)}>
+            <span className="nav-icon">📊</span>
+            <span>Stats</span>
+          </button>
+
+          <button className="nav-button" onClick={() => setUpgradesOpen(true)}>
+            <span className="nav-icon">⬆️</span>
+            <span>Upgrades</span>
+          </button>
+
+          <button className="nav-button" onClick={() => setSpellsOpen(true)}>
+            <span className="nav-icon">✨</span>
+            <span>Spells</span>
           </button>
 
           <button className="nav-button" onClick={() => setPrestigeOpen(true)}>
