@@ -283,3 +283,123 @@ export interface BalanceConfig {
     minClickInterval: number;
   };
 }
+
+// ============================================
+// EQUIPMENT SYSTEM
+// ============================================
+
+export enum EquipmentSlot {
+  HEAD = 'head',
+  SHOULDERS = 'shoulders',
+  CHEST = 'chest',
+  BACK = 'back',
+  BRACERS = 'bracers',
+  GLOVES = 'gloves',
+  PANTS = 'pants',
+  BOOTS = 'boots',
+  MAIN_HAND = 'mainHand',
+  OFF_HAND = 'offHand',
+  RING_1 = 'ring1',
+  RING_2 = 'ring2',
+  NECKLACE = 'necklace',
+  TRINKET = 'trinket',
+}
+
+export enum EquipmentType {
+  ARMOR = 'armor',
+  WEAPON = 'weapon',
+  JEWELRY = 'jewelry',
+}
+
+export enum ArmorClass {
+  PLATE = 'plate',
+  MAIL = 'mail',
+  LEATHER = 'leather',
+  CLOTH = 'cloth',
+}
+
+export enum WeaponType {
+  SWORD = 'sword',
+  BROADSWORD = 'broadsword',
+  MACE = 'mace',
+  AXE = 'axe',
+  DAGGER = 'dagger',
+  STAFF = 'staff',
+  WAND = 'wand',
+  SHIELD = 'shield',
+  ORB = 'orb',
+}
+
+export enum MaterialTier {
+  COPPER = 1,
+  BRONZE = 2,
+  IRON = 3,
+  SILVER = 4,
+  MITHRIL = 5,
+  GOLD = 6,
+  PLATINUM = 7,
+  DIAMOND = 8,
+  DRAGON = 9,
+}
+
+export enum Rarity {
+  COMMON = 'common',
+  UNCOMMON = 'uncommon',
+  RARE = 'rare',
+  EPIC = 'epic',
+  LEGENDARY = 'legendary',
+}
+
+export interface EquipmentStats {
+  strength: number;
+  intellect: number;
+  agility: number;
+  stamina: number;
+}
+
+export interface Equipment {
+  id: string;
+  name: string;
+  type: EquipmentType;
+  slot: EquipmentSlot;
+  materialTier: MaterialTier;
+  rarity: Rarity;
+  armorClass?: ArmorClass;
+  weaponType?: WeaponType;
+  stats: EquipmentStats;
+  sellValue: number;
+  icon: string;
+}
+
+export interface CharacterStats {
+  // Base stats (from equipment)
+  strength: number;
+  intellect: number;
+  agility: number;
+  stamina: number;
+
+  // Derived stats
+  maxHp: number;        // 10 + (stamina * 5)
+  currentHp: number;
+  tapPowerBonus: number;   // strength * 1%
+  manaRegenBonus: number;  // intellect * 2%
+  luckBonus: number;       // agility * 0.5%
+  dodgeChance: number;     // agility * 0.25%
+}
+
+export interface CharacterEquipment {
+  [EquipmentSlot.HEAD]: Equipment | null;
+  [EquipmentSlot.SHOULDERS]: Equipment | null;
+  [EquipmentSlot.CHEST]: Equipment | null;
+  [EquipmentSlot.BACK]: Equipment | null;
+  [EquipmentSlot.BRACERS]: Equipment | null;
+  [EquipmentSlot.GLOVES]: Equipment | null;
+  [EquipmentSlot.PANTS]: Equipment | null;
+  [EquipmentSlot.BOOTS]: Equipment | null;
+  [EquipmentSlot.MAIN_HAND]: Equipment | null;
+  [EquipmentSlot.OFF_HAND]: Equipment | null;
+  [EquipmentSlot.RING_1]: Equipment | null;
+  [EquipmentSlot.RING_2]: Equipment | null;
+  [EquipmentSlot.NECKLACE]: Equipment | null;
+  [EquipmentSlot.TRINKET]: Equipment | null;
+}
