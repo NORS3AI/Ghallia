@@ -261,6 +261,10 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
                     <button className="dev-button" onClick={() => devAddBonusTaps(500)}>+500</button>
                     <button className="dev-button" onClick={() => devAddBonusTaps(5000)}>+5K</button>
                     <button className="dev-button" onClick={() => devAddBonusTaps(50000)}>+50K</button>
+                    <button className="dev-button" onClick={() => devAddBonusTaps(5000000)}>+5M</button>
+                    <button className="dev-button" onClick={() => devAddBonusTaps(50000000)}>+50M</button>
+                    <button className="dev-button" onClick={() => devAddBonusTaps(500000000)}>+500M</button>
+                    <button className="dev-button" onClick={() => devAddBonusTaps(5000000000)}>+5B</button>
                   </div>
                 </div>
 
