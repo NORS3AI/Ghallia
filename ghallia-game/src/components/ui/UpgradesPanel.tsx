@@ -13,19 +13,17 @@ interface UpgradesPanelProps {
   onClose: () => void;
 }
 
-type CategoryFilter = 'all' | 'tap' | 'crit' | 'luck' | 'mana' | 'gold';
+type CategoryFilter = 'tap' | 'crit' | 'luck' | 'mana' | 'gold';
 
 const CATEGORY_LABELS: Record<CategoryFilter, string> = {
-  all: 'All',
-  tap: 'Tap Power',
-  crit: 'Critical',
+  tap: 'Tap',
+  crit: 'Crit',
   luck: 'Luck',
   mana: 'Mana',
   gold: 'Gold',
 };
 
 const CATEGORY_ICONS: Record<CategoryFilter, string> = {
-  all: '📋',
   tap: '👆',
   crit: '💥',
   luck: '🍀',
@@ -33,14 +31,53 @@ const CATEGORY_ICONS: Record<CategoryFilter, string> = {
   gold: '💰',
 };
 
+const ALL_CATEGORIES: CategoryFilter[] = ['tap', 'crit', 'luck', 'mana', 'gold'];
+
 export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
   const { state, buyUpgrade } = useGame();
-  const [filter, setFilter] = useState<CategoryFilter>('all');
+  // Multi-select category filters (empty = show all)
+  const [activeCategories, setActiveCategories] = useState<Set<CategoryFilter>>(new Set());
+  // Afford filter - only show affordable upgrades
+  const [affordOnly, setAffordOnly] = useState(false);
+  // Hide purchased upgrades
+  const [hidePurchased, setHidePurchased] = useState(false);
+
+  const toggleCategory = (cat: CategoryFilter) => {
+    setActiveCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cat)) {
+        newSet.delete(cat);
+      } else {
+        newSet.add(cat);
+      }
+      return newSet;
+    });
+  };
 
   const filteredUpgrades = useMemo(() => {
-    if (filter === 'all') return UPGRADES;
-    return UPGRADES.filter(u => u.category === filter);
-  }, [filter]);
+    let result = UPGRADES;
+
+    // Filter by categories (if any selected)
+    if (activeCategories.size > 0) {
+      result = result.filter(u => activeCategories.has(u.category as CategoryFilter));
+    }
+
+    // Filter affordable only
+    if (affordOnly) {
+      result = result.filter(u => {
+        const purchased = !!state.upgrades[u.id];
+        const canAfford = state.gold >= u.baseCost;
+        return !purchased && canAfford;
+      });
+    }
+
+    // Hide purchased
+    if (hidePurchased) {
+      result = result.filter(u => !state.upgrades[u.id]);
+    }
+
+    return result;
+  }, [activeCategories, affordOnly, hidePurchased, state.upgrades, state.gold]);
 
   const sortedUpgrades = useMemo(() => {
     return [...filteredUpgrades].sort((a, b) => a.baseCost - b.baseCost);
@@ -64,24 +101,59 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
       <div className={`upgrades-panel ${isOpen ? 'open' : ''}`}>
         <div className="upgrades-header">
           <h2>Upgrades</h2>
-          <span className="upgrade-count">{upgradeStats.purchased}/{upgradeStats.total}</span>
+          <div className="header-currencies">
+            <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
+            {state.spellsUnlocked && (
+              <span className="currency-mana">💧 {Math.floor(state.mana)}</span>
+            )}
+            {state.prestigeCount > 0 && (
+              <span className="currency-chaos">✨ {state.chaosPoints}</span>
+            )}
+          </div>
           <button className="upgrades-close" onClick={onClose}>
             &times;
           </button>
         </div>
 
-        {/* Category Filter */}
+        {/* Category Filter - Multi-select */}
         <div className="upgrades-filters">
-          {(Object.keys(CATEGORY_LABELS) as CategoryFilter[]).map(cat => (
+          {ALL_CATEGORIES.map(cat => (
             <button
               key={cat}
-              className={`filter-button ${filter === cat ? 'active' : ''}`}
-              onClick={() => setFilter(cat)}
+              className={`filter-button ${activeCategories.has(cat) ? 'active' : ''}`}
+              onClick={() => toggleCategory(cat)}
             >
               <span className="filter-icon">{CATEGORY_ICONS[cat]}</span>
               <span className="filter-label">{CATEGORY_LABELS[cat]}</span>
             </button>
           ))}
+
+          {/* Afford filter */}
+          <button
+            className={`filter-button afford-filter ${affordOnly ? 'active' : ''}`}
+            onClick={() => setAffordOnly(prev => !prev)}
+          >
+            <span className="filter-icon">✓</span>
+            <span className="filter-label">Afford</span>
+          </button>
+
+          {/* Spacer to push Hide to the right */}
+          <div className="filter-spacer" />
+
+          {/* Hide purchased toggle */}
+          <button
+            className={`filter-button hide-filter ${hidePurchased ? 'active' : ''}`}
+            onClick={() => setHidePurchased(prev => !prev)}
+          >
+            <span className="filter-icon">👁️</span>
+            <span className="filter-label">Hide</span>
+          </button>
+        </div>
+
+        {/* Upgrade Count */}
+        <div className="upgrade-count-bar">
+          <span>{upgradeStats.purchased}/{upgradeStats.total} purchased</span>
+          <span className="showing-count">Showing: {sortedUpgrades.length}</span>
         </div>
 
         {/* Upgrades List */}
@@ -96,6 +168,9 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
                 onBuy={() => buyUpgrade(upgrade.id)}
               />
             ))}
+            {sortedUpgrades.length === 0 && (
+              <div className="no-upgrades">No upgrades match your filters</div>
+            )}
           </div>
         </div>
       </div>

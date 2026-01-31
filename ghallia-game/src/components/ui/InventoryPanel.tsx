@@ -77,6 +77,15 @@ export function InventoryPanel({ isOpen, onClose }: InventoryPanelProps) {
       <div className={`inventory-panel ${isOpen ? 'open' : ''}`}>
         <div className="inventory-header">
           <h2>Inventory</h2>
+          <div className="header-currencies">
+            <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
+            {state.spellsUnlocked && (
+              <span className="currency-mana">💧 {Math.floor(state.mana)}</span>
+            )}
+            {state.prestigeCount > 0 && (
+              <span className="currency-chaos">✨ {state.chaosPoints}</span>
+            )}
+          </div>
           <button className="inventory-close" onClick={onClose}>&times;</button>
         </div>
 

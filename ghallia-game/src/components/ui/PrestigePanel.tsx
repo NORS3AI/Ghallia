@@ -70,6 +70,15 @@ export function PrestigePanel({ isOpen, onClose }: PrestigePanelProps) {
       <div className={`prestige-panel ${isOpen ? 'open' : ''}`}>
         <div className="prestige-header">
           <h2>Prestige</h2>
+          <div className="header-currencies">
+            <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
+            {state.spellsUnlocked && (
+              <span className="currency-mana">💧 {Math.floor(state.mana)}</span>
+            )}
+            {state.prestigeCount > 0 && (
+              <span className="currency-chaos">✨ {state.chaosPoints}</span>
+            )}
+          </div>
           <button className="prestige-close" onClick={onClose}>
             &times;
           </button>

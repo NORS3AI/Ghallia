@@ -248,6 +248,9 @@ type GameAction =
   | { type: 'DEV_ADD_MANA'; amount: number }
   | { type: 'DEV_ADD_MAX_MANA'; amount: number }
   | { type: 'DEV_ADD_BONUS_TAPS'; amount: number }
+  | { type: 'DEV_UNLOCK_SPELLS' }
+  | { type: 'DEV_ADD_CHAOS_POINTS'; amount: number }
+  | { type: 'DEV_SET_PRESTIGE'; count: number }
   // Achievements
   | { type: 'UNLOCK_ACHIEVEMENT'; achievementId: string }
   | { type: 'CLAIM_ACHIEVEMENT'; achievementId: string; reward: number }
@@ -474,25 +477,33 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const hasMegaCrit = (state.spells['mega_crit']?.activeUntil || 0) > now;
       const hasLuckyStar = (state.spells['lucky_star']?.activeUntil || 0) > now;
 
-      // Calculate taps (1 base + bonus from upgrades)
-      let taps = 1 + state.bonusTaps;
+      // Calculate base taps (1 base + bonus from upgrades)
+      const baseTaps = 1 + state.bonusTaps;
+      let resourceTaps = baseTaps;
 
-      // Check for crit
+      // Check for crit - affects resources, gives bonus XP
       const effectiveCritChance = hasMegaCrit ? 100 : state.critChance;
       const isCrit = Math.random() * 100 < effectiveCritChance;
       if (isCrit) {
-        taps = Math.floor(taps * (1 + state.critDamage / 100));
+        resourceTaps = Math.floor(resourceTaps * (1 + state.critDamage / 100));
       }
 
-      // Check for luck (chance for +5 bonus taps)
+      // Check for luck (chance for +5 bonus resources)
       const effectiveLuck = hasLuckyStar ? state.luck + 50 : state.luck;
       const isLucky = Math.random() * 100 < effectiveLuck;
       if (isLucky) {
-        taps += 5;
+        resourceTaps += 5;
       }
 
-      // Calculate XP
-      let xpGained = xpPerAction(tier, skill.level) * taps;
+      // Calculate XP - consistent growth based on base taps
+      // XP per tap scales smoothly with level (1 + 2% per level)
+      const xpPerTap = 1 + Math.floor(skill.level * 0.02);
+      let xpGained = xpPerTap * baseTaps;
+      // Crits give 50% bonus XP (not the full crit damage multiplier)
+      if (isCrit) xpGained = Math.floor(xpGained * 1.5);
+      // Lucky hits give 25% bonus XP
+      if (isLucky) xpGained = Math.floor(xpGained * 1.25);
+      // Double XP spell doubles final amount
       if (hasDoubleXp) xpGained *= 2;
 
       const newTotalXp = skill.totalXp + xpGained;
@@ -512,14 +523,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         },
         resources: {
           ...state.resources,
-          [resourceId]: (state.resources[resourceId] || 0) + taps,
+          [resourceId]: (state.resources[resourceId] || 0) + resourceTaps,
         },
         stats: {
           ...state.stats,
           totalTaps: state.stats.totalTaps + 1,
           totalCrits: state.stats.totalCrits + (isCrit ? 1 : 0),
           totalLuckyHits: state.stats.totalLuckyHits + (isLucky ? 1 : 0),
-          totalResourcesGathered: state.stats.totalResourcesGathered + taps,
+          totalResourcesGathered: state.stats.totalResourcesGathered + resourceTaps,
         },
       };
     }
@@ -764,6 +775,27 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'DEV_UNLOCK_SPELLS': {
+      return {
+        ...state,
+        spellsUnlocked: true,
+      };
+    }
+
+    case 'DEV_ADD_CHAOS_POINTS': {
+      return {
+        ...state,
+        chaosPoints: state.chaosPoints + action.amount,
+      };
+    }
+
+    case 'DEV_SET_PRESTIGE': {
+      return {
+        ...state,
+        prestigeCount: action.count,
+      };
+    }
+
     // Achievements
     case 'UNLOCK_ACHIEVEMENT': {
       if (state.unlockedAchievements.includes(action.achievementId)) {
@@ -893,6 +925,9 @@ interface GameContextType {
   devAddMana: (amount: number) => void;
   devAddMaxMana: (amount: number) => void;
   devAddBonusTaps: (amount: number) => void;
+  devUnlockSpells: () => void;
+  devAddChaosPoints: (amount: number) => void;
+  devSetPrestige: (count: number) => void;
   // Achievements
   unlockAchievement: (achievementId: string) => void;
   claimAchievement: (achievementId: string, reward: number) => void;
@@ -1012,6 +1047,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'DEV_ADD_BONUS_TAPS', amount });
   }, []);
 
+  const devUnlockSpells = useCallback(() => {
+    dispatch({ type: 'DEV_UNLOCK_SPELLS' });
+  }, []);
+
+  const devAddChaosPoints = useCallback((amount: number) => {
+    dispatch({ type: 'DEV_ADD_CHAOS_POINTS', amount });
+  }, []);
+
+  const devSetPrestige = useCallback((count: number) => {
+    dispatch({ type: 'DEV_SET_PRESTIGE', count });
+  }, []);
+
   // Achievements
   const unlockAchievement = useCallback((achievementId: string) => {
     dispatch({ type: 'UNLOCK_ACHIEVEMENT', achievementId });
@@ -1052,6 +1099,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       devAddMana,
       devAddMaxMana,
       devAddBonusTaps,
+      devUnlockSpells,
+      devAddChaosPoints,
+      devSetPrestige,
       unlockAchievement,
       claimAchievement,
       checkAchievements,

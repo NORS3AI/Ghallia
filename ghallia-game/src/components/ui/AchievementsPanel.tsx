@@ -115,17 +115,28 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
       <div className={`achievements-panel ${isOpen ? 'open' : ''}`}>
         <div className="achievements-header">
           <h2>Achievements</h2>
-          <div className="achievements-stats">
-            <span className="stat-badge">
-              {claimedCount}/{totalAchievements}
-            </span>
-            {claimableCount > 0 && (
-              <span className="claimable-badge">{claimableCount} to claim!</span>
+          <div className="header-currencies">
+            <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
+            {state.spellsUnlocked && (
+              <span className="currency-mana">💧 {Math.floor(state.mana)}</span>
+            )}
+            {state.prestigeCount > 0 && (
+              <span className="currency-chaos">✨ {state.chaosPoints}</span>
             )}
           </div>
           <button className="achievements-close" onClick={onClose}>
             &times;
           </button>
+        </div>
+
+        {/* Progress stats */}
+        <div className="achievements-stats-bar">
+          <span className="stat-badge">
+            {claimedCount}/{totalAchievements} claimed
+          </span>
+          {claimableCount > 0 && (
+            <span className="claimable-badge">{claimableCount} to claim!</span>
+          )}
         </div>
 
         {/* Category Filter */}

@@ -27,7 +27,7 @@ function formatTime(seconds: number): string {
 }
 
 export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
-  const { state, sellAllResources, devAddGold, devAddMana, devAddMaxMana, devAddBonusTaps } = useGame();
+  const { state, sellAllResources, devAddGold, devAddMana, devAddMaxMana, devAddBonusTaps, devUnlockSpells, devAddChaosPoints, devSetPrestige } = useGame();
 
   const critRate = state.stats.totalTaps > 0
     ? ((state.stats.totalCrits / state.stats.totalTaps) * 100).toFixed(1)
@@ -47,6 +47,15 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
       <div className={`stats-panel ${isOpen ? 'open' : ''}`}>
         <div className="stats-header">
           <h2>Stats</h2>
+          <div className="header-currencies">
+            <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
+            {state.spellsUnlocked && (
+              <span className="currency-mana">💧 {Math.floor(state.mana)}</span>
+            )}
+            {state.prestigeCount > 0 && (
+              <span className="currency-chaos">✨ {state.chaosPoints}</span>
+            )}
+          </div>
           <button className="stats-close" onClick={onClose}>
             &times;
           </button>
@@ -203,6 +212,35 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
                 <button className="dev-button" onClick={() => devAddBonusTaps(10)}>+10</button>
                 <button className="dev-button" onClick={() => devAddBonusTaps(50)}>+50</button>
                 <button className="dev-button" onClick={() => devAddBonusTaps(100)}>+100</button>
+              </div>
+            </div>
+
+            <div className="dev-row">
+              <span className="dev-label">Unlocks:</span>
+              <div className="dev-buttons">
+                <button
+                  className={`dev-button ${state.spellsUnlocked ? 'active' : ''}`}
+                  onClick={devUnlockSpells}
+                  disabled={state.spellsUnlocked}
+                >
+                  {state.spellsUnlocked ? '✓ Magic' : 'Unlock Magic'}
+                </button>
+                <button
+                  className={`dev-button ${state.prestigeCount > 0 ? 'active' : ''}`}
+                  onClick={() => devSetPrestige(Math.max(1, state.prestigeCount))}
+                  disabled={state.prestigeCount > 0}
+                >
+                  {state.prestigeCount > 0 ? '✓ Prestige' : 'Unlock Prestige'}
+                </button>
+              </div>
+            </div>
+
+            <div className="dev-row">
+              <span className="dev-label">Chaos Pts:</span>
+              <div className="dev-buttons">
+                <button className="dev-button" onClick={() => devAddChaosPoints(10)}>+10</button>
+                <button className="dev-button" onClick={() => devAddChaosPoints(100)}>+100</button>
+                <button className="dev-button" onClick={() => devAddChaosPoints(1000)}>+1000</button>
               </div>
             </div>
           </div>
