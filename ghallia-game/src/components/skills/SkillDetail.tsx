@@ -29,9 +29,16 @@ interface SkillDetailProps {
 interface NumberPop {
   id: number;
   value: string;
-  type: 'normal' | 'crit' | 'lucky' | 'crit-lucky';
+  type: 'normal' | 'crit' | 'lucky' | 'crit-lucky' | 'level-up';
   x: number;
   y: number;
+}
+
+interface GlitterParticle {
+  id: number;
+  x: number;
+  y: number;
+  hue: number;
 }
 
 export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }: SkillDetailProps) {
@@ -41,12 +48,29 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
   const [selectedTier, setSelectedTier] = useState<number | 'all'>('all');
   const [pops, setPops] = useState<NumberPop[]>([]);
   const [selectedQuantities, setSelectedQuantities] = useState<Record<string, number>>({});
+  const [glitter, setGlitter] = useState<GlitterParticle[]>([]);
   const popIdRef = useRef(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const tier = getTierFromLevel(skillState.level);
-  const resourceName = getResourceName(skillType, tier);
-  const resourceId = `${skillType}_t${tier}`;
+
+  // For crafting skills, show produced resource; for gathering, show raw resource
+  const craftingResourceMap: Partial<Record<SkillType, string>> = {
+    [SkillType.SAWMILL]: 'plank',
+    [SkillType.SMITHING]: 'ingot',
+    [SkillType.COOKING]: 'fillet',
+    [SkillType.ALCHEMY]: 'extract',
+    [SkillType.LEATHERWORKING]: 'leather',
+    [SkillType.TAILORING]: 'cloth',
+    [SkillType.JEWELCRAFTING]: 'setting',
+    [SkillType.ENCHANTING]: 'essence',
+    [SkillType.ENGINEERING]: 'part',
+  };
+  const craftingResource = craftingResourceMap[skillType];
+  const resourceId = craftingResource ? `${craftingResource}_t${tier}` : `${skillType}_t${tier}`;
+  const resourceName = craftingResource
+    ? getResourceNameById(resourceId)
+    : getResourceName(skillType, tier);
   const resourceCount = state.resources[resourceId] || 0;
 
   const xpProgress = getXpProgress(skillState);
@@ -79,7 +103,7 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
       const rect = buttonRef.current?.getBoundingClientRect();
       if (rect) {
         // Determine pop type based on crit/lucky
-        let popType: 'normal' | 'crit' | 'lucky' | 'crit-lucky' = 'normal';
+        let popType: 'normal' | 'crit' | 'lucky' | 'crit-lucky' | 'level-up' = 'normal';
         if (lastGather.isCrit && lastGather.isLucky) {
           popType = 'crit-lucky';
         } else if (lastGather.isCrit) {
@@ -88,17 +112,51 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
           popType = 'lucky';
         }
 
+        // Normal resource pop (centered on screen)
+        const screenCenterX = window.innerWidth / 2;
+        const screenCenterY = window.innerHeight / 2;
         const newPop: NumberPop = {
           id: ++popIdRef.current,
           value: `+${lastGather.resourceTaps}`,
           type: popType,
-          x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 30,
-          y: rect.top - 40,
+          x: screenCenterX,
+          y: screenCenterY - 50,
         };
         setPops(prev => [...prev, newPop]);
         setTimeout(() => {
           setPops(prev => prev.filter(p => p.id !== newPop.id));
         }, 800);
+
+        // Level up effect
+        if (lastGather.levelUp && lastGather.levelUpBonus) {
+          // Level up bonus pop (near the level display)
+          const levelUpPop: NumberPop = {
+            id: ++popIdRef.current,
+            value: `+${lastGather.levelUpBonus}`,
+            type: 'level-up',
+            x: screenCenterX,
+            y: screenCenterY - 120,
+          };
+          setPops(prev => [...prev, levelUpPop]);
+          setTimeout(() => {
+            setPops(prev => prev.filter(p => p.id !== levelUpPop.id));
+          }, 1200);
+
+          // Glitter shower effect
+          const newGlitter: GlitterParticle[] = [];
+          for (let i = 0; i < 30; i++) {
+            newGlitter.push({
+              id: Date.now() + i,
+              x: Math.random() * window.innerWidth,
+              y: -20 - Math.random() * 100,
+              hue: Math.random() * 60 + 40, // Gold-ish colors
+            });
+          }
+          setGlitter(newGlitter);
+          setTimeout(() => {
+            setGlitter([]);
+          }, 1500);
+        }
       }
     }
   }, [lastGather, skillType]);
@@ -445,6 +503,19 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
         >
           {pop.value}
         </div>
+      ))}
+
+      {/* Level up glitter shower */}
+      {glitter.map(particle => (
+        <div
+          key={particle.id}
+          className="glitter-particle"
+          style={{
+            left: particle.x,
+            top: particle.y,
+            '--hue': particle.hue,
+          } as React.CSSProperties}
+        />
       ))}
     </div>
   );

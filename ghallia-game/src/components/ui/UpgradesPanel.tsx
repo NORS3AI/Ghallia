@@ -34,7 +34,7 @@ const CATEGORY_ICONS: Record<CategoryFilter, string> = {
 const ALL_CATEGORIES: CategoryFilter[] = ['tap', 'crit', 'luck', 'mana', 'gold'];
 
 export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
-  const { state, buyUpgrade } = useGame();
+  const { state, buyUpgrade, unlockAchievements, unlockSpells } = useGame();
   // Multi-select category filters (empty = show all)
   const [activeCategories, setActiveCategories] = useState<Set<CategoryFilter>>(new Set());
   // Afford filter - only show affordable upgrades
@@ -158,6 +158,51 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
 
         {/* Upgrades List */}
         <div className="upgrades-content">
+          {/* Feature Unlocks Section */}
+          {(!state.achievementsUnlocked || !state.spellsUnlocked) && (
+            <div className="feature-unlocks-section">
+              <h3 className="feature-unlocks-title">Feature Unlocks</h3>
+              <div className="feature-unlocks-list">
+                {!state.achievementsUnlocked && (
+                  <div className={`feature-unlock-item ${state.gold >= 100 ? 'affordable' : 'locked'}`}>
+                    <div className="feature-unlock-info">
+                      <span className="feature-unlock-icon">🏆</span>
+                      <div className="feature-unlock-text">
+                        <span className="feature-unlock-name">Achievements</span>
+                        <span className="feature-unlock-desc">Track your progress and earn rewards</span>
+                      </div>
+                    </div>
+                    <button
+                      className={`feature-unlock-buy ${state.gold >= 100 ? 'affordable' : ''}`}
+                      onClick={unlockAchievements}
+                      disabled={state.gold < 100}
+                    >
+                      100g
+                    </button>
+                  </div>
+                )}
+                {!state.spellsUnlocked && (
+                  <div className={`feature-unlock-item ${state.gold >= 10000 ? 'affordable' : 'locked'}`}>
+                    <div className="feature-unlock-info">
+                      <span className="feature-unlock-icon">🔮</span>
+                      <div className="feature-unlock-text">
+                        <span className="feature-unlock-name">Magic</span>
+                        <span className="feature-unlock-desc">Cast powerful spells using mana</span>
+                      </div>
+                    </div>
+                    <button
+                      className={`feature-unlock-buy ${state.gold >= 10000 ? 'affordable' : ''}`}
+                      onClick={unlockSpells}
+                      disabled={state.gold < 10000}
+                    >
+                      10,000g
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="upgrades-list">
             {sortedUpgrades.map(upgrade => {
               const manaCost = getUpgradeManaCost(upgrade.id);

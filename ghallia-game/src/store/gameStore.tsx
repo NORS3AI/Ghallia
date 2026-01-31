@@ -937,6 +937,9 @@ export interface GatherResult {
   isLucky: boolean;
   xpGained: number;
   timestamp: number;
+  levelUp?: boolean;
+  newLevel?: number;
+  levelUpBonus?: number;
 }
 
 export interface GameState {
@@ -954,6 +957,8 @@ export interface GameState {
   // New systems
   upgrades: Record<string, number>; // upgrade id -> level
   spellsUnlocked: boolean;
+  achievementsUnlocked: boolean;
+  characterUnlocked: boolean;
   spells: Record<string, SpellState>;
   stats: StatsState;
   // Computed bonuses (from upgrades)
@@ -986,6 +991,8 @@ type GameAction =
   | { type: 'ADD_GOLD'; amount: number }
   | { type: 'BUY_UPGRADE'; upgradeId: string }
   | { type: 'UNLOCK_SPELLS' }
+  | { type: 'UNLOCK_ACHIEVEMENTS' }
+  | { type: 'UNLOCK_CHARACTER' }
   | { type: 'CAST_SPELL'; spellId: string }
   | { type: 'TICK'; deltaMs: number }
   | { type: 'LOAD_GAME'; state: GameState }
@@ -1083,11 +1090,13 @@ const initialState: GameState = {
   gameVersion: GAME_VERSION,
   upgrades: {},
   spellsUnlocked: false,
+  achievementsUnlocked: false,
+  characterUnlocked: false,
   spells: {},
   stats: initialStats,
   bonusTaps: 0,
-  critChance: 5, // 5% base
-  critDamage: 100, // 100% = 2x damage
+  critChance: 0, // 0% base
+  critDamage: 0, // 0% base
   luck: 0,
   goldBonus: 0,
   equipmentInventory: [],
@@ -1302,8 +1311,8 @@ function recalculateCharacterStats(state: GameState): CharacterState {
 
 function recalculateBonuses(state: GameState): GameState {
   let bonusTaps = 0;
-  let critChance = 5; // base 5%
-  let critDamage = 100; // base 100% (2x)
+  let critChance = 0; // base 0%
+  let critDamage = 0; // base 0%
   let luck = 0;
   let goldBonus = 0;
   let maxMana = 50;
@@ -1407,11 +1416,28 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       const newTotalXp = skill.totalXp + xpGained;
       const newLevel = levelFromTotalXp(newTotalXp);
+      const didLevelUp = newLevel > skill.level;
 
       const resourceId = `${action.skillType}_t${tier}`;
 
+      // Level up bonus: +100 per level, +1000 every 10 levels
+      let levelUpBonus = 0;
+      if (didLevelUp) {
+        const levelsGained = newLevel - skill.level;
+        for (let i = skill.level + 1; i <= newLevel && i <= 999; i++) {
+          levelUpBonus += (i % 10 === 0) ? 1000 : 100;
+        }
+      }
+
+      // Total resources gained (normal + level up bonus)
+      const totalResourceGain = resourceTaps + levelUpBonus;
+
+      // Auto-unlock character tab when foraging
+      const shouldUnlockCharacter = action.skillType === SkillType.FORAGING && !state.characterUnlocked;
+
       return {
         ...state,
+        characterUnlocked: state.characterUnlocked || shouldUnlockCharacter,
         skills: {
           ...state.skills,
           [action.skillType]: {
@@ -1422,14 +1448,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         },
         resources: {
           ...state.resources,
-          [resourceId]: (state.resources[resourceId] || 0) + resourceTaps,
+          [resourceId]: (state.resources[resourceId] || 0) + totalResourceGain,
         },
         stats: {
           ...state.stats,
           totalTaps: state.stats.totalTaps + 1,
           totalCrits: state.stats.totalCrits + (isCrit ? 1 : 0),
           totalLuckyHits: state.stats.totalLuckyHits + (isLucky ? 1 : 0),
-          totalResourcesGathered: state.stats.totalResourcesGathered + resourceTaps,
+          totalResourcesGathered: state.stats.totalResourcesGathered + totalResourceGain,
         },
         lastGatherResult: {
           skillType: action.skillType,
@@ -1439,6 +1465,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           isLucky,
           xpGained,
           timestamp: Date.now(),
+          levelUp: didLevelUp,
+          newLevel: didLevelUp ? newLevel : undefined,
+          levelUpBonus: didLevelUp ? levelUpBonus : undefined,
         },
       };
     }
@@ -1529,12 +1558,31 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'UNLOCK_SPELLS': {
       if (state.spellsUnlocked) return state;
-      if (state.gold < 1000) return state;
+      if (state.gold < 10000) return state;
 
       return {
         ...state,
-        gold: state.gold - 1000,
+        gold: state.gold - 10000,
         spellsUnlocked: true,
+      };
+    }
+
+    case 'UNLOCK_ACHIEVEMENTS': {
+      if (state.achievementsUnlocked) return state;
+      if (state.gold < 100) return state;
+
+      return {
+        ...state,
+        gold: state.gold - 100,
+        achievementsUnlocked: true,
+      };
+    }
+
+    case 'UNLOCK_CHARACTER': {
+      if (state.characterUnlocked) return state;
+      return {
+        ...state,
+        characterUnlocked: true,
       };
     }
 
@@ -1586,8 +1634,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Calculate XP and crafted items from completed crafts
       let newCraftedItems = { ...state.craftedItems };
       let newSkills = { ...state.skills };
-
       let newResources = { ...state.resources };
+      let shouldUnlockCharacter = false;
+
+      // Equipment crafting skills (unlock character when crafting final items)
+      const equipmentSkills = [
+        SkillType.SMITHING,
+        SkillType.LEATHERWORKING,
+        SkillType.TAILORING,
+        SkillType.JEWELCRAFTING,
+      ];
 
       for (const completed of completedCrafts) {
         const recipe = CRAFTING_RECIPES.find(r => r.id === completed.recipeId);
@@ -1598,6 +1654,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
               (newResources[recipe.produces.resourceId] || 0) + recipe.produces.quantity;
           } else {
             newCraftedItems[recipe.id] = (newCraftedItems[recipe.id] || 0) + 1;
+            // Unlock character when crafting equipment (final items from equipment skills)
+            if (equipmentSkills.includes(recipe.craftingSkill)) {
+              shouldUnlockCharacter = true;
+            }
           }
 
           // Add XP to crafting skill
@@ -1619,6 +1679,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...state,
+        characterUnlocked: state.characterUnlocked || shouldUnlockCharacter,
         mana: state.spellsUnlocked ? newMana : state.mana,
         stats: {
           ...state.stats,
@@ -1972,6 +2033,8 @@ interface GameContextType {
   sellAllResources: () => void;
   buyUpgrade: (upgradeId: string) => void;
   unlockSpells: () => void;
+  unlockAchievements: () => void;
+  unlockCharacter: () => void;
   castSpell: (spellId: string) => void;
   saveGame: () => void;
   addEquipment: (equipment: Equipment) => void;
@@ -2066,6 +2129,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const unlockSpells = useCallback(() => {
     dispatch({ type: 'UNLOCK_SPELLS' });
+  }, []);
+
+  const unlockAchievements = useCallback(() => {
+    dispatch({ type: 'UNLOCK_ACHIEVEMENTS' });
+  }, []);
+
+  const unlockCharacter = useCallback(() => {
+    dispatch({ type: 'UNLOCK_CHARACTER' });
   }, []);
 
   const castSpell = useCallback((spellId: string) => {
@@ -2164,6 +2235,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       sellAllResources,
       buyUpgrade,
       unlockSpells,
+      unlockAchievements,
+      unlockCharacter,
       castSpell,
       saveGame,
       addEquipment,
