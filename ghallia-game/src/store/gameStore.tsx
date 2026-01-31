@@ -3,7 +3,7 @@
  * React Context + useReducer for state management
  */
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import { SkillType, SkillCategory, ItemQuality } from '../types/game.types';
 import {
   xpPerAction,
@@ -57,6 +57,96 @@ export const SKILL_DEFINITIONS: SkillDef[] = [
 ];
 
 // ============================================
+// UPGRADE DEFINITIONS
+// ============================================
+
+export interface UpgradeDef {
+  id: string;
+  name: string;
+  description: string;
+  baseCost: number;
+  maxLevel: number;
+  effect: (level: number) => number;
+  category: 'tap' | 'crit' | 'luck' | 'mana' | 'gold';
+}
+
+export const UPGRADES: UpgradeDef[] = [
+  // Tap upgrades (increases taps per click)
+  { id: 'tap_power_1', name: 'Stronger Grip', description: '+1 tap per click', baseCost: 0.5, maxLevel: 1, effect: () => 1, category: 'tap' },
+  { id: 'tap_power_2', name: 'Calloused Hands', description: '+1 tap per click', baseCost: 5, maxLevel: 1, effect: () => 1, category: 'tap' },
+  { id: 'tap_power_3', name: 'Iron Fingers', description: '+1 tap per click', baseCost: 50, maxLevel: 1, effect: () => 1, category: 'tap' },
+  { id: 'tap_power_4', name: 'Steel Arms', description: '+1 tap per click', baseCost: 500, maxLevel: 1, effect: () => 1, category: 'tap' },
+  { id: 'tap_power_5', name: 'Titan Strength', description: '+1 tap per click', baseCost: 5000, maxLevel: 1, effect: () => 1, category: 'tap' },
+  { id: 'tap_power_6', name: 'Divine Touch', description: '+2 taps per click', baseCost: 25000, maxLevel: 1, effect: () => 2, category: 'tap' },
+  { id: 'tap_power_7', name: 'Cosmic Power', description: '+3 taps per click', baseCost: 100000, maxLevel: 1, effect: () => 3, category: 'tap' },
+
+  // Crit Chance upgrades
+  { id: 'crit_chance_1', name: 'Sharp Eyes', description: '+2% crit chance', baseCost: 1, maxLevel: 1, effect: () => 2, category: 'crit' },
+  { id: 'crit_chance_2', name: 'Focused Mind', description: '+2% crit chance', baseCost: 10, maxLevel: 1, effect: () => 2, category: 'crit' },
+  { id: 'crit_chance_3', name: 'Keen Instincts', description: '+3% crit chance', baseCost: 100, maxLevel: 1, effect: () => 3, category: 'crit' },
+  { id: 'crit_chance_4', name: 'Eagle Vision', description: '+3% crit chance', baseCost: 1000, maxLevel: 1, effect: () => 3, category: 'crit' },
+  { id: 'crit_chance_5', name: 'Perfect Precision', description: '+5% crit chance', baseCost: 10000, maxLevel: 1, effect: () => 5, category: 'crit' },
+  { id: 'crit_chance_6', name: 'Master Striker', description: '+5% crit chance', baseCost: 50000, maxLevel: 1, effect: () => 5, category: 'crit' },
+
+  // Crit Damage upgrades
+  { id: 'crit_damage_1', name: 'Heavy Hits', description: '+25% crit damage', baseCost: 2, maxLevel: 1, effect: () => 25, category: 'crit' },
+  { id: 'crit_damage_2', name: 'Brutal Force', description: '+25% crit damage', baseCost: 20, maxLevel: 1, effect: () => 25, category: 'crit' },
+  { id: 'crit_damage_3', name: 'Devastating Blows', description: '+50% crit damage', baseCost: 200, maxLevel: 1, effect: () => 50, category: 'crit' },
+  { id: 'crit_damage_4', name: 'Crushing Power', description: '+50% crit damage', baseCost: 2000, maxLevel: 1, effect: () => 50, category: 'crit' },
+  { id: 'crit_damage_5', name: 'Annihilating Strikes', description: '+100% crit damage', baseCost: 20000, maxLevel: 1, effect: () => 100, category: 'crit' },
+
+  // Luck upgrades (chance for +5 bonus taps)
+  { id: 'luck_1', name: 'Lucky Charm', description: '+1% luck', baseCost: 3, maxLevel: 1, effect: () => 1, category: 'luck' },
+  { id: 'luck_2', name: 'Fortune\'s Favor', description: '+1% luck', baseCost: 15, maxLevel: 1, effect: () => 1, category: 'luck' },
+  { id: 'luck_3', name: 'Blessed Touch', description: '+2% luck', baseCost: 75, maxLevel: 1, effect: () => 2, category: 'luck' },
+  { id: 'luck_4', name: 'Serendipity', description: '+2% luck', baseCost: 375, maxLevel: 1, effect: () => 2, category: 'luck' },
+  { id: 'luck_5', name: 'Golden Aura', description: '+3% luck', baseCost: 1875, maxLevel: 1, effect: () => 3, category: 'luck' },
+  { id: 'luck_6', name: 'Destiny\'s Child', description: '+3% luck', baseCost: 9375, maxLevel: 1, effect: () => 3, category: 'luck' },
+  { id: 'luck_7', name: 'Cosmic Fortune', description: '+5% luck', baseCost: 46875, maxLevel: 1, effect: () => 5, category: 'luck' },
+
+  // Mana upgrades
+  { id: 'mana_cap_1', name: 'Mana Pool I', description: '+10 max mana', baseCost: 100, maxLevel: 1, effect: () => 10, category: 'mana' },
+  { id: 'mana_cap_2', name: 'Mana Pool II', description: '+10 max mana', baseCost: 500, maxLevel: 1, effect: () => 10, category: 'mana' },
+  { id: 'mana_cap_3', name: 'Mana Pool III', description: '+15 max mana', baseCost: 2500, maxLevel: 1, effect: () => 15, category: 'mana' },
+  { id: 'mana_cap_4', name: 'Mana Pool IV', description: '+15 max mana', baseCost: 12500, maxLevel: 1, effect: () => 15, category: 'mana' },
+  { id: 'mana_cap_5', name: 'Mana Pool V', description: '+25 max mana', baseCost: 62500, maxLevel: 1, effect: () => 25, category: 'mana' },
+  { id: 'mana_regen_1', name: 'Mana Flow I', description: '+0.05 mana/sec', baseCost: 250, maxLevel: 1, effect: () => 0.05, category: 'mana' },
+  { id: 'mana_regen_2', name: 'Mana Flow II', description: '+0.05 mana/sec', baseCost: 1250, maxLevel: 1, effect: () => 0.05, category: 'mana' },
+  { id: 'mana_regen_3', name: 'Mana Flow III', description: '+0.1 mana/sec', baseCost: 6250, maxLevel: 1, effect: () => 0.1, category: 'mana' },
+  { id: 'mana_regen_4', name: 'Mana Flow IV', description: '+0.1 mana/sec', baseCost: 31250, maxLevel: 1, effect: () => 0.1, category: 'mana' },
+
+  // Gold upgrades
+  { id: 'gold_bonus_1', name: 'Merchant\'s Eye', description: '+5% gold from sales', baseCost: 25, maxLevel: 1, effect: () => 5, category: 'gold' },
+  { id: 'gold_bonus_2', name: 'Haggler', description: '+5% gold from sales', baseCost: 125, maxLevel: 1, effect: () => 5, category: 'gold' },
+  { id: 'gold_bonus_3', name: 'Trade Master', description: '+10% gold from sales', baseCost: 625, maxLevel: 1, effect: () => 10, category: 'gold' },
+  { id: 'gold_bonus_4', name: 'Golden Touch', description: '+10% gold from sales', baseCost: 3125, maxLevel: 1, effect: () => 10, category: 'gold' },
+  { id: 'gold_bonus_5', name: 'Midas Blessing', description: '+15% gold from sales', baseCost: 15625, maxLevel: 1, effect: () => 15, category: 'gold' },
+  { id: 'gold_bonus_6', name: 'Wealth Incarnate', description: '+20% gold from sales', baseCost: 78125, maxLevel: 1, effect: () => 20, category: 'gold' },
+];
+
+// ============================================
+// SPELL DEFINITIONS
+// ============================================
+
+export interface SpellDef {
+  id: string;
+  name: string;
+  description: string;
+  manaCost: number;
+  duration: number; // seconds, 0 for instant
+  cooldown: number; // seconds
+  icon: string;
+}
+
+export const SPELLS: SpellDef[] = [
+  { id: 'auto_tap', name: 'Auto Harvest', description: 'Auto-tap for 20 seconds', manaCost: 25, duration: 20, cooldown: 60, icon: '⚡' },
+  { id: 'double_xp', name: 'Wisdom', description: '2x XP for 30 seconds', manaCost: 30, duration: 30, cooldown: 90, icon: '📚' },
+  { id: 'double_gold', name: 'Prosperity', description: '2x gold for 30 seconds', manaCost: 30, duration: 30, cooldown: 90, icon: '💎' },
+  { id: 'mega_crit', name: 'Critical Surge', description: '100% crit chance for 10 seconds', manaCost: 40, duration: 10, cooldown: 120, icon: '🎯' },
+  { id: 'lucky_star', name: 'Lucky Star', description: '50% luck for 15 seconds', manaCost: 35, duration: 15, cooldown: 100, icon: '⭐' },
+];
+
+// ============================================
 // STATE TYPES
 // ============================================
 
@@ -70,8 +160,26 @@ interface ResourceState {
   [resourceId: string]: number;
 }
 
+interface StatsState {
+  totalTaps: number;
+  totalCrits: number;
+  totalLuckyHits: number;
+  totalGoldEarned: number;
+  totalResourcesGathered: number;
+  highestCombo: number;
+  playTime: number; // seconds
+}
+
+interface SpellState {
+  activeUntil: number; // timestamp when spell expires
+  cooldownUntil: number; // timestamp when spell can be cast again
+}
+
 export interface GameState {
   gold: number;
+  mana: number;
+  maxMana: number;
+  manaRegen: number; // per second
   skills: Record<SkillType, SkillState>;
   resources: ResourceState;
   skillsUnlockedCount: number;
@@ -79,6 +187,17 @@ export interface GameState {
   chaosPoints: number;
   lastSaveTime: number;
   gameVersion: string;
+  // New systems
+  upgrades: Record<string, number>; // upgrade id -> level
+  spellsUnlocked: boolean;
+  spells: Record<string, SpellState>;
+  stats: StatsState;
+  // Computed bonuses (from upgrades)
+  bonusTaps: number;
+  critChance: number;
+  critDamage: number;
+  luck: number;
+  goldBonus: number;
 }
 
 // ============================================
@@ -90,6 +209,10 @@ type GameAction =
   | { type: 'UNLOCK_SKILL'; skillType: SkillType }
   | { type: 'SELL_RESOURCE'; resourceId: string; quantity: number }
   | { type: 'ADD_GOLD'; amount: number }
+  | { type: 'BUY_UPGRADE'; upgradeId: string }
+  | { type: 'UNLOCK_SPELLS' }
+  | { type: 'CAST_SPELL'; spellId: string }
+  | { type: 'TICK'; deltaMs: number }
   | { type: 'LOAD_GAME'; state: GameState }
   | { type: 'RESET_GAME' };
 
@@ -104,22 +227,44 @@ function createInitialSkills(): Record<SkillType, SkillState> {
     skills[def.id] = {
       level: 1,
       totalXp: 0,
-      unlocked: def.id === SkillType.LOGGING, // Only Logging starts unlocked
+      unlocked: def.id === SkillType.LOGGING,
     };
   }
 
   return skills as Record<SkillType, SkillState>;
 }
 
+const initialStats: StatsState = {
+  totalTaps: 0,
+  totalCrits: 0,
+  totalLuckyHits: 0,
+  totalGoldEarned: 0,
+  totalResourcesGathered: 0,
+  highestCombo: 0,
+  playTime: 0,
+};
+
 const initialState: GameState = {
   gold: 0,
+  mana: 0,
+  maxMana: 50,
+  manaRegen: 0.1,
   skills: createInitialSkills(),
   resources: {},
-  skillsUnlockedCount: 1, // Logging
+  skillsUnlockedCount: 1,
   prestigeCount: 0,
   chaosPoints: 0,
   lastSaveTime: Date.now(),
   gameVersion: GAME_VERSION,
+  upgrades: {},
+  spellsUnlocked: false,
+  spells: {},
+  stats: initialStats,
+  bonusTaps: 0,
+  critChance: 5, // 5% base
+  critDamage: 100, // 100% = 2x damage
+  luck: 0,
+  goldBonus: 0,
 };
 
 // ============================================
@@ -141,8 +286,64 @@ export function getResourceName(skillType: SkillType, tier: number): string {
   if (skillType === SkillType.LOGGING) {
     return LOGGING_TIERS[Math.min(tier - 1, LOGGING_TIERS.length - 1)] + ' Wood';
   }
-  // Add other skills later
   return 'Resource';
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+function recalculateBonuses(state: GameState): GameState {
+  let bonusTaps = 0;
+  let critChance = 5; // base 5%
+  let critDamage = 100; // base 100% (2x)
+  let luck = 0;
+  let goldBonus = 0;
+  let maxMana = 50;
+  let manaRegen = 0.1;
+
+  for (const upgrade of UPGRADES) {
+    const level = state.upgrades[upgrade.id] || 0;
+    if (level > 0) {
+      const effect = upgrade.effect(level);
+      switch (upgrade.category) {
+        case 'tap':
+          bonusTaps += effect;
+          break;
+        case 'crit':
+          if (upgrade.id.includes('chance')) {
+            critChance += effect;
+          } else {
+            critDamage += effect;
+          }
+          break;
+        case 'luck':
+          luck += effect;
+          break;
+        case 'gold':
+          goldBonus += effect;
+          break;
+        case 'mana':
+          if (upgrade.id.includes('cap')) {
+            maxMana += effect;
+          } else {
+            manaRegen += effect;
+          }
+          break;
+      }
+    }
+  }
+
+  return {
+    ...state,
+    bonusTaps,
+    critChance,
+    critDamage,
+    luck,
+    goldBonus,
+    maxMana,
+    manaRegen,
+  };
 }
 
 // ============================================
@@ -156,12 +357,37 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (!skill.unlocked) return state;
 
       const tier = getTierFromLevel(skill.level);
-      const xpGained = xpPerAction(tier, skill.level);
+
+      // Check for active spells
+      const now = Date.now();
+      const hasDoubleXp = (state.spells['double_xp']?.activeUntil || 0) > now;
+      const hasMegaCrit = (state.spells['mega_crit']?.activeUntil || 0) > now;
+      const hasLuckyStar = (state.spells['lucky_star']?.activeUntil || 0) > now;
+
+      // Calculate taps (1 base + bonus from upgrades)
+      let taps = 1 + state.bonusTaps;
+
+      // Check for crit
+      const effectiveCritChance = hasMegaCrit ? 100 : state.critChance;
+      const isCrit = Math.random() * 100 < effectiveCritChance;
+      if (isCrit) {
+        taps = Math.floor(taps * (1 + state.critDamage / 100));
+      }
+
+      // Check for luck (chance for +5 bonus taps)
+      const effectiveLuck = hasLuckyStar ? state.luck + 50 : state.luck;
+      const isLucky = Math.random() * 100 < effectiveLuck;
+      if (isLucky) {
+        taps += 5;
+      }
+
+      // Calculate XP
+      let xpGained = xpPerAction(tier, skill.level) * taps;
+      if (hasDoubleXp) xpGained *= 2;
+
       const newTotalXp = skill.totalXp + xpGained;
       const newLevel = levelFromTotalXp(newTotalXp);
 
-      // Gather resources
-      const { quantity } = calculateGatherYield(0, 0);
       const resourceId = `${action.skillType}_t${tier}`;
 
       return {
@@ -176,7 +402,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         },
         resources: {
           ...state.resources,
-          [resourceId]: (state.resources[resourceId] || 0) + quantity,
+          [resourceId]: (state.resources[resourceId] || 0) + taps,
+        },
+        stats: {
+          ...state.stats,
+          totalTaps: state.stats.totalTaps + 1,
+          totalCrits: state.stats.totalCrits + (isCrit ? 1 : 0),
+          totalLuckyHits: state.stats.totalLuckyHits + (isLucky ? 1 : 0),
+          totalResourcesGathered: state.stats.totalResourcesGathered + taps,
         },
       };
     }
@@ -206,19 +439,27 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const current = state.resources[action.resourceId] || 0;
       if (current < action.quantity) return state;
 
-      // Calculate gold based on tier (extract from resourceId)
-      // Don't floor per-item - floor after multiplying by quantity to preserve fractional values
       const tierMatch = action.resourceId.match(/_t(\d+)$/);
       const tier = tierMatch ? parseInt(tierMatch[1]) : 1;
       const goldPerItem = BALANCE.gold.base * Math.pow(BALANCE.gold.tierScale, tier - 1);
-      const goldGained = goldPerItem * action.quantity; // Keep as decimal for accumulation
+
+      // Check for double gold spell
+      const now = Date.now();
+      const hasDoubleGold = (state.spells['double_gold']?.activeUntil || 0) > now;
+      const goldMultiplier = hasDoubleGold ? 2 : 1;
+
+      let goldGained = goldPerItem * action.quantity * (1 + state.goldBonus / 100) * goldMultiplier;
 
       return {
         ...state,
-        gold: state.gold + goldGained, // Gold tracks decimals now
+        gold: state.gold + goldGained,
         resources: {
           ...state.resources,
           [action.resourceId]: current - action.quantity,
+        },
+        stats: {
+          ...state.stats,
+          totalGoldEarned: state.stats.totalGoldEarned + goldGained,
         },
       };
     }
@@ -230,8 +471,81 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'BUY_UPGRADE': {
+      const upgrade = UPGRADES.find(u => u.id === action.upgradeId);
+      if (!upgrade) return state;
+
+      const currentLevel = state.upgrades[action.upgradeId] || 0;
+      if (currentLevel >= upgrade.maxLevel) return state;
+
+      const cost = upgrade.baseCost;
+      if (state.gold < cost) return state;
+
+      const newState = {
+        ...state,
+        gold: state.gold - cost,
+        upgrades: {
+          ...state.upgrades,
+          [action.upgradeId]: currentLevel + 1,
+        },
+      };
+
+      return recalculateBonuses(newState);
+    }
+
+    case 'UNLOCK_SPELLS': {
+      if (state.spellsUnlocked) return state;
+      if (state.gold < 1000) return state;
+
+      return {
+        ...state,
+        gold: state.gold - 1000,
+        spellsUnlocked: true,
+      };
+    }
+
+    case 'CAST_SPELL': {
+      const spell = SPELLS.find(s => s.id === action.spellId);
+      if (!spell) return state;
+      if (!state.spellsUnlocked) return state;
+      if (state.mana < spell.manaCost) return state;
+
+      const now = Date.now();
+      const spellState = state.spells[action.spellId];
+      if (spellState && spellState.cooldownUntil > now) return state;
+
+      return {
+        ...state,
+        mana: state.mana - spell.manaCost,
+        spells: {
+          ...state.spells,
+          [action.spellId]: {
+            activeUntil: now + spell.duration * 1000,
+            cooldownUntil: now + spell.cooldown * 1000,
+          },
+        },
+      };
+    }
+
+    case 'TICK': {
+      const deltaSeconds = action.deltaMs / 1000;
+      let newMana = state.mana + state.manaRegen * deltaSeconds;
+      if (newMana > state.maxMana) newMana = state.maxMana;
+
+      return {
+        ...state,
+        mana: state.spellsUnlocked ? newMana : state.mana,
+        stats: {
+          ...state.stats,
+          playTime: state.stats.playTime + deltaSeconds,
+        },
+      };
+    }
+
     case 'LOAD_GAME': {
-      return action.state;
+      // Merge loaded state with defaults for any missing fields
+      const loadedState = { ...initialState, ...action.state };
+      return recalculateBonuses(loadedState);
     }
 
     case 'RESET_GAME': {
@@ -271,6 +585,9 @@ interface GameContextType {
   unlockSkill: (skillType: SkillType) => void;
   sellResource: (resourceId: string, quantity: number) => void;
   sellAllResources: () => void;
+  buyUpgrade: (upgradeId: string) => void;
+  unlockSpells: () => void;
+  castSpell: (spellId: string) => void;
   saveGame: () => void;
 }
 
@@ -284,18 +601,29 @@ const SAVE_KEY = 'ghallia_save';
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState, (initial) => {
-    // Load saved game
     try {
       const saved = localStorage.getItem(SAVE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...initial, ...parsed };
+        return recalculateBonuses({ ...initial, ...parsed });
       }
     } catch (e) {
       console.error('Failed to load save:', e);
     }
     return initial;
   });
+
+  // Game tick for mana regen and play time
+  const lastTickRef = useRef(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const deltaMs = now - lastTickRef.current;
+      lastTickRef.current = now;
+      dispatch({ type: 'TICK', deltaMs });
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -325,6 +653,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, [state.resources]);
 
+  const buyUpgrade = useCallback((upgradeId: string) => {
+    dispatch({ type: 'BUY_UPGRADE', upgradeId });
+  }, []);
+
+  const unlockSpells = useCallback(() => {
+    dispatch({ type: 'UNLOCK_SPELLS' });
+  }, []);
+
+  const castSpell = useCallback((spellId: string) => {
+    dispatch({ type: 'CAST_SPELL', spellId });
+  }, []);
+
   const saveGame = useCallback(() => {
     localStorage.setItem(SAVE_KEY, JSON.stringify({ ...state, lastSaveTime: Date.now() }));
   }, [state]);
@@ -337,6 +677,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       unlockSkill,
       sellResource,
       sellAllResources,
+      buyUpgrade,
+      unlockSpells,
+      castSpell,
       saveGame
     }}>
       {children}

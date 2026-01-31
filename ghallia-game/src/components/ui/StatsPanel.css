@@ -1,6 +1,6 @@
-/* Settings Panel Styles */
+/* Stats Panel Styles */
 
-.settings-backdrop {
+.stats-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0);
@@ -11,14 +11,14 @@
   z-index: 90;
 }
 
-.settings-backdrop.open {
+.stats-backdrop.open {
   opacity: 1;
   pointer-events: auto;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
 }
 
-.settings-panel {
+.stats-panel {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -36,11 +36,11 @@
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
 }
 
-.settings-panel.open {
+.stats-panel.open {
   transform: translateY(0);
 }
 
-.settings-header {
+.stats-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -49,15 +49,16 @@
   position: sticky;
   top: 0;
   background: var(--color-bg-medium, #2a2218);
+  z-index: 1;
 }
 
-.settings-header h2 {
+.stats-header h2 {
   margin: 0;
   font-size: 1.25rem;
   color: var(--color-gold, #d4a853);
 }
 
-.settings-close {
+.stats-close {
   background: none;
   border: none;
   font-size: 2rem;
@@ -69,43 +70,75 @@
   transform: scale(1);
 }
 
-.settings-close:active {
+.stats-close:active {
   transform: scale(0.85) rotate(90deg);
 }
 
-.settings-content {
+.stats-content {
   padding: 20px;
   padding-bottom: calc(40px + env(safe-area-inset-bottom, 20px));
 }
 
-.settings-section {
+.stats-section {
   margin-bottom: 24px;
 }
 
-.settings-section:last-child {
+.stats-section:last-child {
   margin-bottom: 0;
 }
 
-.settings-section h3 {
+.stats-section h3 {
   margin: 0 0 12px 0;
   font-size: 1rem;
-  color: #ff6b6b;
+  color: var(--color-gold, #d4a853);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.settings-warning {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-  line-height: 1.5;
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.reset-button {
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: var(--color-bg-light, #3d3228);
+  border-radius: 10px;
+  border: 1px solid var(--color-border, #4a3f32);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #a89880);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #e8dcc4);
+}
+
+.stat-value.gold {
+  color: var(--color-gold, #d4a853);
+}
+
+.stat-value.mana {
+  color: #4ecdc4;
+}
+
+.sell-all-button {
   width: 100%;
   padding: 14px;
-  background: #3a2020;
-  border: 2px solid #ff6b6b;
+  background: linear-gradient(135deg, #3d6b3d 0%, #2a4a2a 100%);
+  border: 2px solid #5a9b5a;
   border-radius: 10px;
-  color: #ff6b6b;
+  color: #90ee90;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -113,37 +146,7 @@
   transform: scale(1);
 }
 
-.reset-button:active {
+.sell-all-button:active {
   transform: scale(0.96);
-  background: #4a2020;
-}
-
-.reset-button.confirm {
-  background: #ff6b6b;
-  color: #1a1410;
-  animation: pulseWarning 1s ease-in-out infinite;
-}
-
-@keyframes pulseWarning {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(255, 107, 107, 0); }
-}
-
-.cancel-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  background: var(--color-bg-light, #3d3228);
-  border: 1px solid var(--color-border, #4a3f32);
-  border-radius: 10px;
-  color: var(--color-text-secondary, #a89880);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform: scale(1);
-}
-
-.cancel-button:active {
-  transform: scale(0.96);
-  background: var(--color-bg-medium, #2a2218);
+  background: linear-gradient(135deg, #4a7d4a 0%, #3a5a3a 100%);
 }

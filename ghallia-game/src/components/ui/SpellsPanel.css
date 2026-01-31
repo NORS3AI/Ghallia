@@ -1,0 +1,331 @@
+/* Spells Panel Styles */
+
+.spells-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 90;
+}
+
+.spells-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.spells-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-medium, #2a2218);
+  border-top: 2px solid #4ecdc4;
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%);
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.spells-panel.open {
+  transform: translateY(0);
+}
+
+.spells-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border, #4a3f32);
+  position: sticky;
+  top: 0;
+  background: var(--color-bg-medium, #2a2218);
+  z-index: 1;
+}
+
+.spells-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #4ecdc4;
+}
+
+.mana-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 16px;
+  padding: 6px 12px;
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 20px;
+}
+
+.mana-icon {
+  font-size: 1rem;
+}
+
+.mana-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4ecdc4;
+}
+
+.spells-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--color-text-secondary, #a89880);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(1);
+}
+
+.spells-close:active {
+  transform: scale(0.85) rotate(90deg);
+}
+
+.spells-content {
+  padding: 20px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 20px));
+}
+
+/* Unlock Section */
+.spells-unlock-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.unlock-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.spells-unlock-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  color: #4ecdc4;
+}
+
+.unlock-description {
+  margin: 0 0 20px 0;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary, #a89880);
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+.unlock-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.unlock-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--color-text-primary, #e8dcc4);
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+}
+
+.unlock-button {
+  width: 100%;
+  max-width: 280px;
+  padding: 16px 24px;
+  background: var(--color-bg-light, #3d3228);
+  border: 2px solid var(--color-border, #4a3f32);
+  border-radius: 12px;
+  color: var(--color-text-secondary, #a89880);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.unlock-button.affordable {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3ab8b0 100%);
+  border-color: #4ecdc4;
+  color: var(--color-bg-dark, #1a1410);
+}
+
+.unlock-button.affordable:active {
+  transform: scale(0.96);
+}
+
+.unlock-button:disabled {
+  cursor: not-allowed;
+}
+
+/* Spells List */
+.spells-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.spell-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--color-bg-light, #3d3228);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 12px;
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.spell-item.active {
+  background: rgba(78, 205, 196, 0.15);
+  border-color: #4ecdc4;
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
+}
+
+.spell-item.cooldown {
+  opacity: 0.6;
+}
+
+.spell-icon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-medium, #2a2218);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.spell-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.spell-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #e8dcc4);
+  margin-bottom: 2px;
+}
+
+.spell-description {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #a89880);
+  margin-bottom: 6px;
+}
+
+.spell-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #a89880);
+}
+
+.spell-mana {
+  color: #4ecdc4;
+}
+
+.spell-action {
+  flex-shrink: 0;
+}
+
+.spell-cast {
+  padding: 10px 18px;
+  background: var(--color-bg-medium, #2a2218);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 8px;
+  color: var(--color-text-secondary, #a89880);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.spell-cast.ready {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3ab8b0 100%);
+  border-color: #4ecdc4;
+  color: var(--color-bg-dark, #1a1410);
+}
+
+.spell-cast.ready:active {
+  transform: scale(0.95);
+}
+
+.spell-cast:disabled {
+  cursor: not-allowed;
+}
+
+.spell-active-badge,
+.spell-cooldown-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  min-width: 70px;
+}
+
+.spell-active-badge {
+  background: rgba(78, 205, 196, 0.2);
+  border: 1px solid #4ecdc4;
+}
+
+.spell-cooldown-badge {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.active-time,
+.cooldown-time {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.active-time {
+  color: #4ecdc4;
+}
+
+.cooldown-time {
+  color: #ff6b6b;
+}
+
+.active-label,
+.cooldown-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.active-label {
+  color: rgba(78, 205, 196, 0.8);
+}
+
+.cooldown-label {
+  color: rgba(255, 107, 107, 0.6);
+}
