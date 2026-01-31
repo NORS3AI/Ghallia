@@ -70,58 +70,193 @@ export interface UpgradeDef {
   category: 'tap' | 'crit' | 'luck' | 'mana' | 'gold';
 }
 
+// Generate tap upgrades (57 total)
+const TAP_UPGRADE_NAMES = [
+  'Stronger Grip', 'Calloused Hands', 'Iron Fingers', 'Steel Arms', 'Titan Strength',
+  'Divine Touch', 'Cosmic Power', 'Primal Force', 'Unshakeable Will', 'Mountain Might',
+  'Thunder Palms', 'Dragon Grasp', 'Phoenix Claws', 'Demon Fists', 'Angel Wings',
+  'Storm Hands', 'Ocean Force', 'Earth Shaker', 'Sky Splitter', 'Void Walker',
+  'Star Crusher', 'Moon Breaker', 'Sun Burner', 'Galaxy Render', 'Universe Shaker',
+  'Time Bender', 'Space Warper', 'Reality Rift', 'Dimension Tear', 'Eternity Grasp',
+  'Infinite Power', 'Boundless Force', 'Limitless Might', 'Endless Strength', 'Eternal Grip',
+  'Ascended Touch', 'Transcendent Power', 'Supreme Force', 'Ultimate Might', 'Apex Strength',
+  'Legendary Grip', 'Mythic Touch', 'Ancient Power', 'Primordial Force', 'Elder Might',
+  'Cosmic Surge', 'Stellar Burst', 'Nebula Grasp', 'Quasar Touch', 'Pulsar Power',
+  'Black Hole Grip', 'Supernova Force', 'Hypernova Might', 'Omega Strength', 'Alpha Touch',
+  'Genesis Power', 'Apocalypse Force'
+];
+
+const generateTapUpgrades = (): UpgradeDef[] => {
+  return TAP_UPGRADE_NAMES.map((name, i) => ({
+    id: `tap_power_${i + 1}`,
+    name,
+    description: `+1 tap per click`,
+    baseCost: Math.floor(0.5 * Math.pow(2.5, i)),
+    maxLevel: 1,
+    effect: () => 1,
+    category: 'tap' as const
+  }));
+};
+
+// Generate crit chance upgrades (55 total, 0.5% each)
+const CRIT_CHANCE_NAMES = [
+  'Sharp Eyes', 'Focused Mind', 'Keen Instincts', 'Eagle Vision', 'Perfect Precision',
+  'Sniper Sight', 'Hunter Focus', 'Predator Gaze', 'Hawk Eye', 'Lynx Vision',
+  'Cat Reflexes', 'Owl Wisdom', 'Fox Cunning', 'Wolf Senses', 'Bear Awareness',
+  'Tiger Strike', 'Lion Courage', 'Panther Grace', 'Cheetah Speed', 'Viper Strike',
+  'Cobra Focus', 'Scorpion Sting', 'Spider Sense', 'Mantis Precision', 'Dragonfly Dart',
+  'Crystal Clarity', 'Diamond Focus', 'Ruby Sight', 'Sapphire Vision', 'Emerald Eye',
+  'Topaz Gleam', 'Amethyst Gaze', 'Opal Shimmer', 'Pearl Luster', 'Onyx Depth',
+  'Silver Strike', 'Gold Precision', 'Platinum Focus', 'Titanium Edge', 'Mithril Sight',
+  'Adamantine Vision', 'Orichalcum Eye', 'Celestial Gaze', 'Ethereal Focus', 'Astral Precision',
+  'Void Sight', 'Shadow Vision', 'Light Eye', 'Dark Gaze', 'Chaos Focus',
+  'Order Precision', 'Balance Sight', 'Harmony Vision', 'Discord Eye', 'Unity Gaze'
+];
+
+const generateCritChanceUpgrades = (): UpgradeDef[] => {
+  return CRIT_CHANCE_NAMES.map((name, i) => ({
+    id: `crit_chance_${i + 1}`,
+    name,
+    description: `+0.5% crit chance`,
+    baseCost: Math.floor(1 * Math.pow(2, i)),
+    maxLevel: 1,
+    effect: () => 0.5,
+    category: 'crit' as const
+  }));
+};
+
+// Generate crit damage upgrades (55 total, 5% each)
+const CRIT_DAMAGE_NAMES = [
+  'Heavy Hits', 'Brutal Force', 'Devastating Blows', 'Crushing Power', 'Annihilating Strikes',
+  'Shattering Impact', 'Pulverizing Might', 'Obliterating Force', 'Decimating Power', 'Ruinous Blows',
+  'Catastrophic Strikes', 'Cataclysmic Force', 'Apocalyptic Power', 'Doomsday Might', 'Armageddon Blows',
+  'Ragnarok Strikes', 'Twilight Force', 'Dawn Breaker', 'Dusk Crusher', 'Midnight Striker',
+  'Noon Smasher', 'Eclipse Crusher', 'Solstice Breaker', 'Equinox Striker', 'Zenith Smasher',
+  'Nadir Crusher', 'Apex Breaker', 'Peak Striker', 'Summit Smasher', 'Pinnacle Crusher',
+  'Crown Breaker', 'Throne Striker', 'Scepter Smasher', 'Orb Crusher', 'Staff Breaker',
+  'Wand Striker', 'Rod Smasher', 'Blade Crusher', 'Sword Breaker', 'Axe Striker',
+  'Hammer Smasher', 'Mace Crusher', 'Flail Breaker', 'Spear Striker', 'Lance Smasher',
+  'Pike Crusher', 'Halberd Breaker', 'Glaive Striker', 'Scythe Smasher', 'Sickle Crusher',
+  'Dagger Breaker', 'Knife Striker', 'Fang Smasher', 'Claw Crusher', 'Talon Breaker'
+];
+
+const generateCritDamageUpgrades = (): UpgradeDef[] => {
+  return CRIT_DAMAGE_NAMES.map((name, i) => ({
+    id: `crit_damage_${i + 1}`,
+    name,
+    description: `+5% crit damage`,
+    baseCost: Math.floor(2 * Math.pow(2, i)),
+    maxLevel: 1,
+    effect: () => 5,
+    category: 'crit' as const
+  }));
+};
+
+// Generate luck upgrades (55 total, 0.5% each)
+const LUCK_UPGRADE_NAMES = [
+  'Lucky Charm', 'Fortune\'s Favor', 'Blessed Touch', 'Serendipity', 'Golden Aura',
+  'Destiny\'s Child', 'Cosmic Fortune', 'Starlight Blessing', 'Moonbeam Grace', 'Sunray Gift',
+  'Rainbow Promise', 'Four Leaf Clover', 'Horseshoe Luck', 'Rabbit\'s Foot', 'Lucky Penny',
+  'Wishing Well', 'Shooting Star', 'Lucky Number', 'Fortune Cookie', 'Dice Roll',
+  'Card Draw', 'Coin Flip', 'Wheel Spin', 'Jackpot Hit', 'Lottery Win',
+  'Treasure Find', 'Gold Rush', 'Diamond Strike', 'Emerald Discovery', 'Ruby Unearthed',
+  'Sapphire Revealed', 'Pearl Found', 'Opal Uncovered', 'Amethyst Spotted', 'Topaz Located',
+  'Crystal Clear', 'Gem Hunter', 'Jewel Seeker', 'Ore Finder', 'Vein Tracker',
+  'Lode Spotter', 'Mother Lode', 'Bonanza', 'Windfall', 'Godsend',
+  'Miracle', 'Wonder', 'Marvel', 'Phenomenon', 'Providence',
+  'Kismet', 'Karma', 'Fate\'s Hand', 'Chance\'s Favor', 'Random\'s Gift'
+];
+
+const generateLuckUpgrades = (): UpgradeDef[] => {
+  return LUCK_UPGRADE_NAMES.map((name, i) => ({
+    id: `luck_${i + 1}`,
+    name,
+    description: `+0.5% luck`,
+    baseCost: Math.floor(3 * Math.pow(2, i)),
+    maxLevel: 1,
+    effect: () => 0.5,
+    category: 'luck' as const
+  }));
+};
+
+// Generate mana pool upgrades (30 total)
+const MANA_POOL_NAMES = [
+  'Mana Pool I', 'Mana Pool II', 'Mana Pool III', 'Mana Pool IV', 'Mana Pool V',
+  'Arcane Reserve', 'Mystic Reservoir', 'Ethereal Basin', 'Astral Lake', 'Cosmic Ocean',
+  'Spirit Well', 'Soul Spring', 'Life Fountain', 'Energy Core', 'Power Source',
+  'Magic Basin', 'Spell Chamber', 'Enchant Tank', 'Rune Vessel', 'Glyph Container',
+  'Sigil Storage', 'Ward Buffer', 'Shield Cell', 'Barrier Bank', 'Aura Cache',
+  'Essence Pool', 'Vital Reserve', 'Primal Tank', 'Ancient Well', 'Elder Spring'
+];
+
+const generateManaPoolUpgrades = (): UpgradeDef[] => {
+  return MANA_POOL_NAMES.map((name, i) => ({
+    id: `mana_cap_${i + 1}`,
+    name,
+    description: `+5 max mana`,
+    baseCost: Math.floor(100 * Math.pow(2, i)),
+    maxLevel: 1,
+    effect: () => 5,
+    category: 'mana' as const
+  }));
+};
+
+// Generate mana regen upgrades (25 total)
+const MANA_REGEN_NAMES = [
+  'Mana Flow I', 'Mana Flow II', 'Mana Flow III', 'Mana Flow IV', 'Mana Flow V',
+  'Arcane Stream', 'Mystic Current', 'Ethereal River', 'Astral Tide', 'Cosmic Wave',
+  'Spirit Surge', 'Soul Pulse', 'Life Beat', 'Energy Flux', 'Power Cycle',
+  'Magic Rhythm', 'Spell Tempo', 'Enchant Pace', 'Rune Rate', 'Glyph Speed',
+  'Sigil Frequency', 'Ward Interval', 'Shield Timing', 'Barrier Cadence', 'Aura Tempo'
+];
+
+const generateManaRegenUpgrades = (): UpgradeDef[] => {
+  return MANA_REGEN_NAMES.map((name, i) => ({
+    id: `mana_regen_${i + 1}`,
+    name,
+    description: `+0.02 mana/sec`,
+    baseCost: Math.floor(250 * Math.pow(2, i)),
+    maxLevel: 1,
+    effect: () => 0.02,
+    category: 'mana' as const
+  }));
+};
+
+// Generate gold bonus upgrades (55 total)
+const GOLD_BONUS_NAMES = [
+  'Merchant\'s Eye', 'Haggler', 'Trade Master', 'Golden Touch', 'Midas Blessing',
+  'Wealth Incarnate', 'Fortune Seeker', 'Treasure Hunter', 'Gold Digger', 'Coin Collector',
+  'Silver Tongue', 'Bronze Mind', 'Copper Heart', 'Iron Will', 'Steel Resolve',
+  'Platinum Soul', 'Diamond Spirit', 'Emerald Essence', 'Ruby Core', 'Sapphire Aura',
+  'Market Savvy', 'Price Wisdom', 'Value Insight', 'Worth Knowledge', 'Cost Awareness',
+  'Profit Sense', 'Gain Instinct', 'Yield Intuition', 'Return Feel', 'Revenue Gut',
+  'Income Flow', 'Earnings Stream', 'Wages River', 'Salary Ocean', 'Payment Sea',
+  'Commission Lake', 'Bonus Pond', 'Tip Well', 'Gratuity Spring', 'Reward Fountain',
+  'Prize Pool', 'Bounty Basin', 'Loot Reservoir', 'Spoils Tank', 'Plunder Cache',
+  'Riches Vault', 'Wealth Safe', 'Fortune Chest', 'Treasure Box', 'Coffer Fill',
+  'Purse Swell', 'Wallet Grow', 'Pouch Expand', 'Sack Enlarge', 'Bag Increase'
+];
+
+const generateGoldBonusUpgrades = (): UpgradeDef[] => {
+  return GOLD_BONUS_NAMES.map((name, i) => ({
+    id: `gold_bonus_${i + 1}`,
+    name,
+    description: `+1% gold from sales`,
+    baseCost: Math.floor(25 * Math.pow(2, i)),
+    maxLevel: 1,
+    effect: () => 1,
+    category: 'gold' as const
+  }));
+};
+
 export const UPGRADES: UpgradeDef[] = [
-  // Tap upgrades (increases taps per click)
-  { id: 'tap_power_1', name: 'Stronger Grip', description: '+1 tap per click', baseCost: 0.5, maxLevel: 1, effect: () => 1, category: 'tap' },
-  { id: 'tap_power_2', name: 'Calloused Hands', description: '+1 tap per click', baseCost: 5, maxLevel: 1, effect: () => 1, category: 'tap' },
-  { id: 'tap_power_3', name: 'Iron Fingers', description: '+1 tap per click', baseCost: 50, maxLevel: 1, effect: () => 1, category: 'tap' },
-  { id: 'tap_power_4', name: 'Steel Arms', description: '+1 tap per click', baseCost: 500, maxLevel: 1, effect: () => 1, category: 'tap' },
-  { id: 'tap_power_5', name: 'Titan Strength', description: '+1 tap per click', baseCost: 5000, maxLevel: 1, effect: () => 1, category: 'tap' },
-  { id: 'tap_power_6', name: 'Divine Touch', description: '+2 taps per click', baseCost: 25000, maxLevel: 1, effect: () => 2, category: 'tap' },
-  { id: 'tap_power_7', name: 'Cosmic Power', description: '+3 taps per click', baseCost: 100000, maxLevel: 1, effect: () => 3, category: 'tap' },
-
-  // Crit Chance upgrades
-  { id: 'crit_chance_1', name: 'Sharp Eyes', description: '+2% crit chance', baseCost: 1, maxLevel: 1, effect: () => 2, category: 'crit' },
-  { id: 'crit_chance_2', name: 'Focused Mind', description: '+2% crit chance', baseCost: 10, maxLevel: 1, effect: () => 2, category: 'crit' },
-  { id: 'crit_chance_3', name: 'Keen Instincts', description: '+3% crit chance', baseCost: 100, maxLevel: 1, effect: () => 3, category: 'crit' },
-  { id: 'crit_chance_4', name: 'Eagle Vision', description: '+3% crit chance', baseCost: 1000, maxLevel: 1, effect: () => 3, category: 'crit' },
-  { id: 'crit_chance_5', name: 'Perfect Precision', description: '+5% crit chance', baseCost: 10000, maxLevel: 1, effect: () => 5, category: 'crit' },
-  { id: 'crit_chance_6', name: 'Master Striker', description: '+5% crit chance', baseCost: 50000, maxLevel: 1, effect: () => 5, category: 'crit' },
-
-  // Crit Damage upgrades
-  { id: 'crit_damage_1', name: 'Heavy Hits', description: '+25% crit damage', baseCost: 2, maxLevel: 1, effect: () => 25, category: 'crit' },
-  { id: 'crit_damage_2', name: 'Brutal Force', description: '+25% crit damage', baseCost: 20, maxLevel: 1, effect: () => 25, category: 'crit' },
-  { id: 'crit_damage_3', name: 'Devastating Blows', description: '+50% crit damage', baseCost: 200, maxLevel: 1, effect: () => 50, category: 'crit' },
-  { id: 'crit_damage_4', name: 'Crushing Power', description: '+50% crit damage', baseCost: 2000, maxLevel: 1, effect: () => 50, category: 'crit' },
-  { id: 'crit_damage_5', name: 'Annihilating Strikes', description: '+100% crit damage', baseCost: 20000, maxLevel: 1, effect: () => 100, category: 'crit' },
-
-  // Luck upgrades (chance for +5 bonus taps)
-  { id: 'luck_1', name: 'Lucky Charm', description: '+1% luck', baseCost: 3, maxLevel: 1, effect: () => 1, category: 'luck' },
-  { id: 'luck_2', name: 'Fortune\'s Favor', description: '+1% luck', baseCost: 15, maxLevel: 1, effect: () => 1, category: 'luck' },
-  { id: 'luck_3', name: 'Blessed Touch', description: '+2% luck', baseCost: 75, maxLevel: 1, effect: () => 2, category: 'luck' },
-  { id: 'luck_4', name: 'Serendipity', description: '+2% luck', baseCost: 375, maxLevel: 1, effect: () => 2, category: 'luck' },
-  { id: 'luck_5', name: 'Golden Aura', description: '+3% luck', baseCost: 1875, maxLevel: 1, effect: () => 3, category: 'luck' },
-  { id: 'luck_6', name: 'Destiny\'s Child', description: '+3% luck', baseCost: 9375, maxLevel: 1, effect: () => 3, category: 'luck' },
-  { id: 'luck_7', name: 'Cosmic Fortune', description: '+5% luck', baseCost: 46875, maxLevel: 1, effect: () => 5, category: 'luck' },
-
-  // Mana upgrades
-  { id: 'mana_cap_1', name: 'Mana Pool I', description: '+10 max mana', baseCost: 100, maxLevel: 1, effect: () => 10, category: 'mana' },
-  { id: 'mana_cap_2', name: 'Mana Pool II', description: '+10 max mana', baseCost: 500, maxLevel: 1, effect: () => 10, category: 'mana' },
-  { id: 'mana_cap_3', name: 'Mana Pool III', description: '+15 max mana', baseCost: 2500, maxLevel: 1, effect: () => 15, category: 'mana' },
-  { id: 'mana_cap_4', name: 'Mana Pool IV', description: '+15 max mana', baseCost: 12500, maxLevel: 1, effect: () => 15, category: 'mana' },
-  { id: 'mana_cap_5', name: 'Mana Pool V', description: '+25 max mana', baseCost: 62500, maxLevel: 1, effect: () => 25, category: 'mana' },
-  { id: 'mana_regen_1', name: 'Mana Flow I', description: '+0.05 mana/sec', baseCost: 250, maxLevel: 1, effect: () => 0.05, category: 'mana' },
-  { id: 'mana_regen_2', name: 'Mana Flow II', description: '+0.05 mana/sec', baseCost: 1250, maxLevel: 1, effect: () => 0.05, category: 'mana' },
-  { id: 'mana_regen_3', name: 'Mana Flow III', description: '+0.1 mana/sec', baseCost: 6250, maxLevel: 1, effect: () => 0.1, category: 'mana' },
-  { id: 'mana_regen_4', name: 'Mana Flow IV', description: '+0.1 mana/sec', baseCost: 31250, maxLevel: 1, effect: () => 0.1, category: 'mana' },
-
-  // Gold upgrades
-  { id: 'gold_bonus_1', name: 'Merchant\'s Eye', description: '+5% gold from sales', baseCost: 25, maxLevel: 1, effect: () => 5, category: 'gold' },
-  { id: 'gold_bonus_2', name: 'Haggler', description: '+5% gold from sales', baseCost: 125, maxLevel: 1, effect: () => 5, category: 'gold' },
-  { id: 'gold_bonus_3', name: 'Trade Master', description: '+10% gold from sales', baseCost: 625, maxLevel: 1, effect: () => 10, category: 'gold' },
-  { id: 'gold_bonus_4', name: 'Golden Touch', description: '+10% gold from sales', baseCost: 3125, maxLevel: 1, effect: () => 10, category: 'gold' },
-  { id: 'gold_bonus_5', name: 'Midas Blessing', description: '+15% gold from sales', baseCost: 15625, maxLevel: 1, effect: () => 15, category: 'gold' },
-  { id: 'gold_bonus_6', name: 'Wealth Incarnate', description: '+20% gold from sales', baseCost: 78125, maxLevel: 1, effect: () => 20, category: 'gold' },
+  ...generateTapUpgrades(),
+  ...generateCritChanceUpgrades(),
+  ...generateCritDamageUpgrades(),
+  ...generateLuckUpgrades(),
+  ...generateManaPoolUpgrades(),
+  ...generateManaRegenUpgrades(),
+  ...generateGoldBonusUpgrades(),
 ];
 
 // ============================================
@@ -145,6 +280,111 @@ export const SPELLS: SpellDef[] = [
   { id: 'mega_crit', name: 'Critical Surge', description: '100% crit chance for 10 seconds', manaCost: 40, duration: 10, cooldown: 120, icon: '🎯' },
   { id: 'lucky_star', name: 'Lucky Star', description: '50% luck for 15 seconds', manaCost: 35, duration: 15, cooldown: 100, icon: '⭐' },
 ];
+
+// ============================================
+// CRAFTING RECIPE DEFINITIONS
+// ============================================
+
+export interface CraftingRecipe {
+  id: string;
+  name: string;
+  craftingSkill: SkillType; // Which crafting skill makes this
+  requiredLevel: number; // Level needed in crafting skill
+  materials: { resourceId: string; quantity: number }[]; // Required materials
+  craftTime: number; // Seconds to craft
+  xpReward: number; // XP gained when crafted
+  sellValue: number; // Gold when sold
+  icon: string;
+}
+
+// Recipe template types for Sawmill (15 types as requested)
+const SAWMILL_RECIPE_TYPES = [
+  { suffix: 'Plank', icon: '🪵', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
+  { suffix: 'Board', icon: '📋', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
+  { suffix: 'Beam', icon: '🏗️', timeMultiplier: 1.5, materialMultiplier: 5, valueMultiplier: 3 },
+  { suffix: 'Frame', icon: '🖼️', timeMultiplier: 2, materialMultiplier: 6, valueMultiplier: 4 },
+  { suffix: 'Chair', icon: '🪑', timeMultiplier: 3, materialMultiplier: 8, valueMultiplier: 6 },
+  { suffix: 'Table', icon: '🪵', timeMultiplier: 4, materialMultiplier: 12, valueMultiplier: 10 },
+  { suffix: 'Shelf', icon: '📚', timeMultiplier: 2.5, materialMultiplier: 7, valueMultiplier: 5 },
+  { suffix: 'Chest', icon: '📦', timeMultiplier: 5, materialMultiplier: 15, valueMultiplier: 12 },
+  { suffix: 'Cabinet', icon: '🗄️', timeMultiplier: 6, materialMultiplier: 20, valueMultiplier: 16 },
+  { suffix: 'Bed', icon: '🛏️', timeMultiplier: 8, materialMultiplier: 25, valueMultiplier: 20 },
+  { suffix: 'Wardrobe', icon: '🚪', timeMultiplier: 10, materialMultiplier: 30, valueMultiplier: 25 },
+  { suffix: 'Throne', icon: '👑', timeMultiplier: 15, materialMultiplier: 50, valueMultiplier: 40 },
+  { suffix: 'Carriage', icon: '🛞', timeMultiplier: 20, materialMultiplier: 75, valueMultiplier: 60 },
+  { suffix: 'Ship Hull', icon: '⛵', timeMultiplier: 30, materialMultiplier: 100, valueMultiplier: 85 },
+  { suffix: 'Cathedral Frame', icon: '⛪', timeMultiplier: 60, materialMultiplier: 200, valueMultiplier: 180 },
+];
+
+// Wood tier names for recipes
+const WOOD_TIERS = [
+  'Maple', 'Oak', 'Birch', 'Pine', 'Willow', 'Cedar', 'Ash', 'Elm', 'Spruce', 'Redwood',
+  'Mahogany', 'Teak', 'Ebony', 'Ironwood', 'Bloodwood', 'Ghostwood', 'Petrified',
+  'Crystalbark', 'Moonbark', 'Sunwood', 'Stormoak', 'Frostpine', 'Emberbark', 'Voidwood',
+  'Mythril', 'Dragon', 'Phoenix', 'Titan', 'Cosmic', 'Nebula',
+  'Starfall', 'Quantum', 'Temporal', 'Ethereal', 'Celestial',
+  'Divine', 'Astral', 'Primal', 'Giving', 'Infinity',
+  'Schrödinger', 'Meme', 'Plot Armor', 'Lag Spike', 'Fourth Wall',
+  'Error 404', 'Gigachad', 'Final Boss', 'Prestige', 'World Tree'
+];
+
+// Generate sawmill recipes
+const generateSawmillRecipes = (): CraftingRecipe[] => {
+  const recipes: CraftingRecipe[] = [];
+
+  // Generate 15 recipes per tier (first 10 tiers for now)
+  for (let tier = 1; tier <= 10; tier++) {
+    const woodName = WOOD_TIERS[tier - 1];
+    const resourceId = `logging_t${tier}`;
+    const tierLevel = (tier - 1) * 20 + 1;
+    const baseValue = tier * 5;
+
+    SAWMILL_RECIPE_TYPES.forEach((type, typeIdx) => {
+      const requiredLevel = tierLevel + typeIdx;
+      recipes.push({
+        id: `sawmill_${tier}_${typeIdx}`,
+        name: `${woodName} ${type.suffix}`,
+        craftingSkill: SkillType.SAWMILL,
+        requiredLevel,
+        materials: [{ resourceId, quantity: type.materialMultiplier }],
+        craftTime: Math.floor(type.timeMultiplier * (1 + tier * 0.5)),
+        xpReward: Math.floor(10 * tier * type.timeMultiplier),
+        sellValue: Math.floor(baseValue * type.valueMultiplier),
+        icon: type.icon,
+      });
+    });
+  }
+
+  return recipes;
+};
+
+export const CRAFTING_RECIPES: CraftingRecipe[] = [
+  ...generateSawmillRecipes(),
+];
+
+// Helper to get recipes for a specific crafting skill
+export function getRecipesForSkill(skillType: SkillType, level: number): CraftingRecipe[] {
+  return CRAFTING_RECIPES.filter(
+    r => r.craftingSkill === skillType && r.requiredLevel <= level
+  ).sort((a, b) => a.requiredLevel - b.requiredLevel);
+}
+
+// Helper to get unique material tiers available for a skill
+export function getMaterialTiersForSkill(skillType: SkillType): number[] {
+  const recipes = CRAFTING_RECIPES.filter(r => r.craftingSkill === skillType);
+  const tiers = new Set<number>();
+
+  recipes.forEach(recipe => {
+    recipe.materials.forEach(mat => {
+      const match = mat.resourceId.match(/_t(\d+)$/);
+      if (match) {
+        tiers.add(parseInt(match[1]));
+      }
+    });
+  });
+
+  return Array.from(tiers).sort((a, b) => a - b);
+}
 
 // ============================================
 // STATE TYPES
@@ -178,6 +418,14 @@ interface SpellState {
   cooldownUntil: number; // timestamp when spell can be cast again
 }
 
+// Crafting queue item
+export interface CraftingQueueItem {
+  id: string; // unique instance id
+  recipeId: string; // recipe being crafted
+  startTime: number; // timestamp when started
+  endTime: number; // timestamp when complete
+}
+
 // ============================================
 // CHARACTER STATS
 // ============================================
@@ -192,6 +440,17 @@ interface CharacterState {
   // Derived stats
   maxHp: number;
   currentHp: number;
+}
+
+// Result of last gather action for UI feedback
+export interface GatherResult {
+  skillType: SkillType;
+  baseTaps: number;
+  resourceTaps: number;
+  isCrit: boolean;
+  isLucky: boolean;
+  xpGained: number;
+  timestamp: number;
 }
 
 export interface GameState {
@@ -223,6 +482,11 @@ export interface GameState {
   // Achievements
   unlockedAchievements: string[]; // achievement IDs that have been unlocked
   claimedAchievements: string[]; // achievement IDs that have been claimed
+  // Last gather result for UI feedback
+  lastGatherResult: GatherResult | null;
+  // Crafting system
+  craftingQueue: CraftingQueueItem[];
+  craftedItems: Record<string, number>; // recipeId -> quantity crafted
 }
 
 // ============================================
@@ -255,7 +519,11 @@ type GameAction =
   | { type: 'UNLOCK_ACHIEVEMENT'; achievementId: string }
   | { type: 'CLAIM_ACHIEVEMENT'; achievementId: string; reward: number }
   // Prestige
-  | { type: 'PRESTIGE'; chaosPointsEarned: number };
+  | { type: 'PRESTIGE'; chaosPointsEarned: number }
+  // Crafting
+  | { type: 'START_CRAFT'; recipeId: string }
+  | { type: 'CANCEL_CRAFT'; queueItemId: string }
+  | { type: 'COLLECT_CRAFTED'; recipeId: string; quantity: number };
 
 // ============================================
 // INITIAL STATE
@@ -340,6 +608,9 @@ const initialState: GameState = {
   character: initialCharacter,
   unlockedAchievements: [],
   claimedAchievements: [],
+  lastGatherResult: null,
+  craftingQueue: [],
+  craftedItems: {},
 };
 
 // ============================================
@@ -532,6 +803,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           totalLuckyHits: state.stats.totalLuckyHits + (isLucky ? 1 : 0),
           totalResourcesGathered: state.stats.totalResourcesGathered + resourceTaps,
         },
+        lastGatherResult: {
+          skillType: action.skillType,
+          baseTaps,
+          resourceTaps,
+          isCrit,
+          isLucky,
+          xpGained,
+          timestamp: Date.now(),
+        },
       };
     }
 
@@ -657,6 +937,46 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       let newMana = state.mana + state.manaRegen * deltaSeconds;
       if (newMana > state.maxMana) newMana = state.maxMana;
 
+      // Process completed crafts
+      const now = Date.now();
+      const completedCrafts: CraftingQueueItem[] = [];
+      const remainingQueue: CraftingQueueItem[] = [];
+
+      for (const item of state.craftingQueue) {
+        if (item.endTime <= now) {
+          completedCrafts.push(item);
+        } else {
+          remainingQueue.push(item);
+        }
+      }
+
+      // Calculate XP and crafted items from completed crafts
+      let newCraftedItems = { ...state.craftedItems };
+      let newSkills = { ...state.skills };
+
+      for (const completed of completedCrafts) {
+        const recipe = CRAFTING_RECIPES.find(r => r.id === completed.recipeId);
+        if (recipe) {
+          // Add to crafted items
+          newCraftedItems[recipe.id] = (newCraftedItems[recipe.id] || 0) + 1;
+
+          // Add XP to crafting skill
+          const skillState = newSkills[recipe.craftingSkill];
+          if (skillState) {
+            const newTotalXp = skillState.totalXp + recipe.xpReward;
+            const newLevel = levelFromTotalXp(newTotalXp);
+            newSkills = {
+              ...newSkills,
+              [recipe.craftingSkill]: {
+                ...skillState,
+                totalXp: newTotalXp,
+                level: newLevel,
+              },
+            };
+          }
+        }
+      }
+
       return {
         ...state,
         mana: state.spellsUnlocked ? newMana : state.mana,
@@ -665,6 +985,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           totalPlayTime: state.stats.totalPlayTime + deltaSeconds,
           sessionPlayTime: state.stats.sessionPlayTime + deltaSeconds,
         },
+        craftingQueue: remainingQueue,
+        craftedItems: newCraftedItems,
+        skills: newSkills,
       };
     }
 
@@ -851,6 +1174,91 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    // Crafting actions
+    case 'START_CRAFT': {
+      const recipe = CRAFTING_RECIPES.find(r => r.id === action.recipeId);
+      if (!recipe) return state;
+
+      // Check if player has required materials
+      for (const mat of recipe.materials) {
+        const have = state.resources[mat.resourceId] || 0;
+        if (have < mat.quantity) {
+          return state; // Not enough materials
+        }
+      }
+
+      // Check if player has required crafting skill level
+      const skillLevel = state.skills[recipe.craftingSkill]?.level || 1;
+      if (skillLevel < recipe.requiredLevel) {
+        return state; // Level too low
+      }
+
+      // Deduct materials
+      const newResources = { ...state.resources };
+      for (const mat of recipe.materials) {
+        newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) - mat.quantity;
+      }
+
+      // Add to crafting queue
+      const now = Date.now();
+      const queueItem: CraftingQueueItem = {
+        id: `craft_${now}_${Math.random().toString(36).substr(2, 9)}`,
+        recipeId: action.recipeId,
+        startTime: now,
+        endTime: now + (recipe.craftTime * 1000),
+      };
+
+      return {
+        ...state,
+        resources: newResources,
+        craftingQueue: [...state.craftingQueue, queueItem],
+      };
+    }
+
+    case 'CANCEL_CRAFT': {
+      const itemToCancel = state.craftingQueue.find(item => item.id === action.queueItemId);
+      if (!itemToCancel) return state;
+
+      // Refund materials
+      const recipe = CRAFTING_RECIPES.find(r => r.id === itemToCancel.recipeId);
+      if (!recipe) return state;
+
+      const newResources = { ...state.resources };
+      for (const mat of recipe.materials) {
+        newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) + mat.quantity;
+      }
+
+      return {
+        ...state,
+        resources: newResources,
+        craftingQueue: state.craftingQueue.filter(item => item.id !== action.queueItemId),
+      };
+    }
+
+    case 'COLLECT_CRAFTED': {
+      const currentCount = state.craftedItems[action.recipeId] || 0;
+      if (currentCount < action.quantity) return state;
+
+      const recipe = CRAFTING_RECIPES.find(r => r.id === action.recipeId);
+      if (!recipe) return state;
+
+      // Sell for gold
+      const goldEarned = recipe.sellValue * action.quantity * (1 + state.goldBonus / 100);
+
+      return {
+        ...state,
+        gold: state.gold + goldEarned,
+        craftedItems: {
+          ...state.craftedItems,
+          [action.recipeId]: currentCount - action.quantity,
+        },
+        stats: {
+          ...state.stats,
+          totalGoldEarned: state.stats.totalGoldEarned + goldEarned,
+        },
+      };
+    }
+
     case 'LOAD_GAME': {
       // Merge loaded state with defaults for any missing fields
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -871,6 +1279,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         unlockedAchievements: action.state.unlockedAchievements || [],
         claimedAchievements: action.state.claimedAchievements || [],
         stats: migratedStats,
+        // Migration: add crafting state if missing
+        craftingQueue: action.state.craftingQueue || [],
+        craftedItems: action.state.craftedItems || {},
       };
       return recalculateBonuses(loadedState);
     }
@@ -934,6 +1345,10 @@ interface GameContextType {
   checkAchievements: () => void;
   // Prestige
   prestige: (chaosPointsEarned: number) => void;
+  // Crafting
+  startCraft: (recipeId: string) => void;
+  cancelCraft: (queueItemId: string) => void;
+  collectCrafted: (recipeId: string, quantity: number) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -1079,6 +1494,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'PRESTIGE', chaosPointsEarned });
   }, []);
 
+  // Crafting functions
+  const startCraft = useCallback((recipeId: string) => {
+    dispatch({ type: 'START_CRAFT', recipeId });
+  }, []);
+
+  const cancelCraft = useCallback((queueItemId: string) => {
+    dispatch({ type: 'CANCEL_CRAFT', queueItemId });
+  }, []);
+
+  const collectCrafted = useCallback((recipeId: string, quantity: number) => {
+    dispatch({ type: 'COLLECT_CRAFTED', recipeId, quantity });
+  }, []);
+
   return (
     <GameContext.Provider value={{
       state,
@@ -1106,6 +1534,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       claimAchievement,
       checkAchievements,
       prestige,
+      startCraft,
+      cancelCraft,
+      collectCrafted,
     }}>
       {children}
     </GameContext.Provider>
