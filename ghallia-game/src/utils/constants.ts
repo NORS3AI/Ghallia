@@ -49,7 +49,7 @@ export const BALANCE: BalanceConfig = {
 
 export const SKILL_UNLOCK_COSTS = {
   1: 0,           // Logging (free) - instant
-  2: 10,          // Sawmill - cheap to get started
+  2: 50,          // Sawmill - cheap to get started
   3: 10_000,      // 3rd skill
   4: 50_000,      // 4th skill
   5: 250_000,     // 5th skill
