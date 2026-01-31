@@ -167,6 +167,22 @@
   opacity: 0.8;
 }
 
+.upgrade-all-button {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, var(--color-gold-dark, #8a7235) 0%, var(--color-gold, #d4a853) 100%);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-bg-dark, #1a1410);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.upgrade-all-button:active {
+  transform: scale(0.95);
+}
+
 /* No Upgrades Message */
 .no-upgrades {
   text-align: center;
