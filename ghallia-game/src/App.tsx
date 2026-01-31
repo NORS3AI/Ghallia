@@ -181,6 +181,12 @@ function GameApp() {
         <div className="header-content">
           <h1 className="header-title">Infinity</h1>
           <div className="header-currencies">
+            {state.prestigeCount > 0 && (
+              <div className="header-chaos">
+                <span>🌀</span>
+                <span>{state.chaosPoints}</span>
+              </div>
+            )}
             {state.spellsUnlocked && (
               <div className="header-mana">
                 <span>💧</span>
@@ -238,6 +244,11 @@ function GameApp() {
       <PrestigePanel
         isOpen={activePanel === 'prestige'}
         onClose={closePanel}
+        onPrestige={() => {
+          // Navigate to logging skill after prestige
+          setSelectedSkill(SkillType.LOGGING);
+          setView('detail');
+        }}
       />
 
       {/* Stats Panel */}

@@ -19,12 +19,13 @@ import './PrestigePanel.css';
 interface PrestigePanelProps {
   isOpen: boolean;
   onClose: () => void;
+  onPrestige?: () => void;
 }
 
 const PRESTIGE_LEVEL_REQUIREMENT = 99;
 const PRESTIGE_SKILLS_REQUIRED = 1;
 
-export function PrestigePanel({ isOpen, onClose }: PrestigePanelProps) {
+export function PrestigePanel({ isOpen, onClose, onPrestige }: PrestigePanelProps) {
   const { state, prestige, buyTalent } = useGame();
   const [activeTab, setActiveTab] = useState<'prestige' | 'talents'>('prestige');
   const [confirmPrestige, setConfirmPrestige] = useState(false);
@@ -92,6 +93,7 @@ export function PrestigePanel({ isOpen, onClose }: PrestigePanelProps) {
       prestige(prestigeInfo.chaosPoints);
       setConfirmPrestige(false);
       onClose();
+      onPrestige?.();
     } else {
       setConfirmPrestige(true);
     }
