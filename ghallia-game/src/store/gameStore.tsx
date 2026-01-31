@@ -329,7 +329,7 @@ export interface SpellDef {
 }
 
 export const SPELLS: SpellDef[] = [
-  { id: 'auto_tap', name: 'Auto Harvest', description: 'Auto-tap for 20 seconds', manaCost: 25, duration: 20, cooldown: 60, icon: '⚡' },
+  { id: 'auto_tap', name: 'Auto Harvest', description: 'Auto-gather all skills for 20s', manaCost: 25, duration: 20, cooldown: 60, icon: '⚡' },
   { id: 'double_xp', name: 'Wisdom', description: '2x XP for 30 seconds', manaCost: 30, duration: 30, cooldown: 90, icon: '📚' },
   { id: 'double_gold', name: 'Prosperity', description: '2x gold for 30 seconds', manaCost: 30, duration: 30, cooldown: 90, icon: '💎' },
   { id: 'mega_crit', name: 'Critical Surge', description: '100% crit chance for 10 seconds', manaCost: 40, duration: 10, cooldown: 120, icon: '🎯' },
