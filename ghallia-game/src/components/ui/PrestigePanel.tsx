@@ -22,7 +22,7 @@ interface PrestigePanelProps {
 }
 
 const PRESTIGE_LEVEL_REQUIREMENT = 99;
-const PRESTIGE_SKILLS_REQUIRED = 5;
+const PRESTIGE_SKILLS_REQUIRED = 1;
 
 export function PrestigePanel({ isOpen, onClose }: PrestigePanelProps) {
   const { state, prestige, buyTalent } = useGame();
@@ -238,7 +238,7 @@ export function PrestigePanel({ isOpen, onClose }: PrestigePanelProps) {
                   ? `⚠️ Click again to confirm! You will lose everything!`
                   : prestigeInfo.canPrestige
                     ? `Prestige for ${prestigeInfo.chaosPoints} CP`
-                    : `Need ${prestigeInfo.requiredCount - prestigeInfo.eligibleCount} more skills at 99+`
+                    : `Need ${prestigeInfo.requiredCount - prestigeInfo.eligibleCount} more skill${prestigeInfo.requiredCount - prestigeInfo.eligibleCount === 1 ? '' : 's'} at 99+`
                 }
               </button>
               {confirmPrestige && (

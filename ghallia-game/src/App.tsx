@@ -84,10 +84,40 @@ type View = 'skills' | 'detail';
 type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character' | 'achievements';
 
 function GameApp() {
-  const { state } = useGame();
+  const { state, gather } = useGame();
   const [view, setView] = useState<View>('skills');
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [activePanel, setActivePanel] = useState<PanelType>('none');
+
+  // Auto Harvest spell - gather all unlocked gathering skills simultaneously
+  useEffect(() => {
+    const autoTapSpell = state.spells['auto_tap'];
+    const isActive = autoTapSpell && autoTapSpell.activeUntil > Date.now();
+
+    if (!isActive) return;
+
+    // Get all unlocked gathering skills
+    const gatheringSkills = SKILL_DEFINITIONS
+      .filter(s => s.category === SkillCategory.GATHERING && state.skills[s.id].unlocked)
+      .map(s => s.id);
+
+    if (gatheringSkills.length === 0) return;
+
+    // Auto-gather every 500ms on all gathering skills
+    const interval = setInterval(() => {
+      const now = Date.now();
+      if (autoTapSpell.activeUntil <= now) {
+        clearInterval(interval);
+        return;
+      }
+      // Gather on ALL unlocked gathering skills simultaneously
+      gatheringSkills.forEach(skillType => {
+        gather(skillType);
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [state.spells, state.skills, gather]);
 
   // Helper to open a panel (closes any other open panel, or toggles if same panel)
   const openPanel = useCallback((panel: PanelType) => {
