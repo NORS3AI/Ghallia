@@ -1424,11 +1424,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const resourceId = `${action.skillType}_t${tier}`;
 
       // Level up bonus: scales by level bracket (1-10: 100, 11-20: 200, 21-30: 300, etc.)
+      // Plus milestone bonus at every 10th level (10: +1000, 20: +2000, 30: +3000, etc.)
       let levelUpBonus = 0;
       if (didLevelUp) {
         for (let i = skill.level + 1; i <= newLevel && i <= 999; i++) {
-          // Level bracket determines bonus: ceil(level/10) * 100
+          // Level bracket determines base bonus: ceil(level/10) * 100
           levelUpBonus += Math.ceil(i / 10) * 100;
+          // Milestone bonus at every 10th level: (level/10) * 1000
+          if (i % 10 === 0) {
+            levelUpBonus += (i / 10) * 1000;
+          }
         }
       }
 
