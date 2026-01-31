@@ -27,7 +27,7 @@ function formatTime(seconds: number): string {
 }
 
 export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
-  const { state, sellAllResources } = useGame();
+  const { state, sellAllResources, devAddGold, devAddMana, devAddMaxMana, devAddBonusTaps } = useGame();
 
   const critRate = state.stats.totalTaps > 0
     ? ((state.stats.totalCrits / state.stats.totalTaps) * 100).toFixed(1)
@@ -157,6 +157,48 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
               <div className="stat-item">
                 <span className="stat-label">Upgrades Bought</span>
                 <span className="stat-value">{Object.keys(state.upgrades).length}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Developer Tools */}
+          <div className="stats-section dev-section">
+            <h3>Developer Tools</h3>
+
+            <div className="dev-row">
+              <span className="dev-label">Add Gold:</span>
+              <div className="dev-buttons">
+                <button className="dev-button" onClick={() => devAddGold(1000)}>+1K</button>
+                <button className="dev-button" onClick={() => devAddGold(10000)}>+10K</button>
+                <button className="dev-button" onClick={() => devAddGold(100000)}>+100K</button>
+              </div>
+            </div>
+
+            <div className="dev-row">
+              <span className="dev-label">Add Mana:</span>
+              <div className="dev-buttons">
+                <button className="dev-button" onClick={() => devAddMana(10)}>+10</button>
+                <button className="dev-button" onClick={() => devAddMana(100)}>+100</button>
+                <button className="dev-button" onClick={() => devAddMana(1000)}>+1000</button>
+              </div>
+            </div>
+
+            <div className="dev-row">
+              <span className="dev-label">Mana Cap:</span>
+              <div className="dev-buttons">
+                <button className="dev-button" onClick={() => devAddMaxMana(10)}>+10</button>
+                <button className="dev-button" onClick={() => devAddMaxMana(100)}>+100</button>
+                <button className="dev-button" onClick={() => devAddMaxMana(1000)}>+1000</button>
+              </div>
+            </div>
+
+            <div className="dev-row">
+              <span className="dev-label">Bonus Taps:</span>
+              <div className="dev-buttons">
+                <button className="dev-button" onClick={() => devAddBonusTaps(5)}>+5</button>
+                <button className="dev-button" onClick={() => devAddBonusTaps(10)}>+10</button>
+                <button className="dev-button" onClick={() => devAddBonusTaps(50)}>+50</button>
+                <button className="dev-button" onClick={() => devAddBonusTaps(100)}>+100</button>
               </div>
             </div>
           </div>
