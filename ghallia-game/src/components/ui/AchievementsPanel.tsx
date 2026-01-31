@@ -67,10 +67,11 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
     }, 1000);
   }, [state.claimedAchievements, claimAchievement]);
 
-  // Filter achievements
+  // Filter achievements - exclude hidden ones first
+  const visibleAchievements = ACHIEVEMENTS.filter(a => !a.hidden || !a.hidden(state));
   const filteredAchievements = selectedCategory === 'all'
-    ? ACHIEVEMENTS
-    : getAchievementsByCategory(selectedCategory);
+    ? visibleAchievements
+    : visibleAchievements.filter(a => a.category === selectedCategory);
 
   // Separate into unlocked (claimable), claimed, and locked
   const claimable = filteredAchievements.filter(
@@ -97,12 +98,12 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
   claimed.sort(sortByRarity);
   locked.sort(sortByRarity);
 
-  // Stats
-  const totalAchievements = ACHIEVEMENTS.length;
-  const unlockedCount = state.unlockedAchievements.length + state.claimedAchievements.length;
-  const claimedCount = state.claimedAchievements.length;
+  // Stats - only count visible achievements
+  const totalAchievements = visibleAchievements.length;
+  const visibleIds = new Set(visibleAchievements.map(a => a.id));
+  const claimedCount = state.claimedAchievements.filter(id => visibleIds.has(id)).length;
   const claimableCount = state.unlockedAchievements.filter(
-    id => !state.claimedAchievements.includes(id)
+    id => !state.claimedAchievements.includes(id) && visibleIds.has(id)
   ).length;
 
   return (
@@ -118,7 +119,7 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
           <div className="header-currencies">
             <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
             {state.spellsUnlocked && (
-              <span className="currency-mana">💧 {Math.floor(state.mana)}</span>
+              <span className="currency-mana">💧 {Math.floor(state.mana)}/{state.maxMana} (+{state.manaRegen.toFixed(1)}/s)</span>
             )}
             {state.prestigeCount > 0 && (
               <span className="currency-chaos">✨ {state.chaosPoints}</span>

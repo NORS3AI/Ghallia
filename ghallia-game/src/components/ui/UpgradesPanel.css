@@ -267,3 +267,19 @@
 .upgrade-buy:disabled {
   cursor: not-allowed;
 }
+
+/* Upgrade cost display */
+.upgrade-cost-gold {
+  display: inline;
+}
+
+.upgrade-cost-mana {
+  display: block;
+  font-size: 0.75rem;
+  color: #4ecdc4;
+  margin-top: 2px;
+}
+
+.upgrade-buy.affordable .upgrade-cost-mana {
+  color: var(--color-bg-dark, #1a1410);
+}

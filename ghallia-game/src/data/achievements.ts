@@ -42,6 +42,8 @@ export interface Achievement {
   icon: string;
   // Check function receives game state
   check: (state: any) => boolean;
+  // Optional: hide achievement until condition is met
+  hidden?: (state: any) => boolean;
 }
 
 // ============================================
@@ -491,6 +493,7 @@ SPELL_CAST_MILESTONES.forEach(m => {
     reward: calcReward(m.rarity, m.tier),
     icon: '🔮',
     check: (state) => (state.stats.totalSpellsCast || 0) >= m.count,
+    hidden: (state) => !state.spellsUnlocked,
   });
 });
 
@@ -513,6 +516,7 @@ MANA_MILESTONES.forEach(m => {
     reward: calcReward(m.rarity, m.tier),
     icon: '💧',
     check: (state) => state.maxMana >= m.amount,
+    hidden: (state) => !state.spellsUnlocked,
   });
 });
 
