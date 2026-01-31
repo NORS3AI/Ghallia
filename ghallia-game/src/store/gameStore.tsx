@@ -207,14 +207,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (current < action.quantity) return state;
 
       // Calculate gold based on tier (extract from resourceId)
+      // Don't floor per-item - floor after multiplying by quantity to preserve fractional values
       const tierMatch = action.resourceId.match(/_t(\d+)$/);
       const tier = tierMatch ? parseInt(tierMatch[1]) : 1;
-      const goldPerItem = Math.floor(BALANCE.gold.base * Math.pow(BALANCE.gold.tierScale, tier - 1));
-      const goldGained = goldPerItem * action.quantity;
+      const goldPerItem = BALANCE.gold.base * Math.pow(BALANCE.gold.tierScale, tier - 1);
+      const goldGained = goldPerItem * action.quantity; // Keep as decimal for accumulation
 
       return {
         ...state,
-        gold: state.gold + goldGained,
+        gold: state.gold + goldGained, // Gold tracks decimals now
         resources: {
           ...state.resources,
           [action.resourceId]: current - action.quantity,
