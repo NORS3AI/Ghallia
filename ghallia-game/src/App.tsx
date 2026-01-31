@@ -10,7 +10,7 @@ import { SkillTable } from './components/skills/SkillTable';
 import { SkillDetail } from './components/skills/SkillDetail';
 import { UnlockPanel } from './components/ui/UnlockPanel';
 import { SettingsPanel } from './components/ui/SettingsPanel';
-import { formatNumber } from './utils/math';
+import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
 class ErrorBoundary extends React.Component<
@@ -134,7 +134,7 @@ function GameApp() {
           <h1 className="header-title">Ghallia</h1>
           <div className="header-gold">
             <span>💰</span>
-            <span>{formatNumber(state.gold)}g</span>
+            <span>{formatGold(state.gold)}g</span>
           </div>
         </div>
       </header>

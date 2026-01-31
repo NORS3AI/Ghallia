@@ -27,12 +27,12 @@ import {
 // ============================================
 
 /**
- * Calculate XP required for a specific level
- * Formula: floor((L + 300 × 2^(L/7)) / 4)
+ * Calculate XP required to go from level L to L+1
+ * Level 1→2: 100 taps, then +20% each level
  */
 export function xpForLevel(level: number): number {
-  if (level <= 1) return 0;
-  return Math.floor((level + 300 * Math.pow(2, level / BALANCE.xp.levelExponent)) / 4);
+  if (level <= 1) return 100; // 100 taps to reach level 2
+  return Math.floor(100 * Math.pow(1.2, level - 1));
 }
 
 /**
@@ -66,8 +66,7 @@ export function levelFromTotalXp(totalXp: number): number {
 }
 
 /**
- * Calculate XP earned per action based on tier and bonuses
- * Includes early game multiplier for fast initial progression
+ * Calculate XP earned per action (1 XP per tap)
  */
 export function xpPerAction(
   tier: number,
@@ -75,9 +74,9 @@ export function xpPerAction(
   xpBonusPercent: number = 0,
   talentMultiplier: number = 1
 ): number {
-  const baseXp = BALANCE.xp.base * Math.pow(BALANCE.xp.tierScale, tier - 1);
-  const earlyGameBonus = getEarlyGameMultiplier(currentLevel);
-  return Math.floor(baseXp * earlyGameBonus * (1 + xpBonusPercent / 100) * talentMultiplier);
+  // 1 XP per tap, scaled by tier and bonuses
+  const baseXp = 1 * Math.pow(1.1, tier - 1); // Slight tier bonus
+  return Math.max(1, Math.floor(baseXp * (1 + xpBonusPercent / 100) * talentMultiplier));
 }
 
 /**
@@ -367,6 +366,25 @@ export function formatNumber(num: number): string {
     return (num / 1_000).toFixed(2) + 'K';
   }
   return num.toFixed(0);
+}
+
+/**
+ * Format gold with 2 decimal places (shows 0.00g format)
+ */
+export function formatGold(num: number): string {
+  if (num >= 1_000_000_000_000) {
+    return (num / 1_000_000_000_000).toFixed(2) + 'T';
+  }
+  if (num >= 1_000_000_000) {
+    return (num / 1_000_000_000).toFixed(2) + 'B';
+  }
+  if (num >= 1_000_000) {
+    return (num / 1_000_000).toFixed(2) + 'M';
+  }
+  if (num >= 10_000) {
+    return (num / 1_000).toFixed(2) + 'K';
+  }
+  return num.toFixed(2);
 }
 
 /**
