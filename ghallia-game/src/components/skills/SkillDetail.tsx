@@ -40,6 +40,7 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
   const skillState = state.skills[skillType];
   const [selectedTier, setSelectedTier] = useState<number | 'all'>('all');
   const [pops, setPops] = useState<NumberPop[]>([]);
+  const [selectedQuantities, setSelectedQuantities] = useState<Record<string, number>>({});
   const popIdRef = useRef(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -149,18 +150,41 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
     return items;
   }, [state.craftedItems, skillType]);
 
-  // Check if player can afford a recipe
-  const canAffordRecipe = useCallback((recipe: CraftingRecipe) => {
+  // Check if player can afford a recipe (optionally with a quantity)
+  const canAffordRecipe = useCallback((recipe: CraftingRecipe, quantity: number = 1) => {
     for (const mat of recipe.materials) {
       const have = state.resources[mat.resourceId] || 0;
-      if (have < mat.quantity) return false;
+      if (have < mat.quantity * quantity) return false;
     }
     return true;
   }, [state.resources]);
 
-  // Handle starting a craft
-  const handleStartCraft = useCallback((recipeId: string) => {
-    startCraft(recipeId);
+  // Calculate max craftable for a recipe based on materials
+  const getMaxCraftable = useCallback((recipe: CraftingRecipe) => {
+    let max = Infinity;
+    for (const mat of recipe.materials) {
+      const have = state.resources[mat.resourceId] || 0;
+      const canMake = Math.floor(have / mat.quantity);
+      max = Math.min(max, canMake);
+    }
+    return max === Infinity ? 0 : max;
+  }, [state.resources]);
+
+  // Get selected quantity for a recipe (default to 1)
+  const getSelectedQuantity = useCallback((recipeId: string) => {
+    return selectedQuantities[recipeId] || 1;
+  }, [selectedQuantities]);
+
+  // Set quantity for a recipe
+  const setQuantity = useCallback((recipeId: string, quantity: number) => {
+    setSelectedQuantities(prev => ({ ...prev, [recipeId]: quantity }));
+  }, []);
+
+  // Handle starting a craft with quantity
+  const handleStartCraft = useCallback((recipeId: string, quantity: number) => {
+    startCraft(recipeId, quantity);
+    // Reset quantity to 1 after crafting
+    setSelectedQuantities(prev => ({ ...prev, [recipeId]: 1 }));
   }, [startCraft]);
 
   // Handle collecting/selling crafted items
@@ -318,7 +342,9 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
             <h3 className="section-title">Recipes ({filteredRecipes.length})</h3>
             <div className="recipes-list">
               {filteredRecipes.slice(0, 20).map(recipe => {
-                const canAfford = canAffordRecipe(recipe);
+                const maxCraftable = getMaxCraftable(recipe);
+                const selectedQty = getSelectedQuantity(recipe.id);
+                const canAfford = canAffordRecipe(recipe, selectedQty);
                 const meetsLevel = skillState.level >= recipe.requiredLevel;
                 return (
                   <div
@@ -332,26 +358,58 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
                       <div className="recipe-materials">
                         {recipe.materials.map((mat, idx) => {
                           const have = state.resources[mat.resourceId] || 0;
+                          const needed = mat.quantity * selectedQty;
                           const materialName = getResourceNameById(mat.resourceId);
                           return (
                             <span
                               key={idx}
-                              className={`material ${have >= mat.quantity ? 'has-enough' : 'not-enough'}`}
+                              className={`material ${have >= needed ? 'has-enough' : 'not-enough'}`}
                             >
-                              {materialName}: {have}/{mat.quantity}
+                              {materialName}: {have}/{needed}
                             </span>
                           );
                         })}
                       </div>
+                      {/* Quantity Buttons */}
+                      <div className="quantity-selector">
+                        <button
+                          className={`qty-btn ${selectedQty === 1 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, 1)}
+                          disabled={!meetsLevel}
+                        >
+                          x1
+                        </button>
+                        <button
+                          className={`qty-btn ${selectedQty === 5 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, Math.min(5, maxCraftable || 5))}
+                          disabled={!meetsLevel || maxCraftable < 5}
+                        >
+                          x5
+                        </button>
+                        <button
+                          className={`qty-btn ${selectedQty === 10 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, Math.min(10, maxCraftable || 10))}
+                          disabled={!meetsLevel || maxCraftable < 10}
+                        >
+                          x10
+                        </button>
+                        <button
+                          className={`qty-btn ${selectedQty === maxCraftable && maxCraftable > 0 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, maxCraftable)}
+                          disabled={!meetsLevel || maxCraftable === 0}
+                        >
+                          Max ({maxCraftable})
+                        </button>
+                      </div>
                     </div>
                     <div className="recipe-actions">
-                      <span className="recipe-value">{recipe.sellValue}g</span>
+                      <span className="recipe-value">{formatNumber(recipe.sellValue * selectedQty)}g</span>
                       <button
                         className="craft-button"
                         disabled={!canAfford || !meetsLevel}
-                        onClick={() => handleStartCraft(recipe.id)}
+                        onClick={() => handleStartCraft(recipe.id, selectedQty)}
                       >
-                        Craft
+                        Craft {selectedQty > 1 ? `x${selectedQty}` : ''}
                       </button>
                     </div>
                   </div>
