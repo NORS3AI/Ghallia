@@ -112,6 +112,22 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+.claim-all-button {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, var(--color-gold-dark, #8a7235) 0%, var(--color-gold, #d4a853) 100%);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-bg-dark, #1a1410);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.claim-all-button:active {
+  transform: scale(0.95);
+}
+
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
   50% { box-shadow: 0 0 15px rgba(74, 222, 128, 0.8); }

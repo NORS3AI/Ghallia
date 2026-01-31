@@ -3,7 +3,7 @@
  * Shows purchasable upgrades for tap power, crit, luck, mana, and gold
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useGame, UPGRADES, UpgradeDef, getUpgradeManaCost } from '../../store/gameStore';
 import { formatGold } from '../../utils/math';
 import './UpgradesPanel.css';
@@ -89,6 +89,37 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
     return { total, purchased };
   }, [state.upgrades]);
 
+  // Get affordable unpurchased upgrades sorted by cost
+  const affordableUpgrades = useMemo(() => {
+    return UPGRADES
+      .filter(u => {
+        if (state.upgrades[u.id]) return false;
+        const manaCost = getUpgradeManaCost(u.id);
+        const canAffordGold = state.gold >= u.baseCost;
+        const canAffordMana = manaCost === 0 || state.mana >= manaCost;
+        return canAffordGold && canAffordMana;
+      })
+      .sort((a, b) => a.baseCost - b.baseCost);
+  }, [state.upgrades, state.gold, state.mana]);
+
+  const handleUpgradeAll = useCallback(() => {
+    if (affordableUpgrades.length === 0) return;
+
+    // Buy upgrades one by one, cheapest first
+    // Need to track remaining gold/mana as we buy
+    let remainingGold = state.gold;
+    let remainingMana = state.mana;
+
+    for (const upgrade of affordableUpgrades) {
+      const manaCost = getUpgradeManaCost(upgrade.id);
+      if (remainingGold >= upgrade.baseCost && (manaCost === 0 || remainingMana >= manaCost)) {
+        buyUpgrade(upgrade.id);
+        remainingGold -= upgrade.baseCost;
+        remainingMana -= manaCost;
+      }
+    }
+  }, [affordableUpgrades, state.gold, state.mana, buyUpgrade]);
+
   return (
     <>
       {/* Backdrop */}
@@ -154,6 +185,11 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
         <div className="upgrade-count-bar">
           <span>{upgradeStats.purchased}/{upgradeStats.total} purchased</span>
           <span className="showing-count">Showing: {sortedUpgrades.length}</span>
+          {affordableUpgrades.length > 0 && (
+            <button className="upgrade-all-button" onClick={handleUpgradeAll}>
+              Buy All ({affordableUpgrades.length})
+            </button>
+          )}
         </div>
 
         {/* Upgrades List */}

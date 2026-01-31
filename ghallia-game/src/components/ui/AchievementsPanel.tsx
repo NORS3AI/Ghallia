@@ -69,6 +69,36 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
     }, 1000);
   }, [state.claimedAchievements, claimAchievement]);
 
+  const handleClaimAll = useCallback(() => {
+    // Get all claimable achievements
+    const allClaimable = ACHIEVEMENTS.filter(
+      a => state.unlockedAchievements.includes(a.id) && !state.claimedAchievements.includes(a.id)
+    );
+
+    if (allClaimable.length === 0) return;
+
+    // Claim all at once
+    allClaimable.forEach(achievement => {
+      claimAchievement(achievement.id, achievement.reward);
+    });
+
+    // Create confetti burst in center of screen
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const newConfetti: { id: number; x: number; y: number; hue: number }[] = [];
+    for (let i = 0; i < 40; i++) {
+      newConfetti.push({
+        id: Date.now() + i,
+        x: centerX + (Math.random() - 0.5) * 200,
+        y: centerY + (Math.random() - 0.5) * 200,
+        hue: Math.random() * 360,
+      });
+    }
+    setConfetti(newConfetti);
+
+    setTimeout(() => setConfetti([]), 1000);
+  }, [state.unlockedAchievements, state.claimedAchievements, claimAchievement]);
+
   // Filter achievements - exclude hidden ones first
   const visibleAchievements = ACHIEVEMENTS.filter(a => !a.hidden || !a.hidden(state));
   const filteredAchievements = selectedCategory === 'all'
@@ -138,7 +168,12 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
             {claimedCount}/{totalAchievements} claimed
           </span>
           {claimableCount > 0 && (
-            <span className="claimable-badge">{claimableCount} to claim!</span>
+            <>
+              <span className="claimable-badge">{claimableCount} to claim!</span>
+              <button className="claim-all-button" onClick={handleClaimAll}>
+                Claim All
+              </button>
+            </>
           )}
           <button
             className={`hide-claimed-toggle ${hideClaimed ? 'active' : ''}`}
