@@ -16,6 +16,7 @@ import { UpgradesPanel } from './components/ui/UpgradesPanel';
 import { SpellsPanel } from './components/ui/SpellsPanel';
 import { InventoryPanel } from './components/ui/InventoryPanel';
 import { CharacterPanel } from './components/ui/CharacterPanel';
+import { AchievementsPanel } from './components/ui/AchievementsPanel';
 import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
@@ -79,7 +80,7 @@ class ErrorBoundary extends React.Component<
 
 type View = 'skills' | 'detail';
 
-type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character';
+type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character' | 'achievements';
 
 function GameApp() {
   const { state } = useGame();
@@ -238,6 +239,12 @@ function GameApp() {
         onClose={closePanel}
       />
 
+      {/* Achievements Panel */}
+      <AchievementsPanel
+        isOpen={activePanel === 'achievements'}
+        onClose={closePanel}
+      />
+
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
@@ -277,6 +284,11 @@ function GameApp() {
           <button className="nav-button" onClick={() => openPanel('prestige')}>
             <span className="nav-icon">👑</span>
             <span>Prestige</span>
+          </button>
+
+          <button className="nav-button" onClick={() => openPanel('achievements')}>
+            <span className="nav-icon">🏆</span>
+            <span>Achieve</span>
           </button>
 
           <button className="nav-button" onClick={() => openPanel('settings')}>
