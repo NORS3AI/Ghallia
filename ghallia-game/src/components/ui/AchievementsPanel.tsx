@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useGame } from '../../store/gameStore';
-import { ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES, RARITY_COLORS, AchievementCategory, AchievementRarity, Achievement, getAchievementsByCategory } from '../../data/achievements';
+import { ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES, RARITY_COLORS, AchievementCategory, AchievementRarity, Achievement } from '../../data/achievements';
 import { formatGold } from '../../utils/math';
 import './AchievementsPanel.css';
 
@@ -18,7 +18,7 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
   const { state, unlockAchievement, claimAchievement } = useGame();
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all');
   const [claimingId, setClaimingId] = useState<string | null>(null);
-  const [confetti, setConfetti] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [confetti, setConfetti] = useState<{ id: number; x: number; y: number; hue: number }[]>([]);
   const [hideClaimed, setHideClaimed] = useState(false);
 
   // Check for newly unlocked achievements
@@ -46,12 +46,13 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const newConfetti: { id: number; x: number; y: number }[] = [];
+    const newConfetti: { id: number; x: number; y: number; hue: number }[] = [];
     for (let i = 0; i < 20; i++) {
       newConfetti.push({
         id: Date.now() + i,
         x: centerX + (Math.random() - 0.5) * 100,
         y: centerY + (Math.random() - 0.5) * 100,
+        hue: Math.random() * 360,
       });
     }
     setConfetti(newConfetti);
@@ -271,7 +272,7 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
           style={{
             left: particle.x,
             top: particle.y,
-            '--hue': Math.random() * 360,
+            '--hue': particle.hue,
           } as React.CSSProperties}
         />
       ))}

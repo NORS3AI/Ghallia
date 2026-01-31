@@ -5,8 +5,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { useGame, getResourceName, SKILL_DEFINITIONS } from '../../store/gameStore';
-import { SkillType, Equipment, Rarity } from '../../types/game.types';
-import { RARITY_DATA, MATERIAL_DATA } from '../../data/items';
+import { SkillType, Rarity } from '../../types/game.types';
+import { RARITY_DATA } from '../../data/items';
 import { formatGold } from '../../utils/math';
 import './InventoryPanel.css';
 

@@ -1,5 +1,5 @@
 /**
- * Ghallia Game Math Utilities
+ * Infinity Game Math Utilities
  * All formulas and calculations for game mechanics
  */
 
@@ -361,7 +361,7 @@ export type NumberNotation = 'standard' | 'alphabet' | 'scientific';
  * Get the current number notation setting from localStorage
  */
 export function getNumberNotation(): NumberNotation {
-  const saved = localStorage.getItem('ghallia_number_notation');
+  const saved = localStorage.getItem('infinity_number_notation');
   if (saved === 'alphabet' || saved === 'scientific' || saved === 'standard') {
     return saved;
   }
@@ -372,7 +372,7 @@ export function getNumberNotation(): NumberNotation {
  * Set the number notation preference
  */
 export function setNumberNotation(notation: NumberNotation): void {
-  localStorage.setItem('ghallia_number_notation', notation);
+  localStorage.setItem('infinity_number_notation', notation);
 }
 
 // Alphabet suffixes: a=1K, b=1M, c=1B, d=1T, e=1Qa, etc.

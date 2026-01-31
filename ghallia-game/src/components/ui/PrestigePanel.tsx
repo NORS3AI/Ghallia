@@ -13,7 +13,7 @@ import {
   getRequiredPrestigeForTier,
   calculateChaosPoints,
 } from '../../store/gameStore';
-import { formatNumber, formatGold } from '../../utils/math';
+import { formatGold } from '../../utils/math';
 import './PrestigePanel.css';
 
 interface PrestigePanelProps {
@@ -284,7 +284,6 @@ export function PrestigePanel({ isOpen, onClose }: PrestigePanelProps) {
                         const canAfford = state.chaosPoints >= cost;
                         const isMaxed = currentRank >= talent.maxRank;
                         const currentEffect = talent.effect(currentRank);
-                        const nextEffect = talent.effect(currentRank + 1);
 
                         return (
                           <div

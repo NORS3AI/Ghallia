@@ -1,5 +1,5 @@
 /**
- * Ghallia Item & Gear Data Definitions
+ * Infinity Item & Gear Data Definitions
  * Complete item system with resources, equipment, and rarities
  */
 

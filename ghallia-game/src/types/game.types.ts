@@ -1,5 +1,5 @@
 /**
- * Ghallia Game Types
+ * Infinity Game Types
  * Core type definitions for all game entities
  */
 
