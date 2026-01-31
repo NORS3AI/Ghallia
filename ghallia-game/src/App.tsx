@@ -16,6 +16,7 @@ import { UpgradesPanel } from './components/ui/UpgradesPanel';
 import { SpellsPanel } from './components/ui/SpellsPanel';
 import { InventoryPanel } from './components/ui/InventoryPanel';
 import { CharacterPanel } from './components/ui/CharacterPanel';
+import { AchievementsPanel } from './components/ui/AchievementsPanel';
 import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
@@ -79,7 +80,7 @@ class ErrorBoundary extends React.Component<
 
 type View = 'skills' | 'detail';
 
-type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character';
+type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character' | 'achievements';
 
 function GameApp() {
   const { state } = useGame();
@@ -87,9 +88,9 @@ function GameApp() {
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [activePanel, setActivePanel] = useState<PanelType>('none');
 
-  // Helper to open a panel (closes any other open panel)
+  // Helper to open a panel (closes any other open panel, or toggles if same panel)
   const openPanel = useCallback((panel: PanelType) => {
-    setActivePanel(panel);
+    setActivePanel(current => current === panel ? 'none' : panel);
   }, []);
 
   const closePanel = useCallback(() => {
@@ -238,48 +239,59 @@ function GameApp() {
         onClose={closePanel}
       />
 
+      {/* Achievements Panel */}
+      <AchievementsPanel
+        isOpen={activePanel === 'achievements'}
+        onClose={closePanel}
+      />
+
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
           <button
-            className={`nav-button ${view === 'skills' ? 'active' : ''}`}
+            className={`nav-button ${view === 'skills' && activePanel === 'none' ? 'active' : ''}`}
             onClick={() => { setView('skills'); setSelectedSkill(null); closePanel(); }}
           >
             <span className="nav-icon">📜</span>
             <span>Skills</span>
           </button>
 
-          <button className="nav-button" onClick={() => openPanel('inventory')}>
+          <button className={`nav-button ${activePanel === 'inventory' ? 'active' : ''}`} onClick={() => openPanel('inventory')}>
             <span className="nav-icon">🎒</span>
             <span>Bag</span>
           </button>
 
-          <button className="nav-button" onClick={() => openPanel('character')}>
+          <button className={`nav-button ${activePanel === 'character' ? 'active' : ''}`} onClick={() => openPanel('character')}>
             <span className="nav-icon">🧙</span>
             <span>Char</span>
           </button>
 
-          <button className="nav-button" onClick={() => openPanel('stats')}>
+          <button className={`nav-button ${activePanel === 'stats' ? 'active' : ''}`} onClick={() => openPanel('stats')}>
             <span className="nav-icon">📖</span>
             <span>Stats</span>
           </button>
 
-          <button className="nav-button" onClick={() => openPanel('upgrades')}>
+          <button className={`nav-button ${activePanel === 'upgrades' ? 'active' : ''}`} onClick={() => openPanel('upgrades')}>
             <span className="nav-icon">⚔️</span>
             <span>Power</span>
           </button>
 
-          <button className="nav-button" onClick={() => openPanel('spells')}>
+          <button className={`nav-button ${activePanel === 'spells' ? 'active' : ''}`} onClick={() => openPanel('spells')}>
             <span className="nav-icon">🔮</span>
             <span>Magic</span>
           </button>
 
-          <button className="nav-button" onClick={() => openPanel('prestige')}>
+          <button className={`nav-button ${activePanel === 'prestige' ? 'active' : ''}`} onClick={() => openPanel('prestige')}>
             <span className="nav-icon">👑</span>
             <span>Prestige</span>
           </button>
 
-          <button className="nav-button" onClick={() => openPanel('settings')}>
+          <button className={`nav-button ${activePanel === 'achievements' ? 'active' : ''}`} onClick={() => openPanel('achievements')}>
+            <span className="nav-icon">🏆</span>
+            <span>Achieve</span>
+          </button>
+
+          <button className={`nav-button ${activePanel === 'settings' ? 'active' : ''}`} onClick={() => openPanel('settings')}>
             <span className="nav-icon">⚙️</span>
             <span>Settings</span>
           </button>

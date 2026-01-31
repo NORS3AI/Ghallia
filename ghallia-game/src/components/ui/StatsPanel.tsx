@@ -132,8 +132,12 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
                 <span className="stat-value gold">{formatGold(state.stats.totalGoldEarned)}g</span>
               </div>
               <div className="stat-item">
-                <span className="stat-label">Play Time</span>
-                <span className="stat-value">{formatTime(state.stats.playTime)}</span>
+                <span className="stat-label">Total Play Time</span>
+                <span className="stat-value">{formatTime(state.stats.totalPlayTime)}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Session Time</span>
+                <span className="stat-value">{formatTime(state.stats.sessionPlayTime)}</span>
               </div>
             </div>
           </div>

@@ -167,7 +167,10 @@ interface StatsState {
   totalGoldEarned: number;
   totalResourcesGathered: number;
   highestCombo: number;
-  playTime: number; // seconds
+  totalPlayTime: number; // seconds - never resets
+  sessionPlayTime: number; // seconds - resets on prestige
+  totalSpellsCast: number;
+  totalEquipmentObtained: number;
 }
 
 interface SpellState {
@@ -217,6 +220,9 @@ export interface GameState {
   // Equipment & Character
   equipmentInventory: Equipment[]; // unequipped gear
   character: CharacterState;
+  // Achievements
+  unlockedAchievements: string[]; // achievement IDs that have been unlocked
+  claimedAchievements: string[]; // achievement IDs that have been claimed
 }
 
 // ============================================
@@ -241,7 +247,12 @@ type GameAction =
   // Developer tools
   | { type: 'DEV_ADD_MANA'; amount: number }
   | { type: 'DEV_ADD_MAX_MANA'; amount: number }
-  | { type: 'DEV_ADD_BONUS_TAPS'; amount: number };
+  | { type: 'DEV_ADD_BONUS_TAPS'; amount: number }
+  // Achievements
+  | { type: 'UNLOCK_ACHIEVEMENT'; achievementId: string }
+  | { type: 'CLAIM_ACHIEVEMENT'; achievementId: string; reward: number }
+  // Prestige
+  | { type: 'PRESTIGE'; chaosPointsEarned: number };
 
 // ============================================
 // INITIAL STATE
@@ -268,7 +279,10 @@ const initialStats: StatsState = {
   totalGoldEarned: 0,
   totalResourcesGathered: 0,
   highestCombo: 0,
-  playTime: 0,
+  totalPlayTime: 0,
+  sessionPlayTime: 0,
+  totalSpellsCast: 0,
+  totalEquipmentObtained: 0,
 };
 
 const initialCharacterEquipment: CharacterEquipment = {
@@ -321,6 +335,8 @@ const initialState: GameState = {
   goldBonus: 0,
   equipmentInventory: [],
   character: initialCharacter,
+  unlockedAchievements: [],
+  claimedAchievements: [],
 };
 
 // ============================================
@@ -618,6 +634,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             cooldownUntil: now + spell.cooldown * 1000,
           },
         },
+        stats: {
+          ...state.stats,
+          totalSpellsCast: state.stats.totalSpellsCast + 1,
+        },
       };
     }
 
@@ -631,7 +651,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         mana: state.spellsUnlocked ? newMana : state.mana,
         stats: {
           ...state.stats,
-          playTime: state.stats.playTime + deltaSeconds,
+          totalPlayTime: state.stats.totalPlayTime + deltaSeconds,
+          sessionPlayTime: state.stats.sessionPlayTime + deltaSeconds,
         },
       };
     }
@@ -640,6 +661,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         equipmentInventory: [...state.equipmentInventory, action.equipment],
+        stats: {
+          ...state.stats,
+          totalEquipmentObtained: state.stats.totalEquipmentObtained + 1,
+        },
       };
     }
 
@@ -739,13 +764,81 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    // Achievements
+    case 'UNLOCK_ACHIEVEMENT': {
+      if (state.unlockedAchievements.includes(action.achievementId)) {
+        return state;
+      }
+      return {
+        ...state,
+        unlockedAchievements: [...state.unlockedAchievements, action.achievementId],
+      };
+    }
+
+    case 'CLAIM_ACHIEVEMENT': {
+      if (state.claimedAchievements.includes(action.achievementId)) {
+        return state;
+      }
+      if (!state.unlockedAchievements.includes(action.achievementId)) {
+        return state;
+      }
+      return {
+        ...state,
+        gold: state.gold + action.reward,
+        claimedAchievements: [...state.claimedAchievements, action.achievementId],
+        stats: {
+          ...state.stats,
+          totalGoldEarned: state.stats.totalGoldEarned + action.reward,
+        },
+      };
+    }
+
+    case 'PRESTIGE': {
+      // Reset skills to initial state
+      const newSkills = createInitialSkills();
+
+      // Keep total play time but reset session play time
+      const newStats: StatsState = {
+        ...initialStats,
+        totalPlayTime: state.stats.totalPlayTime,
+        sessionPlayTime: 0,
+      };
+
+      return {
+        ...initialState,
+        prestigeCount: state.prestigeCount + 1,
+        chaosPoints: state.chaosPoints + action.chaosPointsEarned,
+        skills: newSkills,
+        stats: newStats,
+        // Reset achievements for new prestige run
+        unlockedAchievements: [],
+        claimedAchievements: [],
+        // Keep game version
+        gameVersion: state.gameVersion,
+        lastSaveTime: Date.now(),
+      };
+    }
+
     case 'LOAD_GAME': {
       // Merge loaded state with defaults for any missing fields
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const loadedStats = (action.state.stats || {}) as any;
+      // Migration: if old playTime exists but not totalPlayTime, use playTime as totalPlayTime
+      const migratedStats = {
+        ...initialStats,
+        ...loadedStats,
+        totalPlayTime: loadedStats.totalPlayTime ?? loadedStats.playTime ?? 0,
+        sessionPlayTime: loadedStats.sessionPlayTime ?? 0,
+      };
+
       const loadedState = {
         ...initialState,
         ...action.state,
         character: action.state.character || initialCharacter,
         equipmentInventory: action.state.equipmentInventory || [],
+        unlockedAchievements: action.state.unlockedAchievements || [],
+        claimedAchievements: action.state.claimedAchievements || [],
+        stats: migratedStats,
       };
       return recalculateBonuses(loadedState);
     }
@@ -800,6 +893,12 @@ interface GameContextType {
   devAddMana: (amount: number) => void;
   devAddMaxMana: (amount: number) => void;
   devAddBonusTaps: (amount: number) => void;
+  // Achievements
+  unlockAchievement: (achievementId: string) => void;
+  claimAchievement: (achievementId: string, reward: number) => void;
+  checkAchievements: () => void;
+  // Prestige
+  prestige: (chaosPointsEarned: number) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -913,6 +1012,26 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'DEV_ADD_BONUS_TAPS', amount });
   }, []);
 
+  // Achievements
+  const unlockAchievement = useCallback((achievementId: string) => {
+    dispatch({ type: 'UNLOCK_ACHIEVEMENT', achievementId });
+  }, []);
+
+  const claimAchievement = useCallback((achievementId: string, reward: number) => {
+    dispatch({ type: 'CLAIM_ACHIEVEMENT', achievementId, reward });
+  }, []);
+
+  // Check all achievements against current state
+  const checkAchievements = useCallback(() => {
+    // This is called from the component that has access to achievements
+    // We don't check here, just provide the function
+  }, []);
+
+  // Prestige function
+  const prestige = useCallback((chaosPointsEarned: number) => {
+    dispatch({ type: 'PRESTIGE', chaosPointsEarned });
+  }, []);
+
   return (
     <GameContext.Provider value={{
       state,
@@ -933,6 +1052,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       devAddMana,
       devAddMaxMana,
       devAddBonusTaps,
+      unlockAchievement,
+      claimAchievement,
+      checkAchievements,
+      prestige,
     }}>
       {children}
     </GameContext.Provider>
