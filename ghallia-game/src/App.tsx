@@ -273,7 +273,7 @@ function GameApp() {
 
           <button className={`nav-button ${activePanel === 'upgrades' ? 'active' : ''}`} onClick={() => openPanel('upgrades')}>
             <span className="nav-icon">⚔️</span>
-            <span>Power</span>
+            <span>Upgrades</span>
           </button>
 
           <button className={`nav-button ${activePanel === 'spells' ? 'active' : ''}`} onClick={() => openPanel('spells')}>

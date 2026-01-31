@@ -58,6 +58,26 @@
   color: var(--color-gold, #d4a853);
 }
 
+.header-currencies {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+  margin-right: 16px;
+  font-size: 0.9rem;
+}
+
+.currency-gold {
+  color: var(--color-gold, #d4a853);
+}
+
+.currency-mana {
+  color: #4ecdc4;
+}
+
+.currency-chaos {
+  color: #9b59b6;
+}
+
 .stats-close {
   background: none;
   border: none;
@@ -207,4 +227,15 @@
   transform: scale(0.95);
   background: #ff6b6b;
   color: #1a1410;
+}
+
+.dev-button.active {
+  background: #2ecc71;
+  border-color: #2ecc71;
+  color: #1a1410;
+}
+
+.dev-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

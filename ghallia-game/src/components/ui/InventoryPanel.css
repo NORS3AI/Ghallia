@@ -55,6 +55,26 @@
   color: var(--color-gold, #d4a853);
 }
 
+.header-currencies {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+  margin-right: 16px;
+  font-size: 0.9rem;
+}
+
+.currency-gold {
+  color: var(--color-gold, #d4a853);
+}
+
+.currency-mana {
+  color: #4ecdc4;
+}
+
+.currency-chaos {
+  color: #9b59b6;
+}
+
 .inventory-close {
   background: none;
   border: none;

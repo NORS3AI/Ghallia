@@ -56,11 +56,24 @@
   color: var(--color-gold, #d4a853);
 }
 
-.upgrade-count {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary, #a89880);
+.header-currencies {
+  display: flex;
+  gap: 12px;
   margin-left: auto;
   margin-right: 16px;
+  font-size: 0.9rem;
+}
+
+.currency-gold {
+  color: var(--color-gold, #d4a853);
+}
+
+.currency-mana {
+  color: #4ecdc4;
+}
+
+.currency-chaos {
+  color: #9b59b6;
 }
 
 .upgrades-close {
@@ -122,6 +135,44 @@
 
 .filter-label {
   white-space: nowrap;
+}
+
+.filter-spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+.filter-button.afford-filter.active {
+  background: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.filter-button.hide-filter.active {
+  background: #9b59b6;
+  border-color: #9b59b6;
+}
+
+/* Upgrade Count Bar */
+.upgrade-count-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #a89880);
+  border-bottom: 1px solid var(--color-border, #4a3f32);
+  flex-shrink: 0;
+}
+
+.showing-count {
+  opacity: 0.8;
+}
+
+/* No Upgrades Message */
+.no-upgrades {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--color-text-secondary, #a89880);
+  font-size: 0.9rem;
 }
 
 /* Upgrades List */

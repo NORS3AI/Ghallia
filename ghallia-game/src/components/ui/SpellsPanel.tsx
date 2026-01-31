@@ -30,12 +30,15 @@ export function SpellsPanel({ isOpen, onClose }: SpellsPanelProps) {
       <div className={`spells-panel ${isOpen ? 'open' : ''}`}>
         <div className="spells-header">
           <h2>Spells</h2>
-          {state.spellsUnlocked && (
-            <div className="mana-display">
-              <span className="mana-icon">💧</span>
-              <span className="mana-value">{Math.floor(state.mana)}/{state.maxMana}</span>
-            </div>
-          )}
+          <div className="header-currencies">
+            <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
+            {state.spellsUnlocked && (
+              <span className="currency-mana">💧 {Math.floor(state.mana)}/{state.maxMana}</span>
+            )}
+            {state.prestigeCount > 0 && (
+              <span className="currency-chaos">✨ {state.chaosPoints}</span>
+            )}
+          </div>
           <button className="spells-close" onClick={onClose}>
             &times;
           </button>
