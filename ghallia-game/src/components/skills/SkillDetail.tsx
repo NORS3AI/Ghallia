@@ -10,6 +10,7 @@ import {
   SKILL_DEFINITIONS,
   getXpProgress,
   getResourceName,
+  getResourceNameById,
   getRecipesForSkill,
   getMaterialTiersForSkill,
   CRAFTING_RECIPES,
@@ -331,22 +332,7 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
                       <div className="recipe-materials">
                         {recipe.materials.map((mat, idx) => {
                           const have = state.resources[mat.resourceId] || 0;
-                          const tierMatch = mat.resourceId.match(/_t(\d+)$/);
-                          const tierNum = tierMatch ? parseInt(tierMatch[1]) : 1;
-                          // Extract skill type from resourceId (e.g., "logging_t1" -> "logging")
-                          const skillMatch = mat.resourceId.match(/^(.+)_t\d+$/);
-                          const gatheringSkill = skillMatch ? skillMatch[1] : 'logging';
-                          const skillTypeMap: Record<string, SkillType> = {
-                            logging: SkillType.LOGGING,
-                            mining: SkillType.MINING,
-                            fishing: SkillType.FISHING,
-                            herbalism: SkillType.HERBALISM,
-                            skinning: SkillType.SKINNING,
-                            foraging: SkillType.FORAGING,
-                            hunting: SkillType.HUNTING,
-                          };
-                          const matSkillType = skillTypeMap[gatheringSkill] || SkillType.LOGGING;
-                          const materialName = getResourceName(matSkillType, tierNum);
+                          const materialName = getResourceNameById(mat.resourceId);
                           return (
                             <span
                               key={idx}

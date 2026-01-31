@@ -50,19 +50,21 @@ export interface Achievement {
 // REWARD SCALING
 // ============================================
 
-// Base rewards by rarity (grows by ~20% each tier within rarity)
+// Base rewards by rarity - very small amounts, achievements should feel good but not be free gold
+// Progression: 0.01g → 0.05g → 0.10g → 0.25g → 0.50g → 1g (staggered)
 const RARITY_BASE_REWARDS = {
-  [AchievementRarity.COMMON]: 1,
-  [AchievementRarity.UNCOMMON]: 5,
-  [AchievementRarity.RARE]: 25,
-  [AchievementRarity.EPIC]: 125,
-  [AchievementRarity.LEGENDARY]: 625,
+  [AchievementRarity.COMMON]: 0.01,      // 0.01g base
+  [AchievementRarity.UNCOMMON]: 0.05,    // 0.05g base
+  [AchievementRarity.RARE]: 0.10,        // 0.10g base
+  [AchievementRarity.EPIC]: 0.25,        // 0.25g base
+  [AchievementRarity.LEGENDARY]: 0.50,   // 0.50g base
 };
 
-// Calculate scaled reward
+// Calculate scaled reward - grows slowly by ~10% each tier
 function calcReward(rarity: AchievementRarity, tier: number): number {
   const base = RARITY_BASE_REWARDS[rarity];
-  return Math.floor(base * Math.pow(1.2, tier));
+  // Round to 2 decimal places for clean display
+  return Math.round(base * Math.pow(1.10, tier) * 100) / 100;
 }
 
 // ============================================

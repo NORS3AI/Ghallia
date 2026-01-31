@@ -332,214 +332,494 @@ export interface CraftingRecipe {
   craftingSkill: SkillType; // Which crafting skill makes this
   requiredLevel: number; // Level needed in crafting skill
   materials: { resourceId: string; quantity: number }[]; // Required materials
+  produces?: { resourceId: string; quantity: number }; // If set, outputs a resource instead of sellable item
   craftTime: number; // Seconds to craft
   xpReward: number; // XP gained when crafted
   sellValue: number; // Gold when sold
   icon: string;
 }
 
-// Recipe template types for each crafting skill (15 types each)
-const SAWMILL_RECIPE_TYPES = [
-  { suffix: 'Plank', icon: '🪵', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
-  { suffix: 'Board', icon: '📋', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
-  { suffix: 'Beam', icon: '🏗️', timeMultiplier: 1.5, materialMultiplier: 5, valueMultiplier: 3 },
-  { suffix: 'Frame', icon: '🖼️', timeMultiplier: 2, materialMultiplier: 6, valueMultiplier: 4 },
-  { suffix: 'Chair', icon: '🪑', timeMultiplier: 3, materialMultiplier: 8, valueMultiplier: 6 },
-  { suffix: 'Table', icon: '🪵', timeMultiplier: 4, materialMultiplier: 12, valueMultiplier: 10 },
-  { suffix: 'Shelf', icon: '📚', timeMultiplier: 2.5, materialMultiplier: 7, valueMultiplier: 5 },
-  { suffix: 'Chest', icon: '📦', timeMultiplier: 5, materialMultiplier: 15, valueMultiplier: 12 },
-  { suffix: 'Cabinet', icon: '🗄️', timeMultiplier: 6, materialMultiplier: 20, valueMultiplier: 16 },
-  { suffix: 'Bed', icon: '🛏️', timeMultiplier: 8, materialMultiplier: 25, valueMultiplier: 20 },
-  { suffix: 'Wardrobe', icon: '🚪', timeMultiplier: 10, materialMultiplier: 30, valueMultiplier: 25 },
-  { suffix: 'Throne', icon: '👑', timeMultiplier: 15, materialMultiplier: 50, valueMultiplier: 40 },
-  { suffix: 'Carriage', icon: '🛞', timeMultiplier: 20, materialMultiplier: 75, valueMultiplier: 60 },
-  { suffix: 'Ship Hull', icon: '⛵', timeMultiplier: 30, materialMultiplier: 100, valueMultiplier: 85 },
-  { suffix: 'Cathedral Frame', icon: '⛪', timeMultiplier: 60, materialMultiplier: 200, valueMultiplier: 180 },
-];
+// =============================================
+// CRAFTING RECIPE SYSTEM
+// Raw materials → Processed materials → Final items
+// =============================================
 
-const SMITHING_RECIPE_TYPES = [
-  { suffix: 'Ingot', icon: '🧱', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
-  { suffix: 'Nails', icon: '📍', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
-  { suffix: 'Chain', icon: '⛓️', timeMultiplier: 1.5, materialMultiplier: 5, valueMultiplier: 3 },
-  { suffix: 'Dagger', icon: '🗡️', timeMultiplier: 2, materialMultiplier: 6, valueMultiplier: 4 },
-  { suffix: 'Sword', icon: '⚔️', timeMultiplier: 3, materialMultiplier: 10, valueMultiplier: 7 },
-  { suffix: 'Shield', icon: '🛡️', timeMultiplier: 4, materialMultiplier: 12, valueMultiplier: 10 },
-  { suffix: 'Helmet', icon: '⛑️', timeMultiplier: 3.5, materialMultiplier: 8, valueMultiplier: 6 },
-  { suffix: 'Chestplate', icon: '🦺', timeMultiplier: 6, materialMultiplier: 20, valueMultiplier: 16 },
-  { suffix: 'Gauntlets', icon: '🧤', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 8 },
-  { suffix: 'Greaves', icon: '🦿', timeMultiplier: 5, materialMultiplier: 15, valueMultiplier: 12 },
-  { suffix: 'Battleaxe', icon: '🪓', timeMultiplier: 8, materialMultiplier: 25, valueMultiplier: 20 },
-  { suffix: 'Warhammer', icon: '🔨', timeMultiplier: 10, materialMultiplier: 30, valueMultiplier: 25 },
-  { suffix: 'Greatsword', icon: '⚔️', timeMultiplier: 15, materialMultiplier: 50, valueMultiplier: 40 },
-  { suffix: 'Full Armor', icon: '🛡️', timeMultiplier: 25, materialMultiplier: 80, valueMultiplier: 70 },
-  { suffix: 'Legendary Blade', icon: '✨', timeMultiplier: 60, materialMultiplier: 200, valueMultiplier: 180 },
-];
-
-const COOKING_RECIPE_TYPES = [
-  { suffix: 'Fillet', icon: '🍣', timeMultiplier: 1, materialMultiplier: 1, valueMultiplier: 1.5 },
-  { suffix: 'Steak', icon: '🥩', timeMultiplier: 1.2, materialMultiplier: 2, valueMultiplier: 2 },
-  { suffix: 'Soup', icon: '🍲', timeMultiplier: 1.5, materialMultiplier: 3, valueMultiplier: 2.5 },
-  { suffix: 'Sushi', icon: '🍱', timeMultiplier: 2, materialMultiplier: 2, valueMultiplier: 4 },
-  { suffix: 'Pie', icon: '🥧', timeMultiplier: 3, materialMultiplier: 4, valueMultiplier: 5 },
-  { suffix: 'Stew', icon: '🍛', timeMultiplier: 4, materialMultiplier: 5, valueMultiplier: 7 },
-  { suffix: 'Roast', icon: '🍗', timeMultiplier: 5, materialMultiplier: 6, valueMultiplier: 9 },
-  { suffix: 'Casserole', icon: '🥘', timeMultiplier: 6, materialMultiplier: 8, valueMultiplier: 12 },
-  { suffix: 'Gourmet Dish', icon: '🍽️', timeMultiplier: 8, materialMultiplier: 10, valueMultiplier: 16 },
-  { suffix: 'Feast Platter', icon: '🍱', timeMultiplier: 10, materialMultiplier: 15, valueMultiplier: 22 },
-  { suffix: 'Chef Special', icon: '👨‍🍳', timeMultiplier: 15, materialMultiplier: 20, valueMultiplier: 30 },
-  { suffix: 'Royal Banquet', icon: '👑', timeMultiplier: 20, materialMultiplier: 30, valueMultiplier: 45 },
-  { suffix: 'Divine Cuisine', icon: '✨', timeMultiplier: 30, materialMultiplier: 50, valueMultiplier: 70 },
-  { suffix: 'Legendary Meal', icon: '🌟', timeMultiplier: 45, materialMultiplier: 75, valueMultiplier: 100 },
-  { suffix: 'Ambrosia', icon: '🏆', timeMultiplier: 60, materialMultiplier: 100, valueMultiplier: 150 },
-];
-
-const ALCHEMY_RECIPE_TYPES = [
-  { suffix: 'Extract', icon: '💧', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
-  { suffix: 'Essence', icon: '✨', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
-  { suffix: 'Tincture', icon: '🧪', timeMultiplier: 1.5, materialMultiplier: 4, valueMultiplier: 3 },
-  { suffix: 'Salve', icon: '🏺', timeMultiplier: 2, materialMultiplier: 5, valueMultiplier: 4 },
-  { suffix: 'Potion', icon: '🧴', timeMultiplier: 3, materialMultiplier: 6, valueMultiplier: 6 },
-  { suffix: 'Elixir', icon: '⚗️', timeMultiplier: 4, materialMultiplier: 8, valueMultiplier: 9 },
-  { suffix: 'Draught', icon: '🍶', timeMultiplier: 5, materialMultiplier: 10, valueMultiplier: 12 },
-  { suffix: 'Philter', icon: '💝', timeMultiplier: 6, materialMultiplier: 12, valueMultiplier: 15 },
-  { suffix: 'Brew', icon: '🫖', timeMultiplier: 8, materialMultiplier: 15, valueMultiplier: 20 },
-  { suffix: 'Concoction', icon: '🧫', timeMultiplier: 10, materialMultiplier: 20, valueMultiplier: 28 },
-  { suffix: 'Transmutation', icon: '🔮', timeMultiplier: 15, materialMultiplier: 30, valueMultiplier: 40 },
-  { suffix: 'Philosopher\'s Brew', icon: '💎', timeMultiplier: 20, materialMultiplier: 50, valueMultiplier: 60 },
-  { suffix: 'Panacea', icon: '🌈', timeMultiplier: 30, materialMultiplier: 75, valueMultiplier: 90 },
-  { suffix: 'Immortality Elixir', icon: '⚱️', timeMultiplier: 45, materialMultiplier: 100, valueMultiplier: 130 },
-  { suffix: 'Philosopher\'s Stone', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 180 },
-];
-
-const LEATHERWORKING_RECIPE_TYPES = [
-  { suffix: 'Strips', icon: '📜', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
-  { suffix: 'Patch', icon: '🩹', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
-  { suffix: 'Belt', icon: '👔', timeMultiplier: 1.5, materialMultiplier: 4, valueMultiplier: 3 },
-  { suffix: 'Gloves', icon: '🧤', timeMultiplier: 2, materialMultiplier: 5, valueMultiplier: 4 },
-  { suffix: 'Boots', icon: '👢', timeMultiplier: 3, materialMultiplier: 8, valueMultiplier: 6 },
-  { suffix: 'Cap', icon: '🧢', timeMultiplier: 2.5, materialMultiplier: 6, valueMultiplier: 5 },
-  { suffix: 'Vest', icon: '🦺', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 8 },
-  { suffix: 'Jacket', icon: '🧥', timeMultiplier: 5, materialMultiplier: 12, valueMultiplier: 11 },
-  { suffix: 'Armor', icon: '🛡️', timeMultiplier: 7, materialMultiplier: 18, valueMultiplier: 16 },
-  { suffix: 'Satchel', icon: '👜', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 9 },
-  { suffix: 'Backpack', icon: '🎒', timeMultiplier: 8, materialMultiplier: 20, valueMultiplier: 22 },
-  { suffix: 'Saddle', icon: '🐴', timeMultiplier: 12, materialMultiplier: 35, valueMultiplier: 35 },
-  { suffix: 'War Armor', icon: '⚔️', timeMultiplier: 20, materialMultiplier: 60, valueMultiplier: 55 },
-  { suffix: 'Dragon Armor', icon: '🐉', timeMultiplier: 40, materialMultiplier: 100, valueMultiplier: 100 },
-  { suffix: 'Legendary Hide', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 160 },
-];
-
-const TAILORING_RECIPE_TYPES = [
-  { suffix: 'Thread', icon: '🧵', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
-  { suffix: 'Bandage', icon: '🩹', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 2 },
-  { suffix: 'Scarf', icon: '🧣', timeMultiplier: 1.5, materialMultiplier: 4, valueMultiplier: 3 },
-  { suffix: 'Hat', icon: '🎩', timeMultiplier: 2, materialMultiplier: 5, valueMultiplier: 4 },
-  { suffix: 'Shirt', icon: '👕', timeMultiplier: 3, materialMultiplier: 8, valueMultiplier: 6 },
-  { suffix: 'Pants', icon: '👖', timeMultiplier: 3.5, materialMultiplier: 10, valueMultiplier: 8 },
-  { suffix: 'Dress', icon: '👗', timeMultiplier: 4, materialMultiplier: 12, valueMultiplier: 10 },
-  { suffix: 'Robe', icon: '🥻', timeMultiplier: 5, materialMultiplier: 15, valueMultiplier: 13 },
-  { suffix: 'Cloak', icon: '🧥', timeMultiplier: 6, materialMultiplier: 18, valueMultiplier: 16 },
-  { suffix: 'Bag', icon: '👜', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 9 },
-  { suffix: 'Tapestry', icon: '🖼️', timeMultiplier: 10, materialMultiplier: 25, valueMultiplier: 25 },
-  { suffix: 'Royal Garb', icon: '👑', timeMultiplier: 15, materialMultiplier: 40, valueMultiplier: 40 },
-  { suffix: 'Wizard Robe', icon: '🧙', timeMultiplier: 20, materialMultiplier: 60, valueMultiplier: 60 },
-  { suffix: 'Archmage Vestment', icon: '✨', timeMultiplier: 40, materialMultiplier: 100, valueMultiplier: 100 },
-  { suffix: 'Celestial Raiment', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 160 },
-];
-
-const JEWELCRAFTING_RECIPE_TYPES = [
-  { suffix: 'Dust', icon: '✨', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 2 },
-  { suffix: 'Shard', icon: '💎', timeMultiplier: 1.2, materialMultiplier: 3, valueMultiplier: 3 },
-  { suffix: 'Gem', icon: '💠', timeMultiplier: 2, materialMultiplier: 4, valueMultiplier: 5 },
-  { suffix: 'Ring', icon: '💍', timeMultiplier: 3, materialMultiplier: 5, valueMultiplier: 8 },
-  { suffix: 'Earring', icon: '👂', timeMultiplier: 2.5, materialMultiplier: 4, valueMultiplier: 6 },
-  { suffix: 'Pendant', icon: '📿', timeMultiplier: 4, materialMultiplier: 6, valueMultiplier: 10 },
-  { suffix: 'Bracelet', icon: '⌚', timeMultiplier: 5, materialMultiplier: 8, valueMultiplier: 14 },
-  { suffix: 'Necklace', icon: '📿', timeMultiplier: 6, materialMultiplier: 10, valueMultiplier: 18 },
-  { suffix: 'Circlet', icon: '👑', timeMultiplier: 8, materialMultiplier: 15, valueMultiplier: 25 },
-  { suffix: 'Amulet', icon: '🔮', timeMultiplier: 10, materialMultiplier: 20, valueMultiplier: 35 },
-  { suffix: 'Crown', icon: '👑', timeMultiplier: 15, materialMultiplier: 35, valueMultiplier: 55 },
-  { suffix: 'Scepter', icon: '🏆', timeMultiplier: 20, materialMultiplier: 50, valueMultiplier: 80 },
-  { suffix: 'Royal Regalia', icon: '✨', timeMultiplier: 30, materialMultiplier: 75, valueMultiplier: 120 },
-  { suffix: 'Artifact', icon: '🏺', timeMultiplier: 45, materialMultiplier: 100, valueMultiplier: 170 },
-  { suffix: 'Legendary Gem', icon: '🌟', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 220 },
-];
-
-const ENCHANTING_RECIPE_TYPES = [
-  { suffix: 'Dust', icon: '✨', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 2 },
-  { suffix: 'Essence', icon: '💫', timeMultiplier: 1.5, materialMultiplier: 3, valueMultiplier: 3 },
-  { suffix: 'Glyph', icon: '📜', timeMultiplier: 2, materialMultiplier: 4, valueMultiplier: 5 },
-  { suffix: 'Rune', icon: '🔮', timeMultiplier: 3, materialMultiplier: 5, valueMultiplier: 7 },
-  { suffix: 'Sigil', icon: '⚜️', timeMultiplier: 4, materialMultiplier: 7, valueMultiplier: 10 },
-  { suffix: 'Ward', icon: '🛡️', timeMultiplier: 5, materialMultiplier: 9, valueMultiplier: 14 },
-  { suffix: 'Charm', icon: '🍀', timeMultiplier: 6, materialMultiplier: 12, valueMultiplier: 18 },
-  { suffix: 'Enchantment', icon: '✨', timeMultiplier: 8, materialMultiplier: 15, valueMultiplier: 24 },
-  { suffix: 'Blessing', icon: '🙏', timeMultiplier: 10, materialMultiplier: 20, valueMultiplier: 32 },
-  { suffix: 'Hex', icon: '🔯', timeMultiplier: 12, materialMultiplier: 25, valueMultiplier: 42 },
-  { suffix: 'Curse', icon: '💀', timeMultiplier: 15, materialMultiplier: 35, valueMultiplier: 55 },
-  { suffix: 'Prophecy', icon: '📖', timeMultiplier: 20, materialMultiplier: 50, valueMultiplier: 75 },
-  { suffix: 'Divine Rune', icon: '⚡', timeMultiplier: 30, materialMultiplier: 75, valueMultiplier: 110 },
-  { suffix: 'Celestial Mark', icon: '🌟', timeMultiplier: 45, materialMultiplier: 100, valueMultiplier: 150 },
-  { suffix: 'World Enchantment', icon: '🏆', timeMultiplier: 60, materialMultiplier: 150, valueMultiplier: 200 },
-];
-
-const ENGINEERING_RECIPE_TYPES = [
-  { suffix: 'Screw', icon: '🔩', timeMultiplier: 1, materialMultiplier: 2, valueMultiplier: 1.5 },
-  { suffix: 'Gear', icon: '⚙️', timeMultiplier: 1.5, materialMultiplier: 3, valueMultiplier: 2.5 },
-  { suffix: 'Spring', icon: '🌀', timeMultiplier: 2, materialMultiplier: 4, valueMultiplier: 4 },
-  { suffix: 'Mechanism', icon: '🔧', timeMultiplier: 3, materialMultiplier: 6, valueMultiplier: 6 },
-  { suffix: 'Clock', icon: '⏰', timeMultiplier: 4, materialMultiplier: 10, valueMultiplier: 10 },
-  { suffix: 'Compass', icon: '🧭', timeMultiplier: 5, materialMultiplier: 12, valueMultiplier: 13 },
-  { suffix: 'Telescope', icon: '🔭', timeMultiplier: 6, materialMultiplier: 15, valueMultiplier: 17 },
-  { suffix: 'Music Box', icon: '🎵', timeMultiplier: 8, materialMultiplier: 20, valueMultiplier: 24 },
-  { suffix: 'Automaton', icon: '🤖', timeMultiplier: 12, materialMultiplier: 30, valueMultiplier: 38 },
-  { suffix: 'Bomb', icon: '💣', timeMultiplier: 10, materialMultiplier: 25, valueMultiplier: 30 },
-  { suffix: 'Cannon', icon: '🔫', timeMultiplier: 18, materialMultiplier: 50, valueMultiplier: 60 },
-  { suffix: 'Flying Machine', icon: '🚁', timeMultiplier: 25, materialMultiplier: 75, valueMultiplier: 90 },
-  { suffix: 'War Machine', icon: '⚔️', timeMultiplier: 35, materialMultiplier: 100, valueMultiplier: 125 },
-  { suffix: 'Mech Suit', icon: '🦾', timeMultiplier: 50, materialMultiplier: 150, valueMultiplier: 175 },
-  { suffix: 'World Engine', icon: '🏆', timeMultiplier: 60, materialMultiplier: 200, valueMultiplier: 230 },
-];
-
-// Tier name arrays for recipes (10 tiers each)
-const RECIPE_TIER_NAMES = {
+// Tier names for each gathering skill (10 tiers)
+const TIER_NAMES = {
   logging: ['Maple', 'Oak', 'Birch', 'Pine', 'Willow', 'Cedar', 'Ash', 'Elm', 'Spruce', 'Redwood'],
-  mining: ['Copper', 'Tin', 'Bronze', 'Iron', 'Coal', 'Silver', 'Gold', 'Steel', 'Platinum', 'Mithril'],
-  fishing: ['Minnow', 'Sardine', 'Trout', 'Salmon', 'Tuna', 'Cod', 'Bass', 'Perch', 'Pike', 'Catfish'],
+  mining: ['Copper', 'Tin', 'Bronze', 'Iron', 'Steel', 'Silver', 'Gold', 'Platinum', 'Mithril', 'Adamant'],
+  fishing: ['Minnow', 'Sardine', 'Trout', 'Salmon', 'Tuna', 'Cod', 'Bass', 'Perch', 'Pike', 'Swordfish'],
   herbalism: ['Dandelion', 'Clover', 'Mint', 'Basil', 'Sage', 'Thyme', 'Rosemary', 'Lavender', 'Chamomile', 'Ginseng'],
-  skinning: ['Rabbit', 'Deer', 'Wolf', 'Bear', 'Boar', 'Elk', 'Bison', 'Tiger', 'Lion', 'Rhino'],
-  foraging: ['Cotton', 'Flax', 'Hemp', 'Silk', 'Spider Silk', 'Wool', 'Mohair', 'Cashmere', 'Alpaca', 'Angora'],
-  hunting: ['Rabbit', 'Pheasant', 'Duck', 'Goose', 'Turkey', 'Venison', 'Boar', 'Elk', 'Buffalo', 'Bear'],
+  skinning: ['Rabbit', 'Deer', 'Wolf', 'Bear', 'Boar', 'Elk', 'Bison', 'Tiger', 'Lion', 'Dragon'],
+  foraging: ['Cotton', 'Flax', 'Hemp', 'Silk', 'Spider Silk', 'Wool', 'Mohair', 'Cashmere', 'Alpaca', 'Phoenix'],
+  hunting: ['Rabbit', 'Pheasant', 'Duck', 'Goose', 'Turkey', 'Venison', 'Boar', 'Elk', 'Buffalo', 'Beast'],
 };
 
-// Generic recipe generator function
-const generateRecipes = (
-  skillType: SkillType,
-  gatheringSkill: string,
-  recipeTypes: typeof SAWMILL_RECIPE_TYPES,
-  skillPrefix: string
-): CraftingRecipe[] => {
+// =============================================
+// PROCESSING RECIPES (Raw → Processed materials)
+// These produce resources that are used in advanced recipes
+// =============================================
+
+const generateProcessingRecipes = (): CraftingRecipe[] => {
   const recipes: CraftingRecipe[] = [];
-  const tierNames = RECIPE_TIER_NAMES[gatheringSkill as keyof typeof RECIPE_TIER_NAMES] || RECIPE_TIER_NAMES.logging;
 
+  // SAWMILL: Logs → Planks
   for (let tier = 1; tier <= 10; tier++) {
-    const tierName = tierNames[tier - 1];
-    const resourceId = `${gatheringSkill}_t${tier}`;
+    const tierName = TIER_NAMES.logging[tier - 1];
     const tierLevel = (tier - 1) * 10 + 1;
-    const baseValue = tier * 5;
+    recipes.push({
+      id: `sawmill_plank_t${tier}`,
+      name: `${tierName} Plank`,
+      craftingSkill: SkillType.SAWMILL,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `logging_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(2 + tier * 0.5),
+      xpReward: Math.floor(5 * tier),
+      sellValue: 0, // Processing recipes don't sell directly
+      icon: '🪵',
+      produces: { resourceId: `plank_t${tier}`, quantity: 1 },
+    });
+  }
 
-    recipeTypes.forEach((type, typeIdx) => {
-      const requiredLevel = tierLevel + typeIdx;
+  // SMITHING: Ores → Ingots
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.mining[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `smithing_ingot_t${tier}`,
+      name: `${tierName} Ingot`,
+      craftingSkill: SkillType.SMITHING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `mining_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(3 + tier * 0.5),
+      xpReward: Math.floor(5 * tier),
+      sellValue: 0,
+      icon: '🧱',
+      produces: { resourceId: `ingot_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // SMITHING: Ingots → Plates (advanced processing)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.mining[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 5;
+    recipes.push({
+      id: `smithing_plate_t${tier}`,
+      name: `${tierName} Plate`,
+      craftingSkill: SkillType.SMITHING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `ingot_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(4 + tier * 0.5),
+      xpReward: Math.floor(8 * tier),
+      sellValue: 0,
+      icon: '🛡️',
+      produces: { resourceId: `plate_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // COOKING: Fish → Fillets
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.fishing[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `cooking_fillet_t${tier}`,
+      name: `${tierName} Fillet`,
+      craftingSkill: SkillType.COOKING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `fishing_t${tier}`, quantity: 1 }],
+      craftTime: Math.floor(2 + tier * 0.3),
+      xpReward: Math.floor(4 * tier),
+      sellValue: 0,
+      icon: '🍣',
+      produces: { resourceId: `fillet_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // ALCHEMY: Herbs → Extracts
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.herbalism[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `alchemy_extract_t${tier}`,
+      name: `${tierName} Extract`,
+      craftingSkill: SkillType.ALCHEMY,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `herbalism_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(3 + tier * 0.4),
+      xpReward: Math.floor(5 * tier),
+      sellValue: 0,
+      icon: '💧',
+      produces: { resourceId: `extract_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // LEATHERWORKING: Hides → Leather
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.skinning[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `leatherworking_leather_t${tier}`,
+      name: `${tierName} Leather`,
+      craftingSkill: SkillType.LEATHERWORKING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `skinning_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(3 + tier * 0.5),
+      xpReward: Math.floor(5 * tier),
+      sellValue: 0,
+      icon: '📜',
+      produces: { resourceId: `leather_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // TAILORING: Fibers → Cloth
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.foraging[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `tailoring_cloth_t${tier}`,
+      name: `${tierName} Cloth`,
+      craftingSkill: SkillType.TAILORING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `foraging_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(3 + tier * 0.4),
+      xpReward: Math.floor(5 * tier),
+      sellValue: 0,
+      icon: '🧵',
+      produces: { resourceId: `cloth_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // JEWELCRAFTING: Hunting materials → Settings (bones, teeth, etc.)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.hunting[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `jewelcrafting_setting_t${tier}`,
+      name: `${tierName} Setting`,
+      craftingSkill: SkillType.JEWELCRAFTING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `hunting_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(3 + tier * 0.4),
+      xpReward: Math.floor(5 * tier),
+      sellValue: 0,
+      icon: '💎',
+      produces: { resourceId: `setting_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // ENCHANTING: Uses Extracts from Alchemy → Essences
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.herbalism[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `enchanting_essence_t${tier}`,
+      name: `${tierName} Essence`,
+      craftingSkill: SkillType.ENCHANTING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `extract_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(4 + tier * 0.5),
+      xpReward: Math.floor(6 * tier),
+      sellValue: 0,
+      icon: '✨',
+      produces: { resourceId: `essence_t${tier}`, quantity: 1 },
+    });
+  }
+
+  // ENGINEERING: Uses Ingots from Smithing → Parts
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.mining[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 1;
+    recipes.push({
+      id: `engineering_part_t${tier}`,
+      name: `${tierName} Parts`,
+      craftingSkill: SkillType.ENGINEERING,
+      requiredLevel: tierLevel,
+      materials: [{ resourceId: `ingot_t${tier}`, quantity: 2 }],
+      craftTime: Math.floor(3 + tier * 0.4),
+      xpReward: Math.floor(5 * tier),
+      sellValue: 0,
+      icon: '⚙️',
+      produces: { resourceId: `part_t${tier}`, quantity: 1 },
+    });
+  }
+
+  return recipes;
+};
+
+// =============================================
+// FINAL ITEM RECIPES (Processed → Sellable items)
+// =============================================
+
+// Item templates for each crafting skill
+const SAWMILL_ITEMS = [
+  { name: 'Chair', icon: '🪑', plankCost: 3, time: 4, value: 8 },
+  { name: 'Table', icon: '🪵', plankCost: 5, time: 6, value: 15 },
+  { name: 'Shelf', icon: '📚', plankCost: 4, time: 5, value: 12 },
+  { name: 'Chest', icon: '📦', plankCost: 6, time: 8, value: 20 },
+  { name: 'Cabinet', icon: '🗄️', plankCost: 8, time: 10, value: 28 },
+  { name: 'Bed', icon: '🛏️', plankCost: 10, time: 12, value: 35 },
+  { name: 'Wardrobe', icon: '🚪', plankCost: 12, time: 15, value: 45 },
+  { name: 'Throne', icon: '👑', plankCost: 20, time: 25, value: 80 },
+];
+
+const SMITHING_ITEMS = [
+  { name: 'Dagger', icon: '🗡️', plateCost: 1, time: 5, value: 12 },
+  { name: 'Sword', icon: '⚔️', plateCost: 2, time: 8, value: 25 },
+  { name: 'Shield', icon: '🛡️', plateCost: 3, time: 10, value: 35 },
+  { name: 'Helmet', icon: '⛑️', plateCost: 2, time: 7, value: 22 },
+  { name: 'Chestplate', icon: '🦺', plateCost: 4, time: 12, value: 50 },
+  { name: 'Gauntlets', icon: '🧤', plateCost: 2, time: 6, value: 20 },
+  { name: 'Greaves', icon: '🦿', plateCost: 3, time: 8, value: 30 },
+  { name: 'Battleaxe', icon: '🪓', plateCost: 5, time: 15, value: 65 },
+];
+
+const COOKING_ITEMS = [
+  { name: 'Soup', icon: '🍲', filletCost: 2, time: 3, value: 8 },
+  { name: 'Stew', icon: '🍛', filletCost: 3, time: 5, value: 14 },
+  { name: 'Roast', icon: '🍗', filletCost: 4, time: 7, value: 22 },
+  { name: 'Pie', icon: '🥧', filletCost: 3, time: 6, value: 18 },
+  { name: 'Gourmet Dish', icon: '🍽️', filletCost: 5, time: 10, value: 35 },
+  { name: 'Feast Platter', icon: '🍱', filletCost: 8, time: 15, value: 55 },
+  { name: 'Chef Special', icon: '👨‍🍳', filletCost: 10, time: 20, value: 75 },
+  { name: 'Royal Banquet', icon: '👑', filletCost: 15, time: 30, value: 120 },
+];
+
+const ALCHEMY_ITEMS = [
+  { name: 'Tincture', icon: '🧪', extractCost: 2, time: 4, value: 10 },
+  { name: 'Salve', icon: '🏺', extractCost: 3, time: 6, value: 18 },
+  { name: 'Potion', icon: '🧴', extractCost: 4, time: 8, value: 28 },
+  { name: 'Elixir', icon: '⚗️', extractCost: 5, time: 10, value: 40 },
+  { name: 'Draught', icon: '🍶', extractCost: 6, time: 12, value: 52 },
+  { name: 'Philter', icon: '💝', extractCost: 8, time: 15, value: 70 },
+  { name: 'Brew', icon: '🫖', extractCost: 10, time: 20, value: 95 },
+  { name: 'Panacea', icon: '🌈', extractCost: 15, time: 30, value: 150 },
+];
+
+const LEATHERWORKING_ITEMS = [
+  { name: 'Belt', icon: '👔', leatherCost: 2, time: 4, value: 10 },
+  { name: 'Gloves', icon: '🧤', leatherCost: 3, time: 5, value: 16 },
+  { name: 'Boots', icon: '👢', leatherCost: 4, time: 7, value: 24 },
+  { name: 'Vest', icon: '🦺', leatherCost: 5, time: 9, value: 34 },
+  { name: 'Jacket', icon: '🧥', leatherCost: 6, time: 11, value: 45 },
+  { name: 'Armor', icon: '🛡️', leatherCost: 8, time: 14, value: 60 },
+  { name: 'Backpack', icon: '🎒', leatherCost: 10, time: 18, value: 80 },
+  { name: 'Saddle', icon: '🐴', leatherCost: 15, time: 25, value: 125 },
+];
+
+const TAILORING_ITEMS = [
+  { name: 'Scarf', icon: '🧣', clothCost: 2, time: 3, value: 8 },
+  { name: 'Hat', icon: '🎩', clothCost: 3, time: 5, value: 14 },
+  { name: 'Shirt', icon: '👕', clothCost: 4, time: 7, value: 22 },
+  { name: 'Pants', icon: '👖', clothCost: 5, time: 8, value: 28 },
+  { name: 'Dress', icon: '👗', clothCost: 6, time: 10, value: 38 },
+  { name: 'Robe', icon: '🥻', clothCost: 8, time: 13, value: 52 },
+  { name: 'Cloak', icon: '🧥', clothCost: 10, time: 16, value: 70 },
+  { name: 'Royal Garb', icon: '👑', clothCost: 15, time: 25, value: 115 },
+];
+
+const JEWELCRAFTING_ITEMS = [
+  { name: 'Ring', icon: '💍', settingCost: 2, time: 5, value: 15 },
+  { name: 'Earring', icon: '👂', settingCost: 2, time: 4, value: 12 },
+  { name: 'Pendant', icon: '📿', settingCost: 3, time: 6, value: 22 },
+  { name: 'Bracelet', icon: '⌚', settingCost: 4, time: 8, value: 32 },
+  { name: 'Necklace', icon: '📿', settingCost: 5, time: 10, value: 45 },
+  { name: 'Circlet', icon: '👑', settingCost: 7, time: 14, value: 65 },
+  { name: 'Amulet', icon: '🔮', settingCost: 10, time: 18, value: 95 },
+  { name: 'Crown', icon: '👑', settingCost: 15, time: 28, value: 150 },
+];
+
+const ENCHANTING_ITEMS = [
+  { name: 'Glyph', icon: '📜', essenceCost: 2, time: 5, value: 14 },
+  { name: 'Rune', icon: '🔮', essenceCost: 3, time: 7, value: 22 },
+  { name: 'Sigil', icon: '⚜️', essenceCost: 4, time: 9, value: 32 },
+  { name: 'Ward', icon: '🛡️', essenceCost: 5, time: 11, value: 44 },
+  { name: 'Charm', icon: '🍀', essenceCost: 6, time: 14, value: 58 },
+  { name: 'Enchantment', icon: '✨', essenceCost: 8, time: 18, value: 78 },
+  { name: 'Blessing', icon: '🙏', essenceCost: 10, time: 22, value: 100 },
+  { name: 'Divine Rune', icon: '⚡', essenceCost: 15, time: 32, value: 160 },
+];
+
+const ENGINEERING_ITEMS = [
+  { name: 'Gear', icon: '⚙️', partCost: 2, time: 4, value: 10 },
+  { name: 'Spring', icon: '🌀', partCost: 3, time: 6, value: 18 },
+  { name: 'Mechanism', icon: '🔧', partCost: 4, time: 8, value: 28 },
+  { name: 'Clock', icon: '⏰', partCost: 5, time: 10, value: 40 },
+  { name: 'Compass', icon: '🧭', partCost: 6, time: 12, value: 52 },
+  { name: 'Telescope', icon: '🔭', partCost: 8, time: 16, value: 72 },
+  { name: 'Music Box', icon: '🎵', partCost: 10, time: 20, value: 95 },
+  { name: 'Automaton', icon: '🤖', partCost: 15, time: 30, value: 150 },
+];
+
+const generateFinalItemRecipes = (): CraftingRecipe[] => {
+  const recipes: CraftingRecipe[] = [];
+
+  // SAWMILL final items (use planks)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.logging[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3; // Start a bit higher than processing
+    SAWMILL_ITEMS.forEach((item, idx) => {
       recipes.push({
-        id: `${skillPrefix}_${tier}_${typeIdx}`,
-        name: `${tierName} ${type.suffix}`,
-        craftingSkill: skillType,
-        requiredLevel,
-        materials: [{ resourceId, quantity: type.materialMultiplier }],
-        craftTime: Math.floor(type.timeMultiplier * (1 + tier * 0.5)),
-        xpReward: Math.floor(10 * tier * type.timeMultiplier),
-        sellValue: Math.floor(baseValue * type.valueMultiplier),
-        icon: type.icon,
+        id: `sawmill_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.SAWMILL,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `plank_t${tier}`, quantity: item.plankCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // SMITHING final items (use plates)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.mining[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 8; // Higher level since needs plates
+    SMITHING_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `smithing_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.SMITHING,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `plate_t${tier}`, quantity: item.plateCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // COOKING final items (use fillets)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.fishing[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3;
+    COOKING_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `cooking_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.COOKING,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `fillet_t${tier}`, quantity: item.filletCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.25)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // ALCHEMY final items (use extracts)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.herbalism[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3;
+    ALCHEMY_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `alchemy_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.ALCHEMY,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `extract_t${tier}`, quantity: item.extractCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // LEATHERWORKING final items (use leather)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.skinning[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3;
+    LEATHERWORKING_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `leatherworking_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.LEATHERWORKING,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `leather_t${tier}`, quantity: item.leatherCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // TAILORING final items (use cloth)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.foraging[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3;
+    TAILORING_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `tailoring_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.TAILORING,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `cloth_t${tier}`, quantity: item.clothCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // JEWELCRAFTING final items (use settings)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.hunting[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3;
+    JEWELCRAFTING_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `jewelcrafting_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.JEWELCRAFTING,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `setting_t${tier}`, quantity: item.settingCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // ENCHANTING final items (use essences)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.herbalism[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3;
+    ENCHANTING_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `enchanting_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.ENCHANTING,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `essence_t${tier}`, quantity: item.essenceCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
+      });
+    });
+  }
+
+  // ENGINEERING final items (use parts)
+  for (let tier = 1; tier <= 10; tier++) {
+    const tierName = TIER_NAMES.mining[tier - 1];
+    const tierLevel = (tier - 1) * 10 + 3;
+    ENGINEERING_ITEMS.forEach((item, idx) => {
+      recipes.push({
+        id: `engineering_item_t${tier}_${idx}`,
+        name: `${tierName} ${item.name}`,
+        craftingSkill: SkillType.ENGINEERING,
+        requiredLevel: tierLevel + idx,
+        materials: [{ resourceId: `part_t${tier}`, quantity: item.partCost }],
+        craftTime: Math.floor(item.time * (1 + tier * 0.3)),
+        xpReward: Math.floor(item.value * tier * 0.8),
+        sellValue: Math.floor(item.value * tier),
+        icon: item.icon,
       });
     });
   }
@@ -547,17 +827,10 @@ const generateRecipes = (
   return recipes;
 };
 
-// Generate all recipes
+// Generate all recipes (processing + final items)
 export const CRAFTING_RECIPES: CraftingRecipe[] = [
-  ...generateRecipes(SkillType.SAWMILL, 'logging', SAWMILL_RECIPE_TYPES, 'sawmill'),
-  ...generateRecipes(SkillType.SMITHING, 'mining', SMITHING_RECIPE_TYPES, 'smithing'),
-  ...generateRecipes(SkillType.COOKING, 'fishing', COOKING_RECIPE_TYPES, 'cooking'),
-  ...generateRecipes(SkillType.ALCHEMY, 'herbalism', ALCHEMY_RECIPE_TYPES, 'alchemy'),
-  ...generateRecipes(SkillType.LEATHERWORKING, 'skinning', LEATHERWORKING_RECIPE_TYPES, 'leatherworking'),
-  ...generateRecipes(SkillType.TAILORING, 'foraging', TAILORING_RECIPE_TYPES, 'tailoring'),
-  ...generateRecipes(SkillType.JEWELCRAFTING, 'mining', JEWELCRAFTING_RECIPE_TYPES, 'jewelcrafting'),
-  ...generateRecipes(SkillType.ENCHANTING, 'herbalism', ENCHANTING_RECIPE_TYPES, 'enchanting'),
-  ...generateRecipes(SkillType.ENGINEERING, 'mining', ENGINEERING_RECIPE_TYPES, 'engineering'),
+  ...generateProcessingRecipes(),
+  ...generateFinalItemRecipes(),
 ];
 
 // Helper to get recipes for a specific crafting skill
@@ -900,6 +1173,67 @@ export function getResourceName(skillType: SkillType, tier: number): string {
   }
 }
 
+// Get name for any resourceId including processed materials
+export function getResourceNameById(resourceId: string): string {
+  // Parse resourceId format: "type_tN" (e.g., "logging_t1", "plank_t3", "ingot_t5")
+  const match = resourceId.match(/^(.+)_t(\d+)$/);
+  if (!match) return resourceId;
+
+  const [, type, tierStr] = match;
+  const tier = parseInt(tierStr);
+  const idx = Math.min(tier - 1, 9); // Processed materials use 10 tiers
+
+  // Raw gathering materials
+  const skillTypeMap: Record<string, SkillType> = {
+    logging: SkillType.LOGGING,
+    mining: SkillType.MINING,
+    fishing: SkillType.FISHING,
+    herbalism: SkillType.HERBALISM,
+    skinning: SkillType.SKINNING,
+    foraging: SkillType.FORAGING,
+    hunting: SkillType.HUNTING,
+  };
+
+  if (skillTypeMap[type]) {
+    return getResourceName(skillTypeMap[type], tier);
+  }
+
+  // Processed materials
+  const processedNames: Record<string, string[]> = {
+    plank: TIER_NAMES.logging,
+    ingot: TIER_NAMES.mining,
+    plate: TIER_NAMES.mining,
+    fillet: TIER_NAMES.fishing,
+    extract: TIER_NAMES.herbalism,
+    leather: TIER_NAMES.skinning,
+    cloth: TIER_NAMES.foraging,
+    setting: TIER_NAMES.hunting,
+    essence: TIER_NAMES.herbalism,
+    part: TIER_NAMES.mining,
+  };
+
+  const processedSuffixes: Record<string, string> = {
+    plank: 'Plank',
+    ingot: 'Ingot',
+    plate: 'Plate',
+    fillet: 'Fillet',
+    extract: 'Extract',
+    leather: 'Leather',
+    cloth: 'Cloth',
+    setting: 'Setting',
+    essence: 'Essence',
+    part: 'Part',
+  };
+
+  if (processedNames[type]) {
+    const tierName = processedNames[type][idx] || 'Unknown';
+    const suffix = processedSuffixes[type] || type;
+    return `${tierName} ${suffix}`;
+  }
+
+  return resourceId;
+}
+
 // Helper to get tier name without suffix
 export function getTierName(skillType: SkillType, tier: number): string {
   const idx = Math.min(tier - 1, 39);
@@ -1238,11 +1572,18 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       let newCraftedItems = { ...state.craftedItems };
       let newSkills = { ...state.skills };
 
+      let newResources = { ...state.resources };
+
       for (const completed of completedCrafts) {
         const recipe = CRAFTING_RECIPES.find(r => r.id === completed.recipeId);
         if (recipe) {
-          // Add to crafted items
-          newCraftedItems[recipe.id] = (newCraftedItems[recipe.id] || 0) + 1;
+          // If recipe produces a resource, add to resources; otherwise add to crafted items
+          if (recipe.produces) {
+            newResources[recipe.produces.resourceId] =
+              (newResources[recipe.produces.resourceId] || 0) + recipe.produces.quantity;
+          } else {
+            newCraftedItems[recipe.id] = (newCraftedItems[recipe.id] || 0) + 1;
+          }
 
           // Add XP to crafting skill
           const skillState = newSkills[recipe.craftingSkill];
@@ -1272,6 +1613,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         craftingQueue: remainingQueue,
         craftedItems: newCraftedItems,
         skills: newSkills,
+        resources: newResources,
       };
     }
 
