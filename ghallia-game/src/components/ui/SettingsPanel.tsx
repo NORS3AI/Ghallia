@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NumberNotation, getNumberNotation, setNumberNotation } from '../../utils/math';
+import { useGame } from '../../store/gameStore';
 import './SettingsPanel.css';
 
 interface SettingsPanelProps {
@@ -30,7 +31,21 @@ const TEXT_SIZES: { value: TextSize; label: string; size: number }[] = [
 const MIN_FONT_SIZE = 8;
 const MAX_FONT_SIZE = 32;
 
+// Secret codes - rewards applied through game store
+interface SecretCode {
+  code: string;
+  reward: { type: 'gold' | 'chaosPoints' | 'bonusTaps'; amount: number };
+  description: string;
+}
+
+const SECRET_CODES: SecretCode[] = [
+  { code: 'GHALLIA2026', reward: { type: 'gold', amount: 10000 }, description: '+10,000 Gold' },
+  { code: 'CHAOSMASTER', reward: { type: 'chaosPoints', amount: 50 }, description: '+50 Chaos Points' },
+  { code: 'TAPTAPTAP', reward: { type: 'bonusTaps', amount: 5 }, description: '+5 Bonus Taps' },
+];
+
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
+  const { devAddGold, devAddChaosPoints, devAddBonusTaps } = useGame();
   const [confirmReset, setConfirmReset] = useState(false);
   const [textSize, setTextSize] = useState<TextSize>(() => {
     return (localStorage.getItem('ghallia_text_size') as TextSize) || 'medium';
@@ -41,9 +56,75 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   });
   const [numberNotation, setNotation] = useState<NumberNotation>(() => getNumberNotation());
 
+  // Sound settings
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('ghallia_sound_enabled') !== 'false';
+  });
+
+  // Secret codes
+  const [secretCodeInput, setSecretCodeInput] = useState('');
+  const [codeResult, setCodeResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [usedCodes, setUsedCodes] = useState<string[]>(() => {
+    const saved = localStorage.getItem('ghallia_used_codes');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const handleNotationChange = (notation: NumberNotation) => {
     setNotation(notation);
     setNumberNotation(notation);
+  };
+
+  // Save sound setting
+  useEffect(() => {
+    localStorage.setItem('ghallia_sound_enabled', soundEnabled.toString());
+  }, [soundEnabled]);
+
+  // Save used codes
+  useEffect(() => {
+    localStorage.setItem('ghallia_used_codes', JSON.stringify(usedCodes));
+  }, [usedCodes]);
+
+  const handleSecretCode = () => {
+    const code = secretCodeInput.toUpperCase().trim();
+    setSecretCodeInput('');
+
+    if (!code) {
+      setCodeResult({ success: false, message: 'Please enter a code' });
+      return;
+    }
+
+    // Check if code already used
+    if (usedCodes.includes(code)) {
+      setCodeResult({ success: false, message: 'Code already redeemed!' });
+      return;
+    }
+
+    // Find matching code
+    const secretCode = SECRET_CODES.find(c => c.code === code);
+    if (!secretCode) {
+      setCodeResult({ success: false, message: 'Invalid code' });
+      return;
+    }
+
+    // Apply reward
+    switch (secretCode.reward.type) {
+      case 'gold':
+        devAddGold(secretCode.reward.amount);
+        break;
+      case 'chaosPoints':
+        devAddChaosPoints(secretCode.reward.amount);
+        break;
+      case 'bonusTaps':
+        devAddBonusTaps(secretCode.reward.amount);
+        break;
+    }
+
+    // Mark code as used
+    setUsedCodes(prev => [...prev, code]);
+    setCodeResult({ success: true, message: secretCode.description });
+
+    // Clear result after 3 seconds
+    setTimeout(() => setCodeResult(null), 3000);
   };
 
   // Calculate actual font size
@@ -170,6 +251,50 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Sound Settings */}
+          <div className="settings-section">
+            <h3>Sound</h3>
+            <div className="sound-toggle-row">
+              <span className="sound-label">Sound Effects</span>
+              <button
+                className={`sound-toggle ${soundEnabled ? 'enabled' : ''}`}
+                onClick={() => setSoundEnabled(!soundEnabled)}
+              >
+                <span className="toggle-track">
+                  <span className="toggle-thumb" />
+                </span>
+                <span className="toggle-state">{soundEnabled ? 'ON' : 'OFF'}</span>
+              </button>
+            </div>
+            <p className="sound-note">
+              Sound effects coming soon!
+            </p>
+          </div>
+
+          {/* Secret Codes */}
+          <div className="settings-section">
+            <h3>Redeem Code</h3>
+            <div className="secret-code-row">
+              <input
+                type="text"
+                className="secret-code-input"
+                value={secretCodeInput}
+                onChange={(e) => setSecretCodeInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSecretCode()}
+                placeholder="Enter code..."
+                maxLength={20}
+              />
+              <button className="secret-code-button" onClick={handleSecretCode}>
+                Redeem
+              </button>
+            </div>
+            {codeResult && (
+              <p className={`code-result ${codeResult.success ? 'success' : 'error'}`}>
+                {codeResult.success ? '✓ ' : '✗ '}{codeResult.message}
+              </p>
+            )}
           </div>
 
           {/* Reset Section */}
