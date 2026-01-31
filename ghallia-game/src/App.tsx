@@ -17,7 +17,6 @@ import { SpellsPanel } from './components/ui/SpellsPanel';
 import { InventoryPanel } from './components/ui/InventoryPanel';
 import { CharacterPanel } from './components/ui/CharacterPanel';
 import { AchievementsPanel } from './components/ui/AchievementsPanel';
-import { AccountPanel } from './components/ui/AccountPanel';
 import { TutorialOverlay, useTutorial } from './components/ui/TutorialOverlay';
 import { AuthProvider } from './contexts/AuthContext';
 import { formatGold } from './utils/math';
@@ -83,7 +82,7 @@ class ErrorBoundary extends React.Component<
 
 type View = 'skills' | 'detail';
 
-type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character' | 'achievements' | 'account';
+type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character' | 'achievements';
 
 function GameApp() {
   const { state } = useGame();
@@ -262,11 +261,6 @@ function GameApp() {
         onClose={closePanel}
       />
 
-      {/* Account Panel */}
-      <AccountPanel
-        isOpen={activePanel === 'account'}
-        onClose={closePanel}
-      />
 
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
@@ -321,11 +315,6 @@ function GameApp() {
               <span>Achieve</span>
             </button>
           )}
-
-          <button className={`nav-button ${activePanel === 'account' ? 'active' : ''}`} onClick={() => openPanel('account')}>
-            <span className="nav-icon">👤</span>
-            <span>Account</span>
-          </button>
 
           <button className={`nav-button ${activePanel === 'settings' ? 'active' : ''}`} onClick={() => openPanel('settings')}>
             <span className="nav-icon">⚙️</span>
