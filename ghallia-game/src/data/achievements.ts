@@ -97,7 +97,7 @@ PLAYTIME_MILESTONES.forEach(m => {
     rarity: m.rarity,
     reward: calcReward(m.rarity, m.tier),
     icon: '⏱️',
-    check: (state) => state.stats.playTime >= m.mins * 60,
+    check: (state) => state.stats.sessionPlayTime >= m.mins * 60,
   });
 });
 

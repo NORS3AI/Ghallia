@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { NumberNotation, getNumberNotation, setNumberNotation } from '../../utils/math';
 import './SettingsPanel.css';
 
 interface SettingsPanelProps {
@@ -12,6 +13,12 @@ interface SettingsPanelProps {
 }
 
 type TextSize = 'small' | 'medium' | 'large' | 'huge';
+
+const NOTATION_OPTIONS: { value: NumberNotation; label: string; example: string }[] = [
+  { value: 'standard', label: 'Standard', example: '1K, 1M, 1B, 1T' },
+  { value: 'alphabet', label: 'Alphabet', example: '1a, 1b, 1c, 1d' },
+  { value: 'scientific', label: 'Scientific', example: '1e3, 1e6, 1e9' },
+];
 
 const TEXT_SIZES: { value: TextSize; label: string; size: number }[] = [
   { value: 'small', label: 'Small', size: 10 },
@@ -32,6 +39,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     const saved = localStorage.getItem('ghallia_font_offset');
     return saved ? parseInt(saved, 10) : 0;
   });
+  const [numberNotation, setNotation] = useState<NumberNotation>(() => getNumberNotation());
+
+  const handleNotationChange = (notation: NumberNotation) => {
+    setNotation(notation);
+    setNumberNotation(notation);
+  };
 
   // Calculate actual font size
   const getActualFontSize = () => {
@@ -139,6 +152,23 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   Reset
                 </button>
               )}
+            </div>
+          </div>
+
+          {/* Number Notation Section */}
+          <div className="settings-section">
+            <h3>Number Format</h3>
+            <div className="notation-options">
+              {NOTATION_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  className={`notation-button ${numberNotation === option.value ? 'active' : ''}`}
+                  onClick={() => handleNotationChange(option.value)}
+                >
+                  <span className="notation-label">{option.label}</span>
+                  <span className="notation-example">{option.example}</span>
+                </button>
+              ))}
             </div>
           </div>
 

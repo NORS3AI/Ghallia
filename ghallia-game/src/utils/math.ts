@@ -350,9 +350,61 @@ export function talentTotalBonus(effectPerRank: number, ranks: number): number {
 // ============================================
 
 /**
+ * Number notation types:
+ * - 'standard': K, M, B, T (default)
+ * - 'alphabet': a, b, c, d... (1a = 1000, 1b = 1M, 1c = 1B, etc.)
+ * - 'scientific': 1e3, 1e6, etc.
+ */
+export type NumberNotation = 'standard' | 'alphabet' | 'scientific';
+
+/**
+ * Get the current number notation setting from localStorage
+ */
+export function getNumberNotation(): NumberNotation {
+  const saved = localStorage.getItem('ghallia_number_notation');
+  if (saved === 'alphabet' || saved === 'scientific' || saved === 'standard') {
+    return saved;
+  }
+  return 'standard';
+}
+
+/**
+ * Set the number notation preference
+ */
+export function setNumberNotation(notation: NumberNotation): void {
+  localStorage.setItem('ghallia_number_notation', notation);
+}
+
+// Alphabet suffixes: a=1K, b=1M, c=1B, d=1T, e=1Qa, etc.
+const ALPHABET_SUFFIXES = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+/**
  * Format large numbers for display
  */
 export function formatNumber(num: number): string {
+  const notation = getNumberNotation();
+
+  if (notation === 'scientific') {
+    if (num >= 1000) {
+      return num.toExponential(2);
+    }
+    return num.toFixed(0);
+  }
+
+  if (notation === 'alphabet') {
+    if (num < 1000) return num.toFixed(0);
+
+    // Find the appropriate tier (each tier is 1000x)
+    let tier = 0;
+    let value = num;
+    while (value >= 1000 && tier < ALPHABET_SUFFIXES.length - 1) {
+      value /= 1000;
+      tier++;
+    }
+    return value.toFixed(2) + ALPHABET_SUFFIXES[tier];
+  }
+
+  // Standard notation (K, M, B, T)
   if (num >= 1_000_000_000_000) {
     return (num / 1_000_000_000_000).toFixed(2) + 'T';
   }
@@ -372,6 +424,29 @@ export function formatNumber(num: number): string {
  * Format gold with 2 decimal places (shows 0.00g format)
  */
 export function formatGold(num: number): string {
+  const notation = getNumberNotation();
+
+  if (notation === 'scientific') {
+    if (num >= 1000) {
+      return num.toExponential(2);
+    }
+    return num.toFixed(2);
+  }
+
+  if (notation === 'alphabet') {
+    if (num < 1000) return num.toFixed(2);
+
+    // Find the appropriate tier (each tier is 1000x)
+    let tier = 0;
+    let value = num;
+    while (value >= 1000 && tier < ALPHABET_SUFFIXES.length - 1) {
+      value /= 1000;
+      tier++;
+    }
+    return value.toFixed(2) + ALPHABET_SUFFIXES[tier];
+  }
+
+  // Standard notation (K, M, B, T)
   if (num >= 1_000_000_000_000) {
     return (num / 1_000_000_000_000).toFixed(2) + 'T';
   }

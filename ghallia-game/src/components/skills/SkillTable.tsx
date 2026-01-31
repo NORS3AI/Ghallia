@@ -61,11 +61,11 @@ export function SkillTable({ onSelectSkill }: SkillTableProps) {
         </div>
       </div>
 
-      {/* Support Skills - Only after Prestige 1 */}
+      {/* Magic Skills - Only after Prestige 1 */}
       {showSupport && (
         <div className="skill-category">
           <div className="skill-category-header">
-            <span className="skill-category-title">✨ Support</span>
+            <span className="skill-category-title">🔮 Magic</span>
             <span className="skill-category-badge">{unlockedSupport}/{supportSkills.length}</span>
           </div>
           <div className="skill-grid">

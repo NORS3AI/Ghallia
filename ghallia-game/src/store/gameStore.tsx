@@ -167,7 +167,8 @@ interface StatsState {
   totalGoldEarned: number;
   totalResourcesGathered: number;
   highestCombo: number;
-  playTime: number; // seconds
+  totalPlayTime: number; // seconds - never resets
+  sessionPlayTime: number; // seconds - resets on prestige
   totalSpellsCast: number;
   totalEquipmentObtained: number;
 }
@@ -249,7 +250,9 @@ type GameAction =
   | { type: 'DEV_ADD_BONUS_TAPS'; amount: number }
   // Achievements
   | { type: 'UNLOCK_ACHIEVEMENT'; achievementId: string }
-  | { type: 'CLAIM_ACHIEVEMENT'; achievementId: string; reward: number };
+  | { type: 'CLAIM_ACHIEVEMENT'; achievementId: string; reward: number }
+  // Prestige
+  | { type: 'PRESTIGE'; chaosPointsEarned: number };
 
 // ============================================
 // INITIAL STATE
@@ -276,7 +279,8 @@ const initialStats: StatsState = {
   totalGoldEarned: 0,
   totalResourcesGathered: 0,
   highestCombo: 0,
-  playTime: 0,
+  totalPlayTime: 0,
+  sessionPlayTime: 0,
   totalSpellsCast: 0,
   totalEquipmentObtained: 0,
 };
@@ -647,7 +651,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         mana: state.spellsUnlocked ? newMana : state.mana,
         stats: {
           ...state.stats,
-          playTime: state.stats.playTime + deltaSeconds,
+          totalPlayTime: state.stats.totalPlayTime + deltaSeconds,
+          sessionPlayTime: state.stats.sessionPlayTime + deltaSeconds,
         },
       };
     }
@@ -788,8 +793,44 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'PRESTIGE': {
+      // Reset skills to initial state
+      const newSkills = createInitialSkills();
+
+      // Keep total play time but reset session play time
+      const newStats: StatsState = {
+        ...initialStats,
+        totalPlayTime: state.stats.totalPlayTime,
+        sessionPlayTime: 0,
+      };
+
+      return {
+        ...initialState,
+        prestigeCount: state.prestigeCount + 1,
+        chaosPoints: state.chaosPoints + action.chaosPointsEarned,
+        skills: newSkills,
+        stats: newStats,
+        // Reset achievements for new prestige run
+        unlockedAchievements: [],
+        claimedAchievements: [],
+        // Keep game version
+        gameVersion: state.gameVersion,
+        lastSaveTime: Date.now(),
+      };
+    }
+
     case 'LOAD_GAME': {
       // Merge loaded state with defaults for any missing fields
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const loadedStats = (action.state.stats || {}) as any;
+      // Migration: if old playTime exists but not totalPlayTime, use playTime as totalPlayTime
+      const migratedStats = {
+        ...initialStats,
+        ...loadedStats,
+        totalPlayTime: loadedStats.totalPlayTime ?? loadedStats.playTime ?? 0,
+        sessionPlayTime: loadedStats.sessionPlayTime ?? 0,
+      };
+
       const loadedState = {
         ...initialState,
         ...action.state,
@@ -797,10 +838,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         equipmentInventory: action.state.equipmentInventory || [],
         unlockedAchievements: action.state.unlockedAchievements || [],
         claimedAchievements: action.state.claimedAchievements || [],
-        stats: {
-          ...initialStats,
-          ...action.state.stats,
-        },
+        stats: migratedStats,
       };
       return recalculateBonuses(loadedState);
     }
@@ -859,6 +897,8 @@ interface GameContextType {
   unlockAchievement: (achievementId: string) => void;
   claimAchievement: (achievementId: string, reward: number) => void;
   checkAchievements: () => void;
+  // Prestige
+  prestige: (chaosPointsEarned: number) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -987,6 +1027,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     // We don't check here, just provide the function
   }, []);
 
+  // Prestige function
+  const prestige = useCallback((chaosPointsEarned: number) => {
+    dispatch({ type: 'PRESTIGE', chaosPointsEarned });
+  }, []);
+
   return (
     <GameContext.Provider value={{
       state,
@@ -1010,6 +1055,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       unlockAchievement,
       claimAchievement,
       checkAchievements,
+      prestige,
     }}>
       {children}
     </GameContext.Provider>

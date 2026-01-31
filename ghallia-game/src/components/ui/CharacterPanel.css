@@ -76,7 +76,7 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding: 16px;
-  padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px));
+  padding-bottom: calc(150px + env(safe-area-inset-bottom, 20px));
 }
 
 /* Stats Summary */
