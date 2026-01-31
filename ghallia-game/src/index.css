@@ -846,6 +846,35 @@ h4 { font-size: 1.1rem; }
   cursor: not-allowed;
 }
 
+.qty-input {
+  width: 50px;
+  padding: 4px 6px;
+  background: var(--color-bg-dark);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: 0.75rem;
+  font-family: var(--font-ui);
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qty-input:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+
+.qty-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .recipe-actions {
   display: flex;
   flex-direction: column;

@@ -460,12 +460,26 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
                         >
                           x10
                         </button>
+                        <input
+                          type="number"
+                          className="qty-input"
+                          value={selectedQty}
+                          min={1}
+                          max={maxCraftable || 1}
+                          disabled={!meetsLevel || maxCraftable === 0}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            if (!isNaN(val) && val >= 1) {
+                              setQuantity(recipe.id, Math.min(val, maxCraftable || 1));
+                            }
+                          }}
+                        />
                         <button
                           className={`qty-btn ${selectedQty === maxCraftable && maxCraftable > 0 ? 'active' : ''}`}
                           onClick={() => setQuantity(recipe.id, maxCraftable)}
                           disabled={!meetsLevel || maxCraftable === 0}
                         >
-                          Max ({maxCraftable})
+                          Max
                         </button>
                       </div>
                     </div>
