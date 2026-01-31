@@ -19,7 +19,7 @@ interface TutorialStep {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 'welcome',
-    title: 'Welcome to Ghallia!',
+    title: 'Welcome to Infinity!',
     content: 'A medieval crafting adventure awaits. Let me show you the basics!',
     position: 'center',
   },
@@ -178,7 +178,7 @@ export function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
 export function useTutorial() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialComplete, setTutorialComplete] = useState(() => {
-    return localStorage.getItem('ghallia_tutorial_complete') === 'true';
+    return localStorage.getItem('infinity_tutorial_complete') === 'true';
   });
 
   const startTutorial = () => {
@@ -188,11 +188,11 @@ export function useTutorial() {
   const completeTutorial = () => {
     setShowTutorial(false);
     setTutorialComplete(true);
-    localStorage.setItem('ghallia_tutorial_complete', 'true');
+    localStorage.setItem('infinity_tutorial_complete', 'true');
   };
 
   const resetTutorial = () => {
-    localStorage.removeItem('ghallia_tutorial_complete');
+    localStorage.removeItem('infinity_tutorial_complete');
     setTutorialComplete(false);
   };
 

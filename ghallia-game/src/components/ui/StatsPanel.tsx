@@ -31,7 +31,7 @@ function formatTime(seconds: number): string {
 export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
   const { state, sellAllResources, devAddGold, devAddMana, devAddMaxMana, devAddBonusTaps, devUnlockSpells, devAddChaosPoints, devSetPrestige } = useGame();
   const [devUnlocked, setDevUnlocked] = useState(() => {
-    return localStorage.getItem('ghallia_dev_unlocked') === 'true';
+    return localStorage.getItem('infinity_dev_unlocked') === 'true';
   });
   const [passcodeInput, setPasscodeInput] = useState('');
   const [passcodeError, setPasscodeError] = useState(false);
@@ -39,7 +39,7 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
   // Save dev unlocked state
   useEffect(() => {
     if (devUnlocked) {
-      localStorage.setItem('ghallia_dev_unlocked', 'true');
+      localStorage.setItem('infinity_dev_unlocked', 'true');
     }
   }, [devUnlocked]);
 
@@ -294,7 +294,7 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
 
                 <button
                   className="dev-lock-button"
-                  onClick={() => { setDevUnlocked(false); localStorage.removeItem('ghallia_dev_unlocked'); }}
+                  onClick={() => { setDevUnlocked(false); localStorage.removeItem('infinity_dev_unlocked'); }}
                 >
                   Lock Dev Tools
                 </button>

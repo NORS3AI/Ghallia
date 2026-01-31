@@ -1196,7 +1196,9 @@ type GameAction =
   // Crafting
   | { type: 'START_CRAFT'; recipeId: string; quantity: number }
   | { type: 'CANCEL_CRAFT'; queueItemId: string }
-  | { type: 'COLLECT_CRAFTED'; recipeId: string; quantity: number };
+  | { type: 'COLLECT_CRAFTED'; recipeId: string; quantity: number }
+  // Cloud save
+  | { type: 'LOAD_CLOUD_SAVE'; cloudState: any };
 
 // ============================================
 // INITIAL STATE
@@ -2288,6 +2290,32 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return recalculateBonuses(loadedState);
     }
 
+    case 'LOAD_CLOUD_SAVE': {
+      // Load cloud save state, similar to LOAD_GAME
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cloudStats = (action.cloudState.stats || {}) as any;
+      const migratedStats = {
+        ...initialStats,
+        ...cloudStats,
+        totalPlayTime: cloudStats.totalPlayTime ?? cloudStats.playTime ?? 0,
+        sessionPlayTime: 0, // Reset session time on cloud load
+      };
+
+      const cloudState = {
+        ...initialState,
+        ...action.cloudState,
+        character: action.cloudState.character || initialCharacter,
+        equipmentInventory: action.cloudState.equipmentInventory || [],
+        unlockedAchievements: action.cloudState.unlockedAchievements || [],
+        claimedAchievements: action.cloudState.claimedAchievements || [],
+        stats: migratedStats,
+        craftingQueue: action.cloudState.craftingQueue || [],
+        craftedItems: action.cloudState.craftedItems || {},
+        talents: action.cloudState.talents || {},
+      };
+      return recalculateBonuses(cloudState);
+    }
+
     case 'RESET_GAME': {
       return initialState;
     }
@@ -2354,6 +2382,8 @@ interface GameContextType {
   startCraft: (recipeId: string, quantity?: number) => void;
   cancelCraft: (queueItemId: string) => void;
   collectCrafted: (recipeId: string, quantity: number) => void;
+  // Cloud save
+  loadCloudSave: (cloudState: any) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -2362,7 +2392,7 @@ const GameContext = createContext<GameContextType | null>(null);
 // PROVIDER
 // ============================================
 
-const SAVE_KEY = 'ghallia_save';
+const SAVE_KEY = 'infinity_save';
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState, (initial) => {
@@ -2525,6 +2555,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'COLLECT_CRAFTED', recipeId, quantity });
   }, []);
 
+  // Load cloud save - replaces current state with cloud state
+  const loadCloudSave = useCallback((cloudState: any) => {
+    dispatch({ type: 'LOAD_CLOUD_SAVE', cloudState });
+  }, []);
+
   return (
     <GameContext.Provider value={{
       state,
@@ -2558,6 +2593,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       startCraft,
       cancelCraft,
       collectCrafted,
+      loadCloudSave,
     }}>
       {children}
     </GameContext.Provider>

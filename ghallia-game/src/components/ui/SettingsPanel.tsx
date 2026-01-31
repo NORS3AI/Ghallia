@@ -39,7 +39,7 @@ interface SecretCode {
 }
 
 const SECRET_CODES: SecretCode[] = [
-  { code: 'GHALLIA2026', reward: { type: 'gold', amount: 10000 }, description: '+10,000 Gold' },
+  { code: 'INFINITY2026', reward: { type: 'gold', amount: 10000 }, description: '+10,000 Gold' },
   { code: 'CHAOSMASTER', reward: { type: 'chaosPoints', amount: 50 }, description: '+50 Chaos Points' },
   { code: 'TAPTAPTAP', reward: { type: 'bonusTaps', amount: 5 }, description: '+5 Bonus Taps' },
 ];
@@ -48,24 +48,24 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { devAddGold, devAddChaosPoints, devAddBonusTaps } = useGame();
   const [confirmReset, setConfirmReset] = useState(false);
   const [textSize, setTextSize] = useState<TextSize>(() => {
-    return (localStorage.getItem('ghallia_text_size') as TextSize) || 'medium';
+    return (localStorage.getItem('infinity_text_size') as TextSize) || 'medium';
   });
   const [customOffset, setCustomOffset] = useState<number>(() => {
-    const saved = localStorage.getItem('ghallia_font_offset');
+    const saved = localStorage.getItem('infinity_font_offset');
     return saved ? parseInt(saved, 10) : 0;
   });
   const [numberNotation, setNotation] = useState<NumberNotation>(() => getNumberNotation());
 
   // Sound settings
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
-    return localStorage.getItem('ghallia_sound_enabled') !== 'false';
+    return localStorage.getItem('infinity_sound_enabled') !== 'false';
   });
 
   // Secret codes
   const [secretCodeInput, setSecretCodeInput] = useState('');
   const [codeResult, setCodeResult] = useState<{ success: boolean; message: string } | null>(null);
   const [usedCodes, setUsedCodes] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ghallia_used_codes');
+    const saved = localStorage.getItem('infinity_used_codes');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -76,12 +76,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
   // Save sound setting
   useEffect(() => {
-    localStorage.setItem('ghallia_sound_enabled', soundEnabled.toString());
+    localStorage.setItem('infinity_sound_enabled', soundEnabled.toString());
   }, [soundEnabled]);
 
   // Save used codes
   useEffect(() => {
-    localStorage.setItem('ghallia_used_codes', JSON.stringify(usedCodes));
+    localStorage.setItem('infinity_used_codes', JSON.stringify(usedCodes));
   }, [usedCodes]);
 
   const handleSecretCode = () => {
@@ -139,8 +139,8 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     const actualSize = getActualFontSize();
     document.documentElement.style.setProperty('--base-font-size', `${actualSize}px`);
     document.documentElement.style.fontSize = `${actualSize}px`;
-    localStorage.setItem('ghallia_text_size', textSize);
-    localStorage.setItem('ghallia_font_offset', customOffset.toString());
+    localStorage.setItem('infinity_text_size', textSize);
+    localStorage.setItem('infinity_font_offset', customOffset.toString());
   }, [textSize, customOffset]);
 
   const handleIncreaseFont = () => {

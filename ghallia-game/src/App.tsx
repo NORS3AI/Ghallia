@@ -1,5 +1,5 @@
 /**
- * Ghallia - Main App Component
+ * Infinity - Main App Component
  * Medieval idle/active crafting game
  */
 
@@ -17,7 +17,9 @@ import { SpellsPanel } from './components/ui/SpellsPanel';
 import { InventoryPanel } from './components/ui/InventoryPanel';
 import { CharacterPanel } from './components/ui/CharacterPanel';
 import { AchievementsPanel } from './components/ui/AchievementsPanel';
+import { AccountPanel } from './components/ui/AccountPanel';
 import { TutorialOverlay, useTutorial } from './components/ui/TutorialOverlay';
+import { AuthProvider } from './contexts/AuthContext';
 import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
@@ -81,7 +83,7 @@ class ErrorBoundary extends React.Component<
 
 type View = 'skills' | 'detail';
 
-type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character' | 'achievements';
+type PanelType = 'none' | 'unlock' | 'settings' | 'prestige' | 'stats' | 'upgrades' | 'spells' | 'inventory' | 'character' | 'achievements' | 'account';
 
 function GameApp() {
   const { state } = useGame();
@@ -163,7 +165,7 @@ function GameApp() {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <h1 className="header-title">Ghallia</h1>
+          <h1 className="header-title">Infinity</h1>
           <div className="header-currencies">
             {state.spellsUnlocked && (
               <div className="header-mana">
@@ -260,6 +262,12 @@ function GameApp() {
         onClose={closePanel}
       />
 
+      {/* Account Panel */}
+      <AccountPanel
+        isOpen={activePanel === 'account'}
+        onClose={closePanel}
+      />
+
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
@@ -314,6 +322,11 @@ function GameApp() {
             </button>
           )}
 
+          <button className={`nav-button ${activePanel === 'account' ? 'active' : ''}`} onClick={() => openPanel('account')}>
+            <span className="nav-icon">👤</span>
+            <span>Account</span>
+          </button>
+
           <button className={`nav-button ${activePanel === 'settings' ? 'active' : ''}`} onClick={() => openPanel('settings')}>
             <span className="nav-icon">⚙️</span>
             <span>Settings</span>
@@ -332,9 +345,11 @@ function GameApp() {
 function App() {
   return (
     <ErrorBoundary>
-      <GameProvider>
-        <GameApp />
-      </GameProvider>
+      <AuthProvider>
+        <GameProvider>
+          <GameApp />
+        </GameProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
