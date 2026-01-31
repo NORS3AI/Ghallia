@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { useGame, UPGRADES, UpgradeDef } from '../../store/gameStore';
+import { useGame, UPGRADES, UpgradeDef, getUpgradeManaCost } from '../../store/gameStore';
 import { formatGold } from '../../utils/math';
 import './UpgradesPanel.css';
 
@@ -104,7 +104,7 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
           <div className="header-currencies">
             <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
             {state.spellsUnlocked && (
-              <span className="currency-mana">💧 {Math.floor(state.mana)}</span>
+              <span className="currency-mana">💧 {Math.floor(state.mana)}/{state.maxMana} (+{state.manaRegen.toFixed(1)}/s)</span>
             )}
             {state.prestigeCount > 0 && (
               <span className="currency-chaos">✨ {state.chaosPoints}</span>
@@ -159,15 +159,21 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
         {/* Upgrades List */}
         <div className="upgrades-content">
           <div className="upgrades-list">
-            {sortedUpgrades.map(upgrade => (
-              <UpgradeItem
-                key={upgrade.id}
-                upgrade={upgrade}
-                purchased={!!state.upgrades[upgrade.id]}
-                canAfford={state.gold >= upgrade.baseCost}
-                onBuy={() => buyUpgrade(upgrade.id)}
-              />
-            ))}
+            {sortedUpgrades.map(upgrade => {
+              const manaCost = getUpgradeManaCost(upgrade.id);
+              const canAffordGold = state.gold >= upgrade.baseCost;
+              const canAffordMana = manaCost === 0 || state.mana >= manaCost;
+              return (
+                <UpgradeItem
+                  key={upgrade.id}
+                  upgrade={upgrade}
+                  purchased={!!state.upgrades[upgrade.id]}
+                  canAfford={canAffordGold && canAffordMana}
+                  manaCost={manaCost}
+                  onBuy={() => buyUpgrade(upgrade.id)}
+                />
+              );
+            })}
             {sortedUpgrades.length === 0 && (
               <div className="no-upgrades">No upgrades match your filters</div>
             )}
@@ -182,10 +188,11 @@ interface UpgradeItemProps {
   upgrade: UpgradeDef;
   purchased: boolean;
   canAfford: boolean;
+  manaCost: number;
   onBuy: () => void;
 }
 
-function UpgradeItem({ upgrade, purchased, canAfford, onBuy }: UpgradeItemProps) {
+function UpgradeItem({ upgrade, purchased, canAfford, manaCost, onBuy }: UpgradeItemProps) {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'tap': return '#ff9f43';
@@ -214,7 +221,10 @@ function UpgradeItem({ upgrade, purchased, canAfford, onBuy }: UpgradeItemProps)
           onClick={onBuy}
           disabled={!canAfford}
         >
-          {formatGold(upgrade.baseCost)}g
+          <span className="upgrade-cost-gold">{formatGold(upgrade.baseCost)}g</span>
+          {manaCost > 0 && (
+            <span className="upgrade-cost-mana">+ {manaCost}💧</span>
+          )}
         </button>
       )}
     </div>

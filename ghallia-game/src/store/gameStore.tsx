@@ -70,7 +70,7 @@ export interface UpgradeDef {
   category: 'tap' | 'crit' | 'luck' | 'mana' | 'gold';
 }
 
-// Generate tap upgrades (57 total)
+// Generate tap upgrades (57 total) - +1 tap per click each
 const TAP_UPGRADE_NAMES = [
   'Stronger Grip', 'Calloused Hands', 'Iron Fingers', 'Steel Arms', 'Titan Strength',
   'Divine Touch', 'Cosmic Power', 'Primal Force', 'Unshakeable Will', 'Mountain Might',
@@ -98,7 +98,7 @@ const generateTapUpgrades = (): UpgradeDef[] => {
   }));
 };
 
-// Generate crit chance upgrades (55 total, 0.5% each)
+// Generate crit chance upgrades (55 total, 0.025% each - VERY slow grind)
 const CRIT_CHANCE_NAMES = [
   'Sharp Eyes', 'Focused Mind', 'Keen Instincts', 'Eagle Vision', 'Perfect Precision',
   'Sniper Sight', 'Hunter Focus', 'Predator Gaze', 'Hawk Eye', 'Lynx Vision',
@@ -117,15 +117,15 @@ const generateCritChanceUpgrades = (): UpgradeDef[] => {
   return CRIT_CHANCE_NAMES.map((name, i) => ({
     id: `crit_chance_${i + 1}`,
     name,
-    description: `+0.5% crit chance`,
-    baseCost: Math.floor(1 * Math.pow(2, i)),
+    description: `+0.025% crit chance`,
+    baseCost: Math.floor(100 * Math.pow(1.8, i)),
     maxLevel: 1,
-    effect: () => 0.5,
+    effect: () => 0.025,
     category: 'crit' as const
   }));
 };
 
-// Generate crit damage upgrades (55 total, 5% each)
+// Generate crit damage upgrades (55 total, 0.5% each - VERY slow grind)
 const CRIT_DAMAGE_NAMES = [
   'Heavy Hits', 'Brutal Force', 'Devastating Blows', 'Crushing Power', 'Annihilating Strikes',
   'Shattering Impact', 'Pulverizing Might', 'Obliterating Force', 'Decimating Power', 'Ruinous Blows',
@@ -144,15 +144,15 @@ const generateCritDamageUpgrades = (): UpgradeDef[] => {
   return CRIT_DAMAGE_NAMES.map((name, i) => ({
     id: `crit_damage_${i + 1}`,
     name,
-    description: `+5% crit damage`,
-    baseCost: Math.floor(2 * Math.pow(2, i)),
+    description: `+0.5% crit damage`,
+    baseCost: Math.floor(150 * Math.pow(1.8, i)),
     maxLevel: 1,
-    effect: () => 5,
+    effect: () => 0.5,
     category: 'crit' as const
   }));
 };
 
-// Generate luck upgrades (55 total, 0.5% each)
+// Generate luck upgrades (55 total, 0.025% each - VERY slow grind)
 const LUCK_UPGRADE_NAMES = [
   'Lucky Charm', 'Fortune\'s Favor', 'Blessed Touch', 'Serendipity', 'Golden Aura',
   'Destiny\'s Child', 'Cosmic Fortune', 'Starlight Blessing', 'Moonbeam Grace', 'Sunray Gift',
@@ -171,58 +171,92 @@ const generateLuckUpgrades = (): UpgradeDef[] => {
   return LUCK_UPGRADE_NAMES.map((name, i) => ({
     id: `luck_${i + 1}`,
     name,
-    description: `+0.5% luck`,
-    baseCost: Math.floor(3 * Math.pow(2, i)),
+    description: `+0.025% luck`,
+    baseCost: Math.floor(200 * Math.pow(1.8, i)),
     maxLevel: 1,
-    effect: () => 0.5,
+    effect: () => 0.025,
     category: 'luck' as const
   }));
 };
 
-// Generate mana pool upgrades (30 total)
+// Generate mana pool upgrades (15 total) - costs only gold, +5 max mana each
+// Costs: 1000, 5000, 25000, 100000, 500000, 2M, 8M, 30M, 100M, 400M, 1.5B, 5B, 20B, 80B, 300B
 const MANA_POOL_NAMES = [
   'Mana Pool I', 'Mana Pool II', 'Mana Pool III', 'Mana Pool IV', 'Mana Pool V',
   'Arcane Reserve', 'Mystic Reservoir', 'Ethereal Basin', 'Astral Lake', 'Cosmic Ocean',
-  'Spirit Well', 'Soul Spring', 'Life Fountain', 'Energy Core', 'Power Source',
-  'Magic Basin', 'Spell Chamber', 'Enchant Tank', 'Rune Vessel', 'Glyph Container',
-  'Sigil Storage', 'Ward Buffer', 'Shield Cell', 'Barrier Bank', 'Aura Cache',
-  'Essence Pool', 'Vital Reserve', 'Primal Tank', 'Ancient Well', 'Elder Spring'
+  'Spirit Well', 'Soul Spring', 'Life Fountain', 'Energy Core', 'Power Source'
 ];
 
 const generateManaPoolUpgrades = (): UpgradeDef[] => {
+  const costs = [1000, 5000, 25000, 100000, 500000, 2000000, 8000000, 30000000, 100000000, 400000000, 1500000000, 5000000000, 20000000000, 80000000000, 300000000000];
   return MANA_POOL_NAMES.map((name, i) => ({
     id: `mana_cap_${i + 1}`,
     name,
     description: `+5 max mana`,
-    baseCost: Math.floor(100 * Math.pow(2, i)),
+    baseCost: costs[i] || costs[costs.length - 1] * Math.pow(4, i - costs.length + 1),
     maxLevel: 1,
     effect: () => 5,
     category: 'mana' as const
   }));
 };
 
-// Generate mana regen upgrades (25 total)
+// Generate mana regen upgrades (15 total)
+// First 10: +0.1/sec each, costs gold only (1000, 10000, 100000, 1M, 10M, ...)
+// Last 5: +0.5/sec each, costs gold AND mana (100k+10mana, 1M+25mana, 10M+50mana, 100M+100mana, 1B+200mana)
 const MANA_REGEN_NAMES = [
   'Mana Flow I', 'Mana Flow II', 'Mana Flow III', 'Mana Flow IV', 'Mana Flow V',
   'Arcane Stream', 'Mystic Current', 'Ethereal River', 'Astral Tide', 'Cosmic Wave',
-  'Spirit Surge', 'Soul Pulse', 'Life Beat', 'Energy Flux', 'Power Cycle',
-  'Magic Rhythm', 'Spell Tempo', 'Enchant Pace', 'Rune Rate', 'Glyph Speed',
-  'Sigil Frequency', 'Ward Interval', 'Shield Timing', 'Barrier Cadence', 'Aura Tempo'
+  'Spirit Surge', 'Soul Pulse', 'Life Beat', 'Energy Flux', 'Power Cycle'
 ];
 
-const generateManaRegenUpgrades = (): UpgradeDef[] => {
-  return MANA_REGEN_NAMES.map((name, i) => ({
-    id: `mana_regen_${i + 1}`,
-    name,
-    description: `+0.02 mana/sec`,
-    baseCost: Math.floor(250 * Math.pow(2, i)),
-    maxLevel: 1,
-    effect: () => 0.02,
-    category: 'mana' as const
-  }));
+// Extended upgrade definition to include mana cost
+export interface ManaUpgradeDef extends UpgradeDef {
+  manaCost?: number;
+}
+
+const generateManaRegenUpgrades = (): ManaUpgradeDef[] => {
+  const upgrades: ManaUpgradeDef[] = [];
+
+  // First 10: +0.1/sec, gold only, exponential costs
+  const goldOnlyCosts = [1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000, 1000000000000];
+  for (let i = 0; i < 10; i++) {
+    upgrades.push({
+      id: `mana_regen_${i + 1}`,
+      name: MANA_REGEN_NAMES[i],
+      description: `+0.1 mana/sec`,
+      baseCost: goldOnlyCosts[i],
+      maxLevel: 1,
+      effect: () => 0.1,
+      category: 'mana' as const,
+      manaCost: 0
+    });
+  }
+
+  // Last 5: +0.5/sec, gold AND mana costs
+  const advancedCosts = [
+    { gold: 100000, mana: 10 },
+    { gold: 1000000, mana: 25 },
+    { gold: 10000000, mana: 50 },
+    { gold: 100000000, mana: 100 },
+    { gold: 1000000000, mana: 200 }
+  ];
+  for (let i = 0; i < 5; i++) {
+    upgrades.push({
+      id: `mana_regen_${i + 11}`,
+      name: MANA_REGEN_NAMES[i + 10],
+      description: `+0.5 mana/sec (costs ${advancedCosts[i].mana} mana)`,
+      baseCost: advancedCosts[i].gold,
+      maxLevel: 1,
+      effect: () => 0.5,
+      category: 'mana' as const,
+      manaCost: advancedCosts[i].mana
+    });
+  }
+
+  return upgrades;
 };
 
-// Generate gold bonus upgrades (55 total)
+// Generate gold bonus upgrades (55 total, 0.1% each - VERY slow grind)
 const GOLD_BONUS_NAMES = [
   'Merchant\'s Eye', 'Haggler', 'Trade Master', 'Golden Touch', 'Midas Blessing',
   'Wealth Incarnate', 'Fortune Seeker', 'Treasure Hunter', 'Gold Digger', 'Coin Collector',
@@ -241,10 +275,10 @@ const generateGoldBonusUpgrades = (): UpgradeDef[] => {
   return GOLD_BONUS_NAMES.map((name, i) => ({
     id: `gold_bonus_${i + 1}`,
     name,
-    description: `+1% gold from sales`,
-    baseCost: Math.floor(25 * Math.pow(2, i)),
+    description: `+0.1% gold from sales`,
+    baseCost: Math.floor(50 * Math.pow(1.8, i)),
     maxLevel: 1,
-    effect: () => 1,
+    effect: () => 0.1,
     category: 'gold' as const
   }));
 };
@@ -258,6 +292,13 @@ export const UPGRADES: UpgradeDef[] = [
   ...generateManaRegenUpgrades(),
   ...generateGoldBonusUpgrades(),
 ];
+
+// Helper to get mana cost for an upgrade (if any)
+export function getUpgradeManaCost(upgradeId: string): number {
+  const manaUpgrades = generateManaRegenUpgrades();
+  const upgrade = manaUpgrades.find(u => u.id === upgradeId);
+  return upgrade?.manaCost || 0;
+}
 
 // ============================================
 // SPELL DEFINITIONS
@@ -1005,9 +1046,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         resourceTaps += 5;
       }
 
-      // Calculate XP - consistent growth based on base taps
-      // XP per tap scales smoothly with level (1 + 2% per level)
-      const xpPerTap = 1 + Math.floor(skill.level * 0.02);
+      // Calculate XP - flat 1 XP per tap, no level scaling
+      const xpPerTap = 1;
       let xpGained = xpPerTap * baseTaps;
       // Crits give 50% bonus XP (not the full crit damage multiplier)
       if (isCrit) xpGained = Math.floor(xpGained * 1.5);
@@ -1121,9 +1161,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const cost = upgrade.baseCost;
       if (state.gold < cost) return state;
 
+      // Check mana cost for advanced mana regen upgrades
+      const manaCost = getUpgradeManaCost(action.upgradeId);
+      if (manaCost > 0 && state.mana < manaCost) return state;
+
       const newState = {
         ...state,
         gold: state.gold - cost,
+        mana: manaCost > 0 ? state.mana - manaCost : state.mana,
         upgrades: {
           ...state.upgrades,
           [action.upgradeId]: currentLevel + 1,

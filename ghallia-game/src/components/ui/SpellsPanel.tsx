@@ -33,7 +33,7 @@ export function SpellsPanel({ isOpen, onClose }: SpellsPanelProps) {
           <div className="header-currencies">
             <span className="currency-gold">💰 {formatGold(state.gold)}g</span>
             {state.spellsUnlocked && (
-              <span className="currency-mana">💧 {Math.floor(state.mana)}/{state.maxMana}</span>
+              <span className="currency-mana">💧 {Math.floor(state.mana)}/{state.maxMana} (+{state.manaRegen.toFixed(1)}/s)</span>
             )}
             {state.prestigeCount > 0 && (
               <span className="currency-chaos">✨ {state.chaosPoints}</span>
