@@ -10,7 +10,8 @@ import { SkillTable } from './components/skills/SkillTable';
 import { SkillDetail } from './components/skills/SkillDetail';
 import { UnlockPanel } from './components/ui/UnlockPanel';
 import { SettingsPanel } from './components/ui/SettingsPanel';
-import { formatNumber } from './utils/math';
+import { PrestigePanel } from './components/ui/PrestigePanel';
+import { formatNumber, formatGold } from './utils/math';
 
 // Error Boundary to catch and display errors
 class ErrorBoundary extends React.Component<
@@ -79,6 +80,7 @@ function GameApp() {
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [unlockPanelOpen, setUnlockPanelOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [prestigeOpen, setPrestigeOpen] = useState(false);
 
   // Get list of unlocked skills for swipe navigation
   const unlockedSkills = useMemo(() => {
@@ -134,7 +136,7 @@ function GameApp() {
           <h1 className="header-title">Ghallia</h1>
           <div className="header-gold">
             <span>💰</span>
-            <span>{formatNumber(state.gold)}g</span>
+            <span>{formatGold(state.gold)}g</span>
           </div>
         </div>
       </header>
@@ -178,6 +180,12 @@ function GameApp() {
         onClose={() => setSettingsOpen(false)}
       />
 
+      {/* Prestige Panel */}
+      <PrestigePanel
+        isOpen={prestigeOpen}
+        onClose={() => setPrestigeOpen(false)}
+      />
+
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
@@ -194,7 +202,7 @@ function GameApp() {
             <span>Sell All</span>
           </button>
 
-          <button className="nav-button">
+          <button className="nav-button" onClick={() => setPrestigeOpen(true)}>
             <span className="nav-icon">🏆</span>
             <span>Prestige</span>
           </button>

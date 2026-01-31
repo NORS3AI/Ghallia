@@ -59,20 +59,20 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
   const handleGather = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     gather(skillType);
 
-    // Create floating number
+    // Create floating number just above the gather button
     const rect = buttonRef.current?.getBoundingClientRect();
     if (rect) {
       const newPop: NumberPop = {
         id: ++popIdRef.current,
         value: '+1',
         type: 'resource',
-        x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 40,
-        y: rect.top,
+        x: rect.left + rect.width / 2 + (Math.random() - 0.5) * 30,
+        y: rect.top - 20, // Position above the button
       };
       setPops(prev => [...prev, newPop]);
       setTimeout(() => {
         setPops(prev => prev.filter(p => p.id !== newPop.id));
-      }, 600);
+      }, 800);
     }
   }, [gather, skillType]);
 
