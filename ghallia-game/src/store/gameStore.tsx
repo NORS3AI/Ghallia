@@ -56,6 +56,20 @@ export const SKILL_DEFINITIONS: SkillDef[] = [
   { id: SkillType.ARCHAEOLOGY, name: 'Archaeology', icon: '🏺', category: SkillCategory.SUPPORT, description: 'Discover artifacts' },
 ];
 
+// Support Skill Chaos Point costs (unlocked after Prestige 1)
+export const SUPPORT_SKILL_COSTS: Record<SkillType, number> = {
+  [SkillType.TRADING]: 100,
+  [SkillType.FARMING]: 150,
+  [SkillType.RUNECRAFTING]: 200,
+  [SkillType.ARCHAEOLOGY]: 250,
+} as Record<SkillType, number>;
+
+// Check if a skill is a support skill
+export function isSupportSkill(skillType: SkillType): boolean {
+  const def = SKILL_DEFINITIONS.find(s => s.id === skillType);
+  return def?.category === SkillCategory.SUPPORT;
+}
+
 // ============================================
 // UPGRADE DEFINITIONS
 // ============================================
@@ -321,6 +335,167 @@ export const SPELLS: SpellDef[] = [
   { id: 'mega_crit', name: 'Critical Surge', description: '100% crit chance for 10 seconds', manaCost: 40, duration: 10, cooldown: 120, icon: '🎯' },
   { id: 'lucky_star', name: 'Lucky Star', description: '50% luck for 15 seconds', manaCost: 35, duration: 15, cooldown: 100, icon: '⭐' },
 ];
+
+// ============================================
+// TALENT DEFINITIONS
+// ============================================
+
+export interface TalentDef {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  maxRank: number;
+  baseCost: number; // CP cost for rank 1
+  costPerRank: number; // Additional CP per rank
+  tier: number; // 1-5, higher tiers require more prestiges
+  effect: (rank: number) => number; // Returns bonus value
+  category: 'xp' | 'gold' | 'crafting' | 'gathering' | 'prestige';
+}
+
+export const TALENTS: TalentDef[] = [
+  // Tier 1 - Basic talents (available immediately)
+  { id: 'xp_boost', name: 'Wisdom', description: '+5% XP per rank', icon: '📚', maxRank: 20, baseCost: 10, costPerRank: 10, tier: 1, effect: (r) => r * 5, category: 'xp' },
+  { id: 'gold_boost', name: 'Prosperity', description: '+3% gold per rank', icon: '💰', maxRank: 20, baseCost: 10, costPerRank: 10, tier: 1, effect: (r) => r * 3, category: 'gold' },
+  { id: 'gather_speed', name: 'Swift Hands', description: '+2% gather speed per rank', icon: '⚡', maxRank: 20, baseCost: 15, costPerRank: 15, tier: 1, effect: (r) => r * 2, category: 'gathering' },
+  { id: 'craft_speed', name: 'Efficient Crafter', description: '+4% crafting speed per rank', icon: '🔨', maxRank: 25, baseCost: 15, costPerRank: 15, tier: 1, effect: (r) => r * 4, category: 'crafting' },
+
+  // Tier 2 - Intermediate (requires Prestige 2+)
+  { id: 'multi_craft', name: 'Double Output', description: '+2% double craft chance per rank', icon: '✨', maxRank: 25, baseCost: 25, costPerRank: 25, tier: 2, effect: (r) => r * 2, category: 'crafting' },
+  { id: 'resource_efficiency', name: 'Resourceful', description: '-2% material cost per rank', icon: '♻️', maxRank: 25, baseCost: 25, costPerRank: 25, tier: 2, effect: (r) => r * 2, category: 'crafting' },
+  { id: 'rare_finds', name: 'Lucky Prospector', description: '+1% rare resource chance per rank', icon: '🍀', maxRank: 20, baseCost: 30, costPerRank: 30, tier: 2, effect: (r) => r * 1, category: 'gathering' },
+  { id: 'crit_boost', name: 'Precision', description: '+1% crit chance per rank', icon: '🎯', maxRank: 20, baseCost: 30, costPerRank: 30, tier: 2, effect: (r) => r * 1, category: 'gathering' },
+
+  // Tier 3 - Advanced (requires Prestige 5+)
+  { id: 'idle_efficiency', name: 'Passive Income', description: '+5% offline crafting speed per rank', icon: '😴', maxRank: 20, baseCost: 50, costPerRank: 50, tier: 3, effect: (r) => r * 5, category: 'crafting' },
+  { id: 'prestige_boost', name: 'Chaos Mastery', description: '+5% Chaos Points earned per rank', icon: '🌀', maxRank: 20, baseCost: 75, costPerRank: 75, tier: 3, effect: (r) => r * 5, category: 'prestige' },
+  { id: 'starting_gold', name: 'Head Start', description: '+100 starting gold per rank', icon: '🏦', maxRank: 50, baseCost: 40, costPerRank: 20, tier: 3, effect: (r) => r * 100, category: 'gold' },
+  { id: 'starting_xp', name: 'Experienced', description: '+50 starting XP per rank (all skills)', icon: '📈', maxRank: 50, baseCost: 40, costPerRank: 20, tier: 3, effect: (r) => r * 50, category: 'xp' },
+
+  // Tier 4 - Expert (requires Prestige 10+)
+  { id: 'super_crit', name: 'Devastating Blows', description: '+5% crit damage per rank', icon: '💥', maxRank: 20, baseCost: 100, costPerRank: 100, tier: 4, effect: (r) => r * 5, category: 'gathering' },
+  { id: 'mega_gold', name: 'Midas Touch', description: '+10% gold per rank', icon: '👑', maxRank: 10, baseCost: 150, costPerRank: 150, tier: 4, effect: (r) => r * 10, category: 'gold' },
+
+  // Tier 5 - Master (requires Prestige 20+)
+  { id: 'ultimate_xp', name: 'Enlightenment', description: '+25% XP per rank', icon: '🌟', maxRank: 5, baseCost: 500, costPerRank: 500, tier: 5, effect: (r) => r * 25, category: 'xp' },
+  { id: 'ultimate_prestige', name: 'Chaos Lord', description: '+25% Chaos Points per rank', icon: '🔥', maxRank: 5, baseCost: 750, costPerRank: 750, tier: 5, effect: (r) => r * 25, category: 'prestige' },
+];
+
+// Get required prestige count for a talent tier
+export function getRequiredPrestigeForTier(tier: number): number {
+  switch (tier) {
+    case 1: return 0;
+    case 2: return 2;
+    case 3: return 5;
+    case 4: return 10;
+    case 5: return 20;
+    default: return 0;
+  }
+}
+
+// Calculate talent cost for a specific rank
+export function getTalentCost(talent: TalentDef, currentRank: number): number {
+  return talent.baseCost + (talent.costPerRank * currentRank);
+}
+
+// Calculate Chaos Points earned from prestige
+export function calculateChaosPoints(
+  skills: Record<SkillType, SkillState>,
+  gold: number,
+  talentBonus: number = 0
+): number {
+  const BASE_CP = 100;
+
+  // Get skills at level 99+
+  const eligibleSkills = Object.values(skills).filter(s => s.level >= 99);
+
+  // Skill bonus: floor(level/10) for each eligible skill
+  const skillBonus = eligibleSkills.reduce((sum, s) => sum + Math.floor(s.level / 10), 0);
+
+  // Gold bonus: log10 of gold
+  const goldBonus = Math.floor(Math.log10(Math.max(1, gold)));
+
+  // Skills multiplier: 1 + (skills_beyond_5 * 0.2)
+  const skillsMultiplier = 1 + Math.max(0, eligibleSkills.length - 5) * 0.2;
+
+  // Talent multiplier from prestige boost talents
+  const talentMultiplier = 1 + (talentBonus / 100);
+
+  return Math.floor((BASE_CP + skillBonus + goldBonus) * skillsMultiplier * talentMultiplier);
+}
+
+// Check if player can prestige
+export function canPrestige(skills: Record<SkillType, SkillState>): boolean {
+  const eligibleSkills = Object.values(skills).filter(s => s.level >= 99);
+  return eligibleSkills.length >= 5;
+}
+
+// Get count of skills at level 99+
+export function getSkillsAt99Plus(skills: Record<SkillType, SkillState>): number {
+  return Object.values(skills).filter(s => s.level >= 99).length;
+}
+
+// Calculate all talent bonuses from talents state
+export interface TalentBonuses {
+  xpBonus: number; // Total XP bonus %
+  goldBonus: number; // Total gold bonus %
+  craftSpeedBonus: number; // Crafting speed bonus %
+  multiCraftChance: number; // Double craft chance %
+  critBonus: number; // Crit chance bonus %
+  critDamageBonus: number; // Crit damage bonus %
+  rareFindsBonus: number; // Rare resource chance bonus %
+}
+
+export function calculateTalentBonuses(talents: Record<string, number>): TalentBonuses {
+  let xpBonus = 0;
+  let goldBonus = 0;
+  let craftSpeedBonus = 0;
+  let multiCraftChance = 0;
+  let critBonus = 0;
+  let critDamageBonus = 0;
+  let rareFindsBonus = 0;
+
+  for (const talent of TALENTS) {
+    const rank = talents[talent.id] || 0;
+    if (rank === 0) continue;
+
+    switch (talent.id) {
+      case 'xp_boost':
+      case 'ultimate_xp':
+        xpBonus += talent.effect(rank);
+        break;
+      case 'gold_boost':
+      case 'mega_gold':
+        goldBonus += talent.effect(rank);
+        break;
+      case 'craft_speed':
+        craftSpeedBonus += talent.effect(rank);
+        break;
+      case 'multi_craft':
+        multiCraftChance += talent.effect(rank);
+        break;
+      case 'crit_boost':
+        critBonus += talent.effect(rank);
+        break;
+      case 'super_crit':
+        critDamageBonus += talent.effect(rank);
+        break;
+      case 'rare_finds':
+        rareFindsBonus += talent.effect(rank);
+        break;
+    }
+  }
+
+  return {
+    xpBonus,
+    goldBonus,
+    craftSpeedBonus,
+    multiCraftChance,
+    critBonus,
+    critDamageBonus,
+    rareFindsBonus,
+  };
+}
 
 // ============================================
 // CRAFTING RECIPE DEFINITIONS
@@ -955,6 +1130,7 @@ export interface GameState {
   skillsUnlockedCount: number;
   prestigeCount: number;
   chaosPoints: number;
+  talents: Record<string, number>; // talent id -> rank
   lastSaveTime: number;
   gameVersion: string;
   // New systems
@@ -1014,8 +1190,9 @@ type GameAction =
   // Achievements
   | { type: 'UNLOCK_ACHIEVEMENT'; achievementId: string }
   | { type: 'CLAIM_ACHIEVEMENT'; achievementId: string; reward: number }
-  // Prestige
+  // Prestige & Talents
   | { type: 'PRESTIGE'; chaosPointsEarned: number }
+  | { type: 'BUY_TALENT'; talentId: string }
   // Crafting
   | { type: 'START_CRAFT'; recipeId: string; quantity: number }
   | { type: 'CANCEL_CRAFT'; queueItemId: string }
@@ -1089,6 +1266,7 @@ const initialState: GameState = {
   skillsUnlockedCount: 1,
   prestigeCount: 0,
   chaosPoints: 0,
+  talents: {},
   lastSaveTime: Date.now(),
   gameVersion: GAME_VERSION,
   upgrades: {},
@@ -1383,6 +1561,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       const tier = getTierFromLevel(skill.level);
 
+      // Get talent bonuses
+      const talentBonuses = calculateTalentBonuses(state.talents);
+
       // Check for active spells
       const now = Date.now();
       const hasDoubleXp = (state.spells['double_xp']?.activeUntil || 0) > now;
@@ -1394,10 +1575,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       let resourceTaps = baseTaps;
 
       // Check for crit - affects resources, gives bonus XP
-      const effectiveCritChance = hasMegaCrit ? 100 : state.critChance;
+      // Apply talent crit bonus
+      const effectiveCritChance = hasMegaCrit ? 100 : (state.critChance + talentBonuses.critBonus);
       const isCrit = Math.random() * 100 < effectiveCritChance;
       if (isCrit) {
-        resourceTaps = Math.floor(resourceTaps * (1 + state.critDamage / 100));
+        // Apply talent crit damage bonus
+        const totalCritDamage = state.critDamage + talentBonuses.critDamageBonus;
+        resourceTaps = Math.floor(resourceTaps * (1 + totalCritDamage / 100));
       }
 
       // Check for luck (chance for +5 bonus resources)
@@ -1416,6 +1600,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (isLucky) xpGained = Math.floor(xpGained * 1.25);
       // Double XP spell doubles final amount
       if (hasDoubleXp) xpGained *= 2;
+      // Apply talent XP bonus
+      if (talentBonuses.xpBonus > 0) {
+        xpGained = Math.floor(xpGained * (1 + talentBonuses.xpBonus / 100));
+      }
 
       const newTotalXp = skill.totalXp + xpGained;
       const newLevel = levelFromTotalXp(newTotalXp);
@@ -1481,11 +1669,33 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'UNLOCK_SKILL': {
-      const cost = getUnlockCost(state.skillsUnlockedCount + 1);
-      if (state.gold < cost) return state;
-
       const skill = state.skills[action.skillType];
       if (skill.unlocked) return state;
+
+      // Check if this is a support skill
+      if (isSupportSkill(action.skillType)) {
+        // Support skills require Prestige 1+ and cost Chaos Points
+        if (state.prestigeCount < 1) return state;
+
+        const cpCost = SUPPORT_SKILL_COSTS[action.skillType] || 100;
+        if (state.chaosPoints < cpCost) return state;
+
+        return {
+          ...state,
+          chaosPoints: state.chaosPoints - cpCost,
+          skills: {
+            ...state.skills,
+            [action.skillType]: {
+              ...skill,
+              unlocked: true,
+            },
+          },
+        };
+      }
+
+      // Regular skills cost gold
+      const cost = getUnlockCost(state.skillsUnlockedCount + 1);
+      if (state.gold < cost) return state;
 
       return {
         ...state,
@@ -1653,10 +1863,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         SkillType.JEWELCRAFTING,
       ];
 
+      // Get talent bonuses for crafting
+      const talentBonuses = calculateTalentBonuses(state.talents);
+
       for (const completed of completedCrafts) {
         const recipe = CRAFTING_RECIPES.find(r => r.id === completed.recipeId);
         if (recipe) {
-          const batchQty = completed.quantity || 1;
+          let batchQty = completed.quantity || 1;
+
+          // Apply multi-craft chance (each item has a chance to double)
+          if (talentBonuses.multiCraftChance > 0) {
+            let bonusItems = 0;
+            for (let i = 0; i < batchQty; i++) {
+              if (Math.random() * 100 < talentBonuses.multiCraftChance) {
+                bonusItems++;
+              }
+            }
+            batchQty += bonusItems;
+          }
 
           // If recipe produces a resource, add to resources; otherwise add to crafted items
           if (recipe.produces) {
@@ -1671,9 +1895,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           }
 
           // Add XP to crafting skill (multiplied by batch quantity)
+          // Apply talent XP bonus
           const skillState = newSkills[recipe.craftingSkill];
           if (skillState) {
-            const newTotalXp = skillState.totalXp + (recipe.xpReward * batchQty);
+            let xpGain = recipe.xpReward * batchQty;
+            if (talentBonuses.xpBonus > 0) {
+              xpGain = Math.floor(xpGain * (1 + talentBonuses.xpBonus / 100));
+            }
+            const newTotalXp = skillState.totalXp + xpGain;
             const newLevel = levelFromTotalXp(newTotalXp);
             newSkills = {
               ...newSkills,
@@ -1864,6 +2093,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Reset skills to initial state
       const newSkills = createInitialSkills();
 
+      // Apply starting XP talent bonus
+      const startingXpTalent = TALENTS.find(t => t.id === 'starting_xp');
+      const startingXpRank = state.talents['starting_xp'] || 0;
+      if (startingXpTalent && startingXpRank > 0) {
+        const bonusXp = startingXpTalent.effect(startingXpRank);
+        for (const skillType of Object.keys(newSkills) as SkillType[]) {
+          newSkills[skillType].totalXp = bonusXp;
+          newSkills[skillType].level = levelFromTotalXp(bonusXp);
+        }
+      }
+
+      // Apply starting gold talent bonus
+      const startingGoldTalent = TALENTS.find(t => t.id === 'starting_gold');
+      const startingGoldRank = state.talents['starting_gold'] || 0;
+      const startingGold = startingGoldTalent && startingGoldRank > 0
+        ? startingGoldTalent.effect(startingGoldRank)
+        : 0;
+
       // Keep total play time but reset session play time
       const newStats: StatsState = {
         ...initialStats,
@@ -1873,8 +2120,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...initialState,
+        gold: startingGold,
         prestigeCount: state.prestigeCount + 1,
         chaosPoints: state.chaosPoints + action.chaosPointsEarned,
+        talents: state.talents, // Keep talents!
         skills: newSkills,
         stats: newStats,
         // Reset achievements for new prestige run
@@ -1883,6 +2132,31 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         // Keep game version
         gameVersion: state.gameVersion,
         lastSaveTime: Date.now(),
+      };
+    }
+
+    case 'BUY_TALENT': {
+      const talent = TALENTS.find(t => t.id === action.talentId);
+      if (!talent) return state;
+
+      const currentRank = state.talents[action.talentId] || 0;
+      if (currentRank >= talent.maxRank) return state;
+
+      // Check prestige requirement
+      const requiredPrestige = getRequiredPrestigeForTier(talent.tier);
+      if (state.prestigeCount < requiredPrestige) return state;
+
+      // Check cost
+      const cost = getTalentCost(talent, currentRank);
+      if (state.chaosPoints < cost) return state;
+
+      return {
+        ...state,
+        chaosPoints: state.chaosPoints - cost,
+        talents: {
+          ...state.talents,
+          [action.talentId]: currentRank + 1,
+        },
       };
     }
 
@@ -1913,9 +2187,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) - (mat.quantity * quantity);
       }
 
+      // Get talent craft speed bonus
+      const talentBonuses = calculateTalentBonuses(state.talents);
+      const craftSpeedMultiplier = 1 + (talentBonuses.craftSpeedBonus / 100);
+
       // Add single batched item to crafting queue (total time = craftTime * quantity)
+      // Apply craft speed bonus (faster = less time)
       const now = Date.now();
-      const totalCraftTime = recipe.craftTime * quantity * 1000;
+      const baseCraftTime = recipe.craftTime * quantity * 1000;
+      const totalCraftTime = Math.floor(baseCraftTime / craftSpeedMultiplier);
       const newQueueItem: CraftingQueueItem = {
         id: `craft_${now}_${Math.random().toString(36).substr(2, 9)}`,
         recipeId: action.recipeId,
@@ -1958,8 +2238,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const recipe = CRAFTING_RECIPES.find(r => r.id === action.recipeId);
       if (!recipe) return state;
 
+      // Get talent gold bonus
+      const talentBonuses = calculateTalentBonuses(state.talents);
+      const totalGoldBonus = state.goldBonus + talentBonuses.goldBonus;
+
       // Sell for gold
-      const goldEarned = recipe.sellValue * action.quantity * (1 + state.goldBonus / 100);
+      const goldEarned = recipe.sellValue * action.quantity * (1 + totalGoldBonus / 100);
 
       return {
         ...state,
@@ -1998,6 +2282,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         // Migration: add crafting state if missing
         craftingQueue: action.state.craftingQueue || [],
         craftedItems: action.state.craftedItems || {},
+        // Migration: add talents if missing
+        talents: action.state.talents || {},
       };
       return recalculateBonuses(loadedState);
     }
@@ -2061,8 +2347,9 @@ interface GameContextType {
   unlockAchievement: (achievementId: string) => void;
   claimAchievement: (achievementId: string, reward: number) => void;
   checkAchievements: () => void;
-  // Prestige
+  // Prestige & Talents
   prestige: (chaosPointsEarned: number) => void;
+  buyTalent: (talentId: string) => void;
   // Crafting
   startCraft: (recipeId: string, quantity?: number) => void;
   cancelCraft: (queueItemId: string) => void;
@@ -2220,6 +2507,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'PRESTIGE', chaosPointsEarned });
   }, []);
 
+  // Talent function
+  const buyTalent = useCallback((talentId: string) => {
+    dispatch({ type: 'BUY_TALENT', talentId });
+  }, []);
+
   // Crafting functions
   const startCraft = useCallback((recipeId: string, quantity: number = 1) => {
     dispatch({ type: 'START_CRAFT', recipeId, quantity });
@@ -2262,6 +2554,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       claimAchievement,
       checkAchievements,
       prestige,
+      buyTalent,
       startCraft,
       cancelCraft,
       collectCrafted,

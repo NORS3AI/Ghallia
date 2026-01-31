@@ -4,7 +4,7 @@
  */
 
 import { SkillType, SkillCategory } from '../../types/game.types';
-import { useGame, SKILL_DEFINITIONS, getUnlockCost } from '../../store/gameStore';
+import { useGame, SKILL_DEFINITIONS, getUnlockCost, SUPPORT_SKILL_COSTS, isSupportSkill } from '../../store/gameStore';
 import { formatNumber } from '../../utils/math';
 
 interface UnlockPanelProps {
@@ -16,23 +16,35 @@ export function UnlockPanel({ isOpen, onClose }: UnlockPanelProps) {
   const { state, unlockSkill } = useGame();
 
   const nextUnlockCost = getUnlockCost(state.skillsUnlockedCount + 1);
-  const canAfford = state.gold >= nextUnlockCost;
+  const canAffordGold = state.gold >= nextUnlockCost;
 
-  // Get locked skills (excluding support skills until prestige)
-  const lockedSkills = SKILL_DEFINITIONS.filter(skill => {
-    if (skill.category === SkillCategory.SUPPORT && state.prestigeCount < 1) {
-      return false;
-    }
+  // Get locked regular skills
+  const lockedRegularSkills = SKILL_DEFINITIONS.filter(skill => {
+    if (skill.category === SkillCategory.SUPPORT) return false;
     return !state.skills[skill.id].unlocked;
   });
+
+  // Get locked support skills (only show after Prestige 1)
+  const lockedSupportSkills = state.prestigeCount >= 1
+    ? SKILL_DEFINITIONS.filter(skill => {
+        if (skill.category !== SkillCategory.SUPPORT) return false;
+        return !state.skills[skill.id].unlocked;
+      })
+    : [];
 
   // Special case: Sawmill must be unlocked second
   const isSawmillNext = state.skillsUnlockedCount === 1;
 
   const handleUnlock = (skillType: SkillType) => {
-    if (canAfford) {
-      unlockSkill(skillType);
+    unlockSkill(skillType);
+  };
+
+  const canAffordSkill = (skillType: SkillType): boolean => {
+    if (isSupportSkill(skillType)) {
+      const cpCost = SUPPORT_SKILL_COSTS[skillType] || 100;
+      return state.chaosPoints >= cpCost;
     }
+    return canAffordGold;
   };
 
   return (
@@ -51,7 +63,7 @@ export function UnlockPanel({ isOpen, onClose }: UnlockPanelProps) {
         <div style={{ textAlign: 'center', marginBottom: '16px' }}>
           <span style={{ color: 'var(--color-text-secondary)' }}>Cost: </span>
           <span style={{
-            color: canAfford ? 'var(--color-gold-light)' : 'var(--color-accent-red)',
+            color: canAffordGold ? 'var(--color-gold-light)' : 'var(--color-accent-red)',
             fontWeight: 600
           }}>
             {formatNumber(nextUnlockCost)}g
@@ -73,32 +85,66 @@ export function UnlockPanel({ isOpen, onClose }: UnlockPanelProps) {
               <button
                 className="unlock-button"
                 onClick={() => handleUnlock(SkillType.SAWMILL)}
-                disabled={!canAfford}
+                disabled={!canAffordGold}
               >
-                {canAfford ? 'Unlock' : 'Need gold'}
+                {canAffordGold ? 'Unlock' : 'Need gold'}
               </button>
             </div>
           ) : (
-            // Show all locked skills
-            lockedSkills.map(skill => (
-              <div key={skill.id} className="unlock-skill-item">
-                <div className="skill-icon">{skill.icon}</div>
-                <div className="unlock-skill-info">
-                  <div className="unlock-skill-name">{skill.name}</div>
-                  <div className="unlock-skill-desc">{skill.description}</div>
+            <>
+              {/* Regular Skills */}
+              {lockedRegularSkills.map(skill => (
+                <div key={skill.id} className="unlock-skill-item">
+                  <div className="skill-icon">{skill.icon}</div>
+                  <div className="unlock-skill-info">
+                    <div className="unlock-skill-name">{skill.name}</div>
+                    <div className="unlock-skill-desc">{skill.description}</div>
+                  </div>
+                  <button
+                    className="unlock-button"
+                    onClick={() => handleUnlock(skill.id)}
+                    disabled={!canAffordGold}
+                  >
+                    {canAffordGold ? 'Unlock' : 'Need gold'}
+                  </button>
                 </div>
-                <button
-                  className="unlock-button"
-                  onClick={() => handleUnlock(skill.id)}
-                  disabled={!canAfford}
-                >
-                  {canAfford ? 'Unlock' : 'Need gold'}
-                </button>
-              </div>
-            ))
+              ))}
+
+              {/* Support Skills Section (after Prestige 1) */}
+              {lockedSupportSkills.length > 0 && (
+                <>
+                  <div className="support-skills-divider">
+                    <span>✨ Support Skills (Chaos Points)</span>
+                  </div>
+                  {lockedSupportSkills.map(skill => {
+                    const cpCost = SUPPORT_SKILL_COSTS[skill.id] || 100;
+                    const canAffordCP = state.chaosPoints >= cpCost;
+                    return (
+                      <div key={skill.id} className="unlock-skill-item support-skill">
+                        <div className="skill-icon">{skill.icon}</div>
+                        <div className="unlock-skill-info">
+                          <div className="unlock-skill-name">{skill.name}</div>
+                          <div className="unlock-skill-desc">{skill.description}</div>
+                          <div className="unlock-skill-cost">
+                            <span className="cp-cost">🌀 {cpCost} CP</span>
+                          </div>
+                        </div>
+                        <button
+                          className="unlock-button cp-unlock"
+                          onClick={() => handleUnlock(skill.id)}
+                          disabled={!canAffordCP}
+                        >
+                          {canAffordCP ? 'Unlock' : 'Need CP'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </>
           )}
 
-          {lockedSkills.length === 0 && !isSawmillNext && (
+          {lockedRegularSkills.length === 0 && lockedSupportSkills.length === 0 && !isSawmillNext && (
             <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '20px' }}>
               All available skills unlocked!
               {state.prestigeCount < 1 && (
