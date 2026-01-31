@@ -101,19 +101,53 @@
 }
 
 /* Text Size Options */
-.text-size-options {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.text-size-row {
+  display: flex;
+  align-items: stretch;
   gap: 8px;
 }
 
+.font-adjust-button {
+  width: 44px;
+  min-width: 44px;
+  background: var(--color-bg-light, #3d3228);
+  border: 2px solid var(--color-border, #4a3f32);
+  border-radius: 10px;
+  color: var(--color-text-primary, #e8dcc4);
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.font-adjust-button:active {
+  transform: scale(0.9);
+  background: var(--color-gold, #d4a853);
+  color: var(--color-bg-dark, #1a1410);
+}
+
+.font-adjust-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.text-size-options {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
 .text-size-button {
-  padding: 12px 8px;
+  padding: 10px 6px;
   background: var(--color-bg-light, #3d3228);
   border: 2px solid var(--color-border, #4a3f32);
   border-radius: 10px;
   color: var(--color-text-secondary, #a89880);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -127,6 +161,32 @@
 
 .text-size-button:active {
   transform: scale(0.95);
+}
+
+.font-size-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #a89880);
+}
+
+.reset-font-button {
+  padding: 4px 12px;
+  background: var(--color-bg-light, #3d3228);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 6px;
+  color: var(--color-text-secondary, #a89880);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.reset-font-button:active {
+  transform: scale(0.95);
+  background: var(--color-bg-medium, #2a2218);
 }
 
 .settings-warning {

@@ -13,28 +13,60 @@ interface SettingsPanelProps {
 
 type TextSize = 'small' | 'medium' | 'large' | 'huge';
 
-const TEXT_SIZES: { value: TextSize; label: string; size: string }[] = [
-  { value: 'small', label: 'Small', size: '10px' },
-  { value: 'medium', label: 'Medium', size: '12px' },
-  { value: 'large', label: 'Large', size: '14px' },
-  { value: 'huge', label: 'Huge', size: '16px' },
+const TEXT_SIZES: { value: TextSize; label: string; size: number }[] = [
+  { value: 'small', label: 'Small', size: 10 },
+  { value: 'medium', label: 'Medium', size: 12 },
+  { value: 'large', label: 'Large', size: 14 },
+  { value: 'huge', label: 'Huge', size: 16 },
 ];
+
+const MIN_FONT_SIZE = 8;
+const MAX_FONT_SIZE = 32;
 
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [confirmReset, setConfirmReset] = useState(false);
   const [textSize, setTextSize] = useState<TextSize>(() => {
     return (localStorage.getItem('ghallia_text_size') as TextSize) || 'medium';
   });
+  const [customOffset, setCustomOffset] = useState<number>(() => {
+    const saved = localStorage.getItem('ghallia_font_offset');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  // Calculate actual font size
+  const getActualFontSize = () => {
+    const sizeConfig = TEXT_SIZES.find(s => s.value === textSize);
+    const baseSize = sizeConfig?.size || 12;
+    return Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, baseSize + customOffset));
+  };
 
   // Apply text size to document
   useEffect(() => {
-    const sizeConfig = TEXT_SIZES.find(s => s.value === textSize);
-    if (sizeConfig) {
-      document.documentElement.style.setProperty('--base-font-size', sizeConfig.size);
-      document.documentElement.style.fontSize = sizeConfig.size;
-      localStorage.setItem('ghallia_text_size', textSize);
+    const actualSize = getActualFontSize();
+    document.documentElement.style.setProperty('--base-font-size', `${actualSize}px`);
+    document.documentElement.style.fontSize = `${actualSize}px`;
+    localStorage.setItem('ghallia_text_size', textSize);
+    localStorage.setItem('ghallia_font_offset', customOffset.toString());
+  }, [textSize, customOffset]);
+
+  const handleIncreaseFont = () => {
+    if (getActualFontSize() < MAX_FONT_SIZE) {
+      setCustomOffset(prev => prev + 2);
     }
-  }, [textSize]);
+  };
+
+  const handleDecreaseFont = () => {
+    // Reset offset when decreasing
+    if (customOffset > 0) {
+      setCustomOffset(prev => Math.max(0, prev - 2));
+    } else if (getActualFontSize() > MIN_FONT_SIZE) {
+      setCustomOffset(prev => prev - 2);
+    }
+  };
+
+  const handleResetFont = () => {
+    setCustomOffset(0);
+  };
 
   const handleReset = () => {
     if (!confirmReset) {
@@ -73,16 +105,40 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           {/* Text Size Section */}
           <div className="settings-section">
             <h3>Text Size</h3>
-            <div className="text-size-options">
-              {TEXT_SIZES.map(size => (
-                <button
-                  key={size.value}
-                  className={`text-size-button ${textSize === size.value ? 'active' : ''}`}
-                  onClick={() => setTextSize(size.value)}
-                >
-                  {size.label}
+            <div className="text-size-row">
+              <button
+                className="font-adjust-button"
+                onClick={handleDecreaseFont}
+                disabled={getActualFontSize() <= MIN_FONT_SIZE}
+              >
+                −
+              </button>
+              <div className="text-size-options">
+                {TEXT_SIZES.map(size => (
+                  <button
+                    key={size.value}
+                    className={`text-size-button ${textSize === size.value ? 'active' : ''}`}
+                    onClick={() => { setTextSize(size.value); setCustomOffset(0); }}
+                  >
+                    {size.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                className="font-adjust-button"
+                onClick={handleIncreaseFont}
+                disabled={getActualFontSize() >= MAX_FONT_SIZE}
+              >
+                +
+              </button>
+            </div>
+            <div className="font-size-display">
+              Current: {getActualFontSize()}px
+              {customOffset !== 0 && (
+                <button className="reset-font-button" onClick={handleResetFont}>
+                  Reset
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
