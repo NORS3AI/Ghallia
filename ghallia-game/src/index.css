@@ -1230,6 +1230,57 @@ h4 { font-size: 1.1rem; }
   text-shadow: 0 0 15px rgba(255, 170, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.number-pop.level-up {
+  color: #44ff44;
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-shadow: 0 0 20px rgba(68, 255, 68, 0.8), 0 0 40px rgba(68, 255, 68, 0.4), 0 2px 4px rgba(0, 0, 0, 0.5);
+  animation: levelUpPop 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes levelUpPop {
+  0% {
+    transform: translateX(-50%) translateY(0) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translateX(-50%) translateY(-20px) scale(1.4);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) translateY(-40px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) translateY(-80px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Glitter shower for level up */
+.glitter-particle {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: hsl(var(--hue), 80%, 60%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 999;
+  animation: glitterFall 1.5s ease-out forwards;
+  box-shadow: 0 0 6px hsl(var(--hue), 80%, 60%);
+}
+
+@keyframes glitterFall {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
 /* ============================================
    RESPONSIVE - LARGER PHONES
    ============================================ */

@@ -185,6 +185,94 @@
   padding-bottom: calc(150px + env(safe-area-inset-bottom, 20px));
 }
 
+/* Feature Unlocks Section */
+.feature-unlocks-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border, #4a3f32);
+}
+
+.feature-unlocks-title {
+  font-size: 0.9rem;
+  color: var(--color-gold, #d4a853);
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.feature-unlocks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feature-unlock-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, var(--color-bg-light, #3d3228) 0%, rgba(212, 168, 83, 0.1) 100%);
+  border: 2px solid var(--color-gold-dark, #a67c3d);
+  border-radius: 10px;
+  transition: all 250ms ease;
+}
+
+.feature-unlock-item.locked {
+  opacity: 0.7;
+  border-color: var(--color-border, #4a3f32);
+}
+
+.feature-unlock-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feature-unlock-icon {
+  font-size: 1.8rem;
+}
+
+.feature-unlock-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feature-unlock-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-gold, #d4a853);
+}
+
+.feature-unlock-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #a89880);
+}
+
+.feature-unlock-buy {
+  padding: 8px 16px;
+  background: var(--color-bg-medium, #2a2218);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 8px;
+  color: var(--color-text-muted, #6b5d4d);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: not-allowed;
+  transition: all 200ms ease;
+}
+
+.feature-unlock-buy.affordable {
+  background: linear-gradient(135deg, var(--color-gold, #d4a853), var(--color-gold-dark, #a67c3d));
+  border-color: var(--color-gold, #d4a853);
+  color: var(--color-bg-dark, #1a1410);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(212, 168, 83, 0.3);
+}
+
+.feature-unlock-buy.affordable:active {
+  transform: scale(0.95);
+}
+
 .upgrades-list {
   display: flex;
   flex-direction: column;

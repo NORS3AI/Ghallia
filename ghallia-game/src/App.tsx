@@ -261,10 +261,12 @@ function GameApp() {
             <span>Bag</span>
           </button>
 
-          <button className={`nav-button ${activePanel === 'character' ? 'active' : ''}`} onClick={() => openPanel('character')}>
-            <span className="nav-icon">🧙</span>
-            <span>Char</span>
-          </button>
+          {state.characterUnlocked && (
+            <button className={`nav-button ${activePanel === 'character' ? 'active' : ''}`} onClick={() => openPanel('character')}>
+              <span className="nav-icon">🧙</span>
+              <span>Char</span>
+            </button>
+          )}
 
           <button className={`nav-button ${activePanel === 'stats' ? 'active' : ''}`} onClick={() => openPanel('stats')}>
             <span className="nav-icon">📖</span>
@@ -276,20 +278,26 @@ function GameApp() {
             <span>Upgrades</span>
           </button>
 
-          <button className={`nav-button ${activePanel === 'spells' ? 'active' : ''}`} onClick={() => openPanel('spells')}>
-            <span className="nav-icon">🔮</span>
-            <span>Magic</span>
-          </button>
+          {state.spellsUnlocked && (
+            <button className={`nav-button ${activePanel === 'spells' ? 'active' : ''}`} onClick={() => openPanel('spells')}>
+              <span className="nav-icon">🔮</span>
+              <span>Magic</span>
+            </button>
+          )}
 
-          <button className={`nav-button ${activePanel === 'prestige' ? 'active' : ''}`} onClick={() => openPanel('prestige')}>
-            <span className="nav-icon">👑</span>
-            <span>Prestige</span>
-          </button>
+          {state.skillsUnlockedCount >= 5 && (
+            <button className={`nav-button ${activePanel === 'prestige' ? 'active' : ''}`} onClick={() => openPanel('prestige')}>
+              <span className="nav-icon">👑</span>
+              <span>Prestige</span>
+            </button>
+          )}
 
-          <button className={`nav-button ${activePanel === 'achievements' ? 'active' : ''}`} onClick={() => openPanel('achievements')}>
-            <span className="nav-icon">🏆</span>
-            <span>Achieve</span>
-          </button>
+          {state.achievementsUnlocked && (
+            <button className={`nav-button ${activePanel === 'achievements' ? 'active' : ''}`} onClick={() => openPanel('achievements')}>
+              <span className="nav-icon">🏆</span>
+              <span>Achieve</span>
+            </button>
+          )}
 
           <button className={`nav-button ${activePanel === 'settings' ? 'active' : ''}`} onClick={() => openPanel('settings')}>
             <span className="nav-icon">⚙️</span>

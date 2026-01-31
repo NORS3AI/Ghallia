@@ -117,6 +117,28 @@
   50% { box-shadow: 0 0 15px rgba(74, 222, 128, 0.8); }
 }
 
+.hide-claimed-toggle {
+  padding: 4px 10px;
+  background: var(--color-bg-light, #3d3228);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #a89880);
+  cursor: pointer;
+  transition: all 200ms ease;
+  margin-left: auto;
+}
+
+.hide-claimed-toggle:active {
+  transform: scale(0.95);
+}
+
+.hide-claimed-toggle.active {
+  background: var(--color-gold, #d4a853);
+  border-color: var(--color-gold, #d4a853);
+  color: var(--color-bg-dark, #1a1410);
+}
+
 .achievements-close {
   background: none;
   border: none;

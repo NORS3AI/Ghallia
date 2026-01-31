@@ -19,6 +19,7 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all');
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [confetti, setConfetti] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [hideClaimed, setHideClaimed] = useState(false);
 
   // Check for newly unlocked achievements
   useEffect(() => {
@@ -138,6 +139,12 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
           {claimableCount > 0 && (
             <span className="claimable-badge">{claimableCount} to claim!</span>
           )}
+          <button
+            className={`hide-claimed-toggle ${hideClaimed ? 'active' : ''}`}
+            onClick={() => setHideClaimed(!hideClaimed)}
+          >
+            {hideClaimed ? 'Show Claimed' : 'Hide Claimed'}
+          </button>
         </div>
 
         {/* Category Filter */}
@@ -197,7 +204,7 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
           )}
 
           {/* Claimed Achievements */}
-          {claimed.length > 0 && (
+          {claimed.length > 0 && !hideClaimed && (
             <div className="achievements-section">
               <h3 className="section-title claimed">Claimed ({claimed.length})</h3>
               <div className="achievements-list">
