@@ -15,7 +15,7 @@ interface SettingsPanelProps {
 }
 
 type TextSize = 'small' | 'medium' | 'large' | 'huge';
-type SettingsTab = 'general' | 'account';
+type SettingsTab = 'general' | 'data' | 'account';
 
 const NOTATION_OPTIONS: { value: NumberNotation; label: string; example: string }[] = [
   { value: 'standard', label: 'Standard', example: '1K, 1M, 1B, 1T' },
@@ -47,7 +47,7 @@ const SECRET_CODES: SecretCode[] = [
 ];
 
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
-  const { devAddGold, devAddChaosPoints, devAddBonusTaps, state, loadCloudSave } = useGame();
+  const { devAddGold, devAddChaosPoints, devAddBonusTaps, state, loadCloudSave, saveGame } = useGame();
   const { user, isAuthenticated, serverOnline, error, login, register, logout, clearError, syncToCloud, loadFromCloud, getCloudSaveInfo } = useAuth();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
@@ -73,6 +73,10 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     const saved = localStorage.getItem('infinity_used_codes');
     return saved ? JSON.parse(saved) : [];
   });
+
+  // Data/Save state
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [importError, setImportError] = useState<string | null>(null);
 
   // Account state
   const [authFormMode, setAuthFormMode] = useState<'login' | 'register'>('login');
@@ -289,6 +293,55 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     setAuthFormMode('login');
   };
 
+  // Data/Save handlers
+  const handleManualSave = () => {
+    setSaveStatus('saving');
+    saveGame();
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
+  const handleExportSave = () => {
+    const saveData = localStorage.getItem('infinity_save');
+    if (!saveData) return;
+
+    const blob = new Blob([saveData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `infinity-save-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportSave = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportError(null);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const parsed = JSON.parse(content);
+
+        if (!parsed.skills || !parsed.gold === undefined) {
+          setImportError('Invalid save file format');
+          return;
+        }
+
+        localStorage.setItem('infinity_save', content);
+        window.location.reload();
+      } catch {
+        setImportError('Failed to parse save file');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
   const displayError = localError || error;
 
   return (
@@ -313,6 +366,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             onClick={() => setActiveTab('general')}
           >
             ⚙️ General
+          </button>
+          <button
+            className={`settings-tab ${activeTab === 'data' ? 'active' : ''}`}
+            onClick={() => setActiveTab('data')}
+          >
+            💾 Data
           </button>
           <button
             className={`settings-tab ${activeTab === 'account' ? 'active' : ''}`}
@@ -441,6 +500,54 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                     Cancel
                   </button>
                 )}
+              </div>
+            </>
+          )}
+
+          {activeTab === 'data' && (
+            <>
+              {/* Save Status */}
+              <div className="settings-section">
+                <h3>Local Save</h3>
+                <div className="save-info">
+                  <span className="save-icon">💾</span>
+                  <span>
+                    {state.lastSaveTime
+                      ? `Last saved: ${new Date(state.lastSaveTime).toLocaleString()}`
+                      : 'No save data'}
+                  </span>
+                </div>
+                <button
+                  className={`save-button ${saveStatus === 'saved' ? 'success' : ''}`}
+                  onClick={handleManualSave}
+                  disabled={saveStatus === 'saving'}
+                >
+                  {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved!' : 'Save Now'}
+                </button>
+                <p className="save-note">Game auto-saves every 30 seconds and when you leave the page.</p>
+              </div>
+
+              {/* Export/Import */}
+              <div className="settings-section">
+                <h3>Backup & Restore</h3>
+                <div className="backup-buttons">
+                  <button className="export-button" onClick={handleExportSave}>
+                    ⬇️ Export Save
+                  </button>
+                  <label className="import-button">
+                    ⬆️ Import Save
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportSave}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
+                {importError && (
+                  <p className="import-error">✗ {importError}</p>
+                )}
+                <p className="backup-note">Export to download a backup file. Import to restore from a backup.</p>
               </div>
             </>
           )}
