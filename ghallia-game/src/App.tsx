@@ -5,7 +5,8 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { SkillType, SkillCategory } from './types/game.types';
-import { GameProvider, useGame, SKILL_DEFINITIONS, getUnlockCost } from './store/gameStore';
+import { GameProvider, useGame, SKILL_DEFINITIONS, getUnlockCost, UPGRADES, getUpgradeManaCost } from './store/gameStore';
+import { ACHIEVEMENTS } from './data/achievements';
 import { SkillTable } from './components/skills/SkillTable';
 import { SkillDetail } from './components/skills/SkillDetail';
 import { UnlockPanel } from './components/ui/UnlockPanel';
@@ -175,6 +176,23 @@ function GameApp() {
   const nextUnlockCost = getUnlockCost(state.skillsUnlockedCount + 1);
   const canUnlock = state.gold >= nextUnlockCost && lockedCount > 0;
 
+  // Check for affordable unpurchased upgrades
+  const hasAffordableUpgrades = useMemo(() => {
+    return UPGRADES.some(upgrade => {
+      const owned = state.upgrades[upgrade.id] || false;
+      if (owned) return false;
+      const manaCost = getUpgradeManaCost(upgrade.id);
+      const canAffordGold = state.gold >= upgrade.baseCost;
+      const canAffordMana = manaCost === 0 || state.mana >= manaCost;
+      return canAffordGold && canAffordMana;
+    });
+  }, [state.upgrades, state.gold, state.mana]);
+
+  // Check for claimable achievements
+  const hasClaimableAchievements = useMemo(() => {
+    return state.unlockedAchievements.some(id => !state.claimedAchievements.includes(id));
+  }, [state.unlockedAchievements, state.claimedAchievements]);
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -324,7 +342,7 @@ function GameApp() {
           </button>
 
           <button className={`nav-button ${activePanel === 'upgrades' ? 'active' : ''}`} onClick={() => openPanel('upgrades')}>
-            <span className="nav-icon">⚔️</span>
+            <span className="nav-icon">⚔️{hasAffordableUpgrades && <span className="nav-badge">!</span>}</span>
             <span>Upgrades</span>
           </button>
 
@@ -344,7 +362,7 @@ function GameApp() {
 
           {state.achievementsUnlocked && (
             <button className={`nav-button ${activePanel === 'achievements' ? 'active' : ''}`} onClick={() => openPanel('achievements')}>
-              <span className="nav-icon">🏆</span>
+              <span className="nav-icon">🏆{hasClaimableAchievements && <span className="nav-badge">!</span>}</span>
               <span>Achieve</span>
             </button>
           )}
