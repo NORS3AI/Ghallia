@@ -2435,6 +2435,24 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [state]);
 
+  // Save on page refresh/close and tab switch
+  useEffect(() => {
+    const saveToStorage = () => {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ ...state, lastSaveTime: Date.now() }));
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveToStorage();
+      }
+    };
+    window.addEventListener('beforeunload', saveToStorage);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('beforeunload', saveToStorage);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [state]);
+
   const gather = useCallback((skillType: SkillType) => {
     dispatch({ type: 'GATHER', skillType });
   }, []);
