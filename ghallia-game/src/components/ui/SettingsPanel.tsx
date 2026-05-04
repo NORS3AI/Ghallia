@@ -50,7 +50,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { devAddGold, devAddChaosPoints, devAddBonusTaps, state, loadCloudSave, saveGame } = useGame();
   const { user, isAuthenticated, serverOnline, error, login, register, logout, clearError, syncToCloud, loadFromCloud, getCloudSaveInfo } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const [activeTab, setActiveTab] = useState<SettingsTab>('data');
   const [confirmReset, setConfirmReset] = useState(false);
   const [textSize, setTextSize] = useState<TextSize>(() => {
     return (localStorage.getItem('infinity_text_size') as TextSize) || 'medium';

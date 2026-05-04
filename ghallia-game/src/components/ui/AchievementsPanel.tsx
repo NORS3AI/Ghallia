@@ -19,7 +19,14 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
   const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all');
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [confetti, setConfetti] = useState<{ id: number; x: number; y: number; hue: number }[]>([]);
-  const [hideClaimed, setHideClaimed] = useState(false);
+  const [hideClaimed, setHideClaimed] = useState(() => {
+    return localStorage.getItem('infinity_hide_claimed_achievements') === 'true';
+  });
+
+  // Persist hideClaimed to localStorage
+  useEffect(() => {
+    localStorage.setItem('infinity_hide_claimed_achievements', hideClaimed.toString());
+  }, [hideClaimed]);
 
   // Check for newly unlocked achievements
   useEffect(() => {

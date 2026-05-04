@@ -3,7 +3,7 @@
  * Shows purchasable upgrades for tap power, crit, luck, mana, and gold
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useGame, UPGRADES, UpgradeDef, getUpgradeManaCost } from '../../store/gameStore';
 import { formatGold } from '../../utils/math';
 import './UpgradesPanel.css';
@@ -40,7 +40,14 @@ export function UpgradesPanel({ isOpen, onClose }: UpgradesPanelProps) {
   // Afford filter - only show affordable upgrades
   const [affordOnly, setAffordOnly] = useState(false);
   // Hide purchased upgrades
-  const [hidePurchased, setHidePurchased] = useState(false);
+  const [hidePurchased, setHidePurchased] = useState(() => {
+    return localStorage.getItem('infinity_hide_purchased_upgrades') === 'true';
+  });
+
+  // Persist hidePurchased to localStorage
+  useEffect(() => {
+    localStorage.setItem('infinity_hide_purchased_upgrades', hidePurchased.toString());
+  }, [hidePurchased]);
 
   const toggleCategory = (cat: CategoryFilter) => {
     setActiveCategories(prev => {
