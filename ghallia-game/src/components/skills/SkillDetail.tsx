@@ -15,6 +15,7 @@ import {
   getMaterialTiersForSkill,
   CRAFTING_RECIPES,
   CraftingRecipe,
+  isEquippableRecipe,
 } from '../../store/gameStore';
 import { getTierFromLevel, totalXpForLevel, formatNumber } from '../../utils/math';
 import { useSwipe } from '../../hooks/useSwipe';
@@ -42,7 +43,7 @@ interface GlitterParticle {
 }
 
 export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }: SkillDetailProps) {
-  const { state, gather, sellResource, startCraft, cancelCraft, collectCrafted } = useGame();
+  const { state, gather, sellResource, startCraft, cancelCraft, collectCrafted, equipCrafted } = useGame();
   const skillDef = SKILL_DEFINITIONS.find(s => s.id === skillType)!;
   const skillState = state.skills[skillType];
   const [selectedTier, setSelectedTier] = useState<number | 'all'>('all');
@@ -334,19 +335,32 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
             <div className="crafted-items-section">
               <h3 className="section-title">Ready to Sell</h3>
               <div className="crafted-items-list">
-                {craftedItemsForSkill.map(({ recipe, quantity }) => (
-                  <div key={recipe.id} className="crafted-item">
-                    <span className="crafted-icon">{recipe.icon}</span>
-                    <span className="crafted-name">{recipe.name}</span>
-                    <span className="crafted-quantity">x{quantity}</span>
-                    <button
-                      className="sell-crafted-button"
-                      onClick={() => handleCollect(recipe.id, quantity)}
-                    >
-                      Sell ({formatNumber(recipe.sellValue * quantity)}g)
-                    </button>
-                  </div>
-                ))}
+                {craftedItemsForSkill.map(({ recipe, quantity }) => {
+                  const canEquip = isEquippableRecipe(recipe.id);
+                  return (
+                    <div key={recipe.id} className="crafted-item">
+                      <span className="crafted-icon">{recipe.icon}</span>
+                      <span className="crafted-name">{recipe.name}</span>
+                      <span className="crafted-quantity">x{quantity}</span>
+                      <div className="crafted-actions">
+                        {canEquip && (
+                          <button
+                            className="equip-crafted-button"
+                            onClick={() => equipCrafted(recipe.id)}
+                          >
+                            Equip
+                          </button>
+                        )}
+                        <button
+                          className="sell-crafted-button"
+                          onClick={() => handleCollect(recipe.id, quantity)}
+                        >
+                          Sell ({formatNumber(recipe.sellValue * quantity)}g)
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

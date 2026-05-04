@@ -1079,6 +1079,115 @@ export function getMaterialTiersForSkill(skillType: SkillType): number[] {
   return Array.from(tiers).sort((a, b) => a - b);
 }
 
+// Equipment slot mapping for crafted items
+const EQUIPMENT_SLOT_MAP: Record<string, EquipmentSlot> = {
+  // Smithing
+  'Dagger': EquipmentSlot.MAIN_HAND,
+  'Sword': EquipmentSlot.MAIN_HAND,
+  'Shield': EquipmentSlot.OFF_HAND,
+  'Helmet': EquipmentSlot.HEAD,
+  'Chestplate': EquipmentSlot.CHEST,
+  'Gauntlets': EquipmentSlot.GLOVES,
+  'Greaves': EquipmentSlot.PANTS,
+  'Battleaxe': EquipmentSlot.MAIN_HAND,
+  // Leatherworking
+  'Belt': EquipmentSlot.BRACERS,
+  'Gloves': EquipmentSlot.GLOVES,
+  'Boots': EquipmentSlot.BOOTS,
+  'Vest': EquipmentSlot.CHEST,
+  'Jacket': EquipmentSlot.CHEST,
+  'Armor': EquipmentSlot.CHEST,
+  'Backpack': EquipmentSlot.BACK,
+  // Tailoring
+  'Scarf': EquipmentSlot.BACK,
+  'Hat': EquipmentSlot.HEAD,
+  'Shirt': EquipmentSlot.CHEST,
+  'Robe': EquipmentSlot.CHEST,
+  'Cloak': EquipmentSlot.BACK,
+  'Cape': EquipmentSlot.BACK,
+  // Jewelcrafting
+  'Ring': EquipmentSlot.RING_1,
+  'Amulet': EquipmentSlot.NECKLACE,
+  'Pendant': EquipmentSlot.NECKLACE,
+  'Bracelet': EquipmentSlot.BRACERS,
+  'Brooch': EquipmentSlot.TRINKET,
+  'Crown': EquipmentSlot.HEAD,
+  'Tiara': EquipmentSlot.HEAD,
+  'Circlet': EquipmentSlot.HEAD,
+};
+
+// Check if a recipe produces equippable gear
+export function isEquippableRecipe(recipeId: string): boolean {
+  const recipe = CRAFTING_RECIPES.find(r => r.id === recipeId);
+  if (!recipe) return false;
+
+  // Check if it's a final item (not processing like ingots/planks)
+  const isProcessing = recipeId.includes('_ingot_') || recipeId.includes('_plank_') ||
+                       recipeId.includes('_plate_') || recipeId.includes('_fillet_') ||
+                       recipeId.includes('_extract_') || recipeId.includes('_leather_') ||
+                       recipeId.includes('_cloth_') || recipeId.includes('_setting_') ||
+                       recipeId.includes('_essence_') || recipeId.includes('_part_');
+  if (isProcessing) return false;
+
+  // Check if we have a slot mapping for this item
+  const itemName = recipe.name.split(' ').pop() || '';
+  return itemName in EQUIPMENT_SLOT_MAP;
+}
+
+// Generate Equipment from a crafted recipe
+export function createEquipmentFromRecipe(recipeId: string): Equipment | null {
+  const recipe = CRAFTING_RECIPES.find(r => r.id === recipeId);
+  if (!recipe || !isEquippableRecipe(recipeId)) return null;
+
+  const itemName = recipe.name.split(' ').pop() || '';
+  const slot = EQUIPMENT_SLOT_MAP[itemName];
+  if (!slot) return null;
+
+  // Extract tier from recipe ID
+  const tierMatch = recipeId.match(/_t(\d+)_/);
+  const tier = tierMatch ? parseInt(tierMatch[1]) : 1;
+
+  // Determine rarity based on tier
+  let rarity: Rarity = Rarity.COMMON;
+  if (tier >= 8) rarity = Rarity.LEGENDARY;
+  else if (tier >= 6) rarity = Rarity.EPIC;
+  else if (tier >= 4) rarity = Rarity.RARE;
+  else if (tier >= 2) rarity = Rarity.UNCOMMON;
+
+  // Calculate stats based on tier and item type
+  const baseStatValue = tier * 2;
+  const stats: EquipmentStats = {
+    strength: 0,
+    intellect: 0,
+    agility: 0,
+    stamina: Math.floor(baseStatValue * 0.5),
+  };
+
+  // Assign primary stat based on crafting skill
+  if (recipe.craftingSkill === SkillType.SMITHING) {
+    stats.strength = baseStatValue;
+  } else if (recipe.craftingSkill === SkillType.LEATHERWORKING) {
+    stats.agility = baseStatValue;
+  } else if (recipe.craftingSkill === SkillType.TAILORING) {
+    stats.intellect = baseStatValue;
+  } else if (recipe.craftingSkill === SkillType.JEWELCRAFTING) {
+    stats.intellect = Math.floor(baseStatValue * 0.5);
+    stats.agility = Math.floor(baseStatValue * 0.5);
+  }
+
+  return {
+    id: `equip_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    name: recipe.name,
+    type: EquipmentType.ARMOR,
+    slot,
+    materialTier: tier as MaterialTier,
+    rarity,
+    stats,
+    sellValue: recipe.sellValue,
+    icon: recipe.icon,
+  };
+}
+
 // ============================================
 // STATE TYPES
 // ============================================
@@ -1228,6 +1337,7 @@ type GameAction =
   | { type: 'START_CRAFT'; recipeId: string; quantity: number }
   | { type: 'CANCEL_CRAFT'; queueItemId: string }
   | { type: 'COLLECT_CRAFTED'; recipeId: string; quantity: number }
+  | { type: 'EQUIP_CRAFTED'; recipeId: string }
   // Cloud save
   | { type: 'LOAD_CLOUD_SAVE'; cloudState: any };
 
@@ -2298,6 +2408,30 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'EQUIP_CRAFTED': {
+      const currentCount = state.craftedItems[action.recipeId] || 0;
+      if (currentCount < 1) return state;
+
+      // Create equipment from the recipe
+      const equipment = createEquipmentFromRecipe(action.recipeId);
+      if (!equipment) return state;
+
+      // Add to equipment inventory and reduce crafted count
+      return {
+        ...state,
+        craftedItems: {
+          ...state.craftedItems,
+          [action.recipeId]: currentCount - 1,
+        },
+        equipmentInventory: [...state.equipmentInventory, equipment],
+        characterUnlocked: true, // Unlock character when getting equipment
+        stats: {
+          ...state.stats,
+          totalEquipmentObtained: state.stats.totalEquipmentObtained + 1,
+        },
+      };
+    }
+
     case 'LOAD_GAME': {
       // Merge loaded state with defaults for any missing fields
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2419,6 +2553,7 @@ interface GameContextType {
   startCraft: (recipeId: string, quantity?: number) => void;
   cancelCraft: (queueItemId: string) => void;
   collectCrafted: (recipeId: string, quantity: number) => void;
+  equipCrafted: (recipeId: string) => void;
   // Cloud save
   loadCloudSave: (cloudState: any) => void;
 }
@@ -2610,6 +2745,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'COLLECT_CRAFTED', recipeId, quantity });
   }, []);
 
+  const equipCrafted = useCallback((recipeId: string) => {
+    dispatch({ type: 'EQUIP_CRAFTED', recipeId });
+  }, []);
+
   // Load cloud save - replaces current state with cloud state
   const loadCloudSave = useCallback((cloudState: any) => {
     dispatch({ type: 'LOAD_CLOUD_SAVE', cloudState });
@@ -2648,6 +2787,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       startCraft,
       cancelCraft,
       collectCrafted,
+      equipCrafted,
       loadCloudSave,
     }}>
       {children}
