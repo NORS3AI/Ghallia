@@ -224,7 +224,7 @@ export function AchievementsPanel({ isOpen, onClose }: AchievementsPanelProps) {
                       <div className="achievement-description">{achievement.description}</div>
                       <div className="achievement-reward">
                         <span className="gold-icon">💰</span>
-                        <span className="reward-amount">{formatGold(achievement.reward)}g</span>
+                        <span className="reward-amount">+{formatGold(achievement.reward)}g/s</span>
                       </div>
                     </div>
                     <button
