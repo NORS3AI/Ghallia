@@ -214,56 +214,86 @@ const generateManaPoolUpgrades = (): UpgradeDef[] => {
   }));
 };
 
-// Generate mana regen upgrades (15 total)
-// First 10: +0.1/sec each, costs gold only (1000, 10000, 100000, 1M, 10M, ...)
-// Last 5: +0.5/sec each, costs gold AND mana (100k+10mana, 1M+25mana, 10M+50mana, 100M+100mana, 1B+200mana)
-const MANA_REGEN_NAMES = [
-  'Mana Flow I', 'Mana Flow II', 'Mana Flow III', 'Mana Flow IV', 'Mana Flow V',
+// Generate mana regen upgrades with Common/Rare/Epic tiers
+// Common: +0.1/sec (gold only) - frequent, affordable
+// Rare: +0.5/sec (gold only) - less frequent, more expensive
+// Epic: +1.0/sec (gold + mana) - rare, very expensive
+const MANA_REGEN_COMMON = [
+  'Mana Trickle', 'Mana Drip', 'Mana Seep', 'Mana Leak', 'Mana Flow',
+  'Minor Stream', 'Small Current', 'Gentle Wave', 'Soft Pulse', 'Light Surge',
+  'Faint Glow', 'Dim Spark', 'Weak Flare', 'Low Burn', 'Mild Heat',
+];
+const MANA_REGEN_RARE = [
   'Arcane Stream', 'Mystic Current', 'Ethereal River', 'Astral Tide', 'Cosmic Wave',
-  'Spirit Surge', 'Soul Pulse', 'Life Beat', 'Energy Flux', 'Power Cycle'
+  'Spirit Rush', 'Soul Cascade', 'Life Torrent', 'Energy Rapids', 'Power Flood',
+];
+const MANA_REGEN_EPIC = [
+  'Mana Tsunami', 'Arcane Deluge', 'Mystic Maelstrom', 'Ethereal Tempest', 'Astral Storm',
 ];
 
 // Extended upgrade definition to include mana cost
 export interface ManaUpgradeDef extends UpgradeDef {
   manaCost?: number;
+  rarity?: 'common' | 'rare' | 'epic';
 }
 
 const generateManaRegenUpgrades = (): ManaUpgradeDef[] => {
   const upgrades: ManaUpgradeDef[] = [];
 
-  // First 10: +0.1/sec, gold only, exponential costs
-  const goldOnlyCosts = [1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000, 1000000000000];
-  for (let i = 0; i < 10; i++) {
+  // Common upgrades (+0.1/sec) - 15 total, gold only
+  // Prices: 500, 2K, 8K, 25K, 80K, 250K, 800K, 2.5M, 8M, 25M, 80M, 250M, 800M, 2.5B, 8B
+  const commonCosts = [500, 2000, 8000, 25000, 80000, 250000, 800000, 2500000, 8000000, 25000000, 80000000, 250000000, 800000000, 2500000000, 8000000000];
+  for (let i = 0; i < MANA_REGEN_COMMON.length; i++) {
     upgrades.push({
-      id: `mana_regen_${i + 1}`,
-      name: MANA_REGEN_NAMES[i],
+      id: `mana_regen_common_${i + 1}`,
+      name: MANA_REGEN_COMMON[i],
       description: `+0.1 mana/sec`,
-      baseCost: goldOnlyCosts[i],
+      baseCost: commonCosts[i],
       maxLevel: 1,
       effect: () => 0.1,
       category: 'mana' as const,
-      manaCost: 0
+      manaCost: 0,
+      rarity: 'common'
     });
   }
 
-  // Last 5: +0.5/sec, gold AND mana costs
-  const advancedCosts = [
-    { gold: 100000, mana: 10 },
-    { gold: 1000000, mana: 25 },
-    { gold: 10000000, mana: 50 },
-    { gold: 100000000, mana: 100 },
-    { gold: 1000000000, mana: 200 }
-  ];
-  for (let i = 0; i < 5; i++) {
+  // Rare upgrades (+0.5/sec) - 10 total, gold only but expensive
+  // Prices: 50K, 200K, 800K, 3M, 12M, 50M, 200M, 800M, 3B, 12B
+  const rareCosts = [50000, 200000, 800000, 3000000, 12000000, 50000000, 200000000, 800000000, 3000000000, 12000000000];
+  for (let i = 0; i < MANA_REGEN_RARE.length; i++) {
     upgrades.push({
-      id: `mana_regen_${i + 11}`,
-      name: MANA_REGEN_NAMES[i + 10],
-      description: `+0.5 mana/sec (costs ${advancedCosts[i].mana} mana)`,
-      baseCost: advancedCosts[i].gold,
+      id: `mana_regen_rare_${i + 1}`,
+      name: MANA_REGEN_RARE[i],
+      description: `+0.5 mana/sec (Rare)`,
+      baseCost: rareCosts[i],
       maxLevel: 1,
       effect: () => 0.5,
       category: 'mana' as const,
-      manaCost: advancedCosts[i].mana
+      manaCost: 0,
+      rarity: 'rare'
+    });
+  }
+
+  // Epic upgrades (+1.0/sec) - 5 total, gold + mana cost
+  // Prices: 5M + 25 mana, 50M + 50 mana, 500M + 100 mana, 5B + 200 mana, 50B + 500 mana
+  const epicCosts = [
+    { gold: 5000000, mana: 25 },
+    { gold: 50000000, mana: 50 },
+    { gold: 500000000, mana: 100 },
+    { gold: 5000000000, mana: 200 },
+    { gold: 50000000000, mana: 500 }
+  ];
+  for (let i = 0; i < MANA_REGEN_EPIC.length; i++) {
+    upgrades.push({
+      id: `mana_regen_epic_${i + 1}`,
+      name: MANA_REGEN_EPIC[i],
+      description: `+1.0 mana/sec (Epic, costs ${epicCosts[i].mana} mana)`,
+      baseCost: epicCosts[i].gold,
+      maxLevel: 1,
+      effect: () => 1.0,
+      category: 'mana' as const,
+      manaCost: epicCosts[i].mana,
+      rarity: 'epic'
     });
   }
 
@@ -330,10 +360,10 @@ export interface SpellDef {
 
 export const SPELLS: SpellDef[] = [
   { id: 'auto_tap', name: 'Auto Harvest', description: 'Auto-gather all skills 100x/sec for 60s', manaCost: 15, duration: 60, cooldown: 60, icon: '⚡' },
-  { id: 'double_xp', name: 'Wisdom', description: '2x XP for 30 seconds', manaCost: 30, duration: 30, cooldown: 90, icon: '📚' },
-  { id: 'double_gold', name: 'Prosperity', description: '2x gold for 30 seconds', manaCost: 30, duration: 30, cooldown: 90, icon: '💎' },
-  { id: 'mega_crit', name: 'Critical Surge', description: '100% crit chance for 10 seconds', manaCost: 40, duration: 10, cooldown: 120, icon: '🎯' },
-  { id: 'lucky_star', name: 'Lucky Star', description: '50% luck for 15 seconds', manaCost: 35, duration: 15, cooldown: 100, icon: '⭐' },
+  { id: 'double_xp', name: 'Wisdom', description: '2x XP for 90 seconds', manaCost: 30, duration: 90, cooldown: 90, icon: '📚' },
+  { id: 'double_gold', name: 'Prosperity', description: '2x gold for 90 seconds', manaCost: 30, duration: 90, cooldown: 90, icon: '💎' },
+  { id: 'mega_crit', name: 'Critical Surge', description: '100% crit chance for 90 seconds', manaCost: 40, duration: 90, cooldown: 120, icon: '🎯' },
+  { id: 'lucky_star', name: 'Lucky Star', description: '50% luck for 90 seconds', manaCost: 35, duration: 90, cooldown: 100, icon: '⭐' },
 ];
 
 // ============================================
