@@ -28,6 +28,19 @@ function formatTime(seconds: number): string {
   return `${secs}s`;
 }
 
+type TooltipType = 'crit' | 'luck' | null;
+
+const STAT_TOOLTIPS: Record<string, { title: string; description: string }> = {
+  crit: {
+    title: 'Critical Hits',
+    description: 'Critical hits multiply your resource gains by your Crit Damage percentage. Higher Crit Chance means more frequent crits. Crit Damage determines how much extra you get when you crit.',
+  },
+  luck: {
+    title: 'Luck',
+    description: 'Luck gives you a chance to find bonus resources on each tap. When luck triggers, you get extra materials on top of your normal gains. Stack luck for more consistent bonus finds!',
+  },
+};
+
 export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
   const { state, sellAllResources, devAddGold, devAddMana, devAddMaxMana, devAddBonusTaps, devUnlockSpells, devAddChaosPoints, devSetPrestige } = useGame();
   const [devUnlocked, setDevUnlocked] = useState(() => {
@@ -35,6 +48,7 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
   });
   const [passcodeInput, setPasscodeInput] = useState('');
   const [passcodeError, setPasscodeError] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<TooltipType>(null);
 
   // Save dev unlocked state
   useEffect(() => {
@@ -102,16 +116,16 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
                 <span className="stat-label">Taps per Click</span>
                 <span className="stat-value">{1 + state.bonusTaps}</span>
               </div>
-              <div className="stat-item">
-                <span className="stat-label">Crit Chance</span>
+              <div className="stat-item tappable" onClick={() => setActiveTooltip('crit')}>
+                <span className="stat-label">Crit Chance <span className="info-icon">ⓘ</span></span>
                 <span className="stat-value">{state.critChance}%</span>
               </div>
-              <div className="stat-item">
-                <span className="stat-label">Crit Damage</span>
+              <div className="stat-item tappable" onClick={() => setActiveTooltip('crit')}>
+                <span className="stat-label">Crit Damage <span className="info-icon">ⓘ</span></span>
                 <span className="stat-value">{state.critDamage}%</span>
               </div>
-              <div className="stat-item">
-                <span className="stat-label">Luck</span>
+              <div className="stat-item tappable" onClick={() => setActiveTooltip('luck')}>
+                <span className="stat-label">Luck <span className="info-icon">ⓘ</span></span>
                 <span className="stat-value">{state.luck}%</span>
               </div>
               <div className="stat-item">
@@ -308,6 +322,20 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
           </div>
         </div>
       </div>
+
+      {/* Stat Tooltip Popup */}
+      {activeTooltip && (
+        <>
+          <div className="stat-tooltip-backdrop" onClick={() => setActiveTooltip(null)} />
+          <div className="stat-tooltip-popup">
+            <h3>{STAT_TOOLTIPS[activeTooltip].title}</h3>
+            <p>{STAT_TOOLTIPS[activeTooltip].description}</p>
+            <button className="tooltip-close-btn" onClick={() => setActiveTooltip(null)}>
+              Got it!
+            </button>
+          </div>
+        </>
+      )}
     </>
   );
 }
