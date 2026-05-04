@@ -356,7 +356,7 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
             <div className="crafting-queue-section">
               <h3 className="section-title">Crafting Queue ({craftingQueue.length})</h3>
               <div className="crafting-queue-list">
-                {craftingQueue.slice(0, 5).map(item => {
+                {craftingQueue.map(item => {
                   const recipe = CRAFTING_RECIPES.find(r => r.id === item.recipeId);
                   if (!recipe) return null;
                   const progress = Math.min(100, ((currentTime - item.startTime) / (item.endTime - item.startTime)) * 100);
