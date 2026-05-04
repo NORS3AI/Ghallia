@@ -625,6 +625,27 @@ h4 { font-size: 1.1rem; }
   font-weight: 600;
 }
 
+.crafted-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.equip-crafted-button {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: linear-gradient(135deg, #4a7c59, #3d6b4a);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.equip-crafted-button:active {
+  transform: scale(0.95);
+}
+
 .sell-crafted-button {
   padding: var(--spacing-xs) var(--spacing-sm);
   background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));

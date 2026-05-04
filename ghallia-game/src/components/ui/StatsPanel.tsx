@@ -42,7 +42,7 @@ const STAT_TOOLTIPS: Record<string, { title: string; description: string }> = {
 };
 
 export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
-  const { state, sellAllResources, devAddGold, devAddMana, devAddMaxMana, devAddBonusTaps, devUnlockSpells, devAddChaosPoints, devSetPrestige } = useGame();
+  const { state, sellAllResources, devAddGold, devAddMana, devAddMaxMana, devAddBonusTaps, devUnlockSpells, devAddChaosPoints, devSetPrestige, devToggleInstantCraft } = useGame();
   const [devUnlocked, setDevUnlocked] = useState(() => {
     return localStorage.getItem('infinity_dev_unlocked') === 'true';
   });
@@ -308,6 +308,18 @@ export function StatsPanel({ isOpen, onClose }: StatsPanelProps) {
                     <button className="dev-button" onClick={() => devAddChaosPoints(10)}>+10</button>
                     <button className="dev-button" onClick={() => devAddChaosPoints(100)}>+100</button>
                     <button className="dev-button" onClick={() => devAddChaosPoints(1000)}>+1000</button>
+                  </div>
+                </div>
+
+                <div className="dev-row">
+                  <span className="dev-label">Crafting:</span>
+                  <div className="dev-buttons">
+                    <button
+                      className={`dev-button ${state.devInstantCraft ? 'active' : ''}`}
+                      onClick={devToggleInstantCraft}
+                    >
+                      {state.devInstantCraft ? '✓ Instant Craft ON' : 'Instant Craft OFF'}
+                    </button>
                   </div>
                 </div>
 

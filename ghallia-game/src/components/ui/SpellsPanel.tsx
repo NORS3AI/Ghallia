@@ -3,7 +3,7 @@
  * Unlockable panel for magical spells that consume mana
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useGame, SPELLS, SpellDef } from '../../store/gameStore';
 import { formatGold } from '../../utils/math';
 import './SpellsPanel.css';
@@ -15,6 +15,35 @@ interface SpellsPanelProps {
 
 export function SpellsPanel({ isOpen, onClose }: SpellsPanelProps) {
   const { state, unlockSpells, castSpell } = useGame();
+
+  // Cast all available spells
+  const handleCastAll = useCallback(() => {
+    const now = Date.now();
+    let remainingMana = state.mana;
+
+    SPELLS.forEach(spell => {
+      const spellState = state.spells[spell.id];
+      const isActive = spellState && spellState.activeUntil > now;
+      const isOnCooldown = spellState && spellState.cooldownUntil > now && !isActive;
+      const canCast = remainingMana >= spell.manaCost && !isActive && !isOnCooldown;
+
+      if (canCast) {
+        castSpell(spell.id);
+        remainingMana -= spell.manaCost;
+      }
+    });
+  }, [state.mana, state.spells, castSpell]);
+
+  // Check if any spell can be cast
+  const canCastAny = useMemo(() => {
+    const now = Date.now();
+    return SPELLS.some(spell => {
+      const spellState = state.spells[spell.id];
+      const isActive = spellState && spellState.activeUntil > now;
+      const isOnCooldown = spellState && spellState.cooldownUntil > now && !isActive;
+      return state.mana >= spell.manaCost && !isActive && !isOnCooldown;
+    });
+  }, [state.mana, state.spells]);
 
   const canUnlock = state.gold >= 1000 && !state.spellsUnlocked;
 
@@ -80,6 +109,13 @@ export function SpellsPanel({ isOpen, onClose }: SpellsPanelProps) {
             </div>
           ) : (
             <div className="spells-list">
+              <button
+                className={`cast-all-button ${canCastAny ? 'ready' : ''}`}
+                onClick={handleCastAll}
+                disabled={!canCastAny}
+              >
+                Cast All
+              </button>
               {SPELLS.map(spell => (
                 <SpellItem
                   key={spell.id}
