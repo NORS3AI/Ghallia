@@ -104,7 +104,7 @@ function GameApp() {
 
     if (gatheringSkills.length === 0) return;
 
-    // Auto-gather every 500ms on all gathering skills
+    // Auto-gather every 200ms on all gathering skills (really fast)
     const interval = setInterval(() => {
       const now = Date.now();
       if (autoTapSpell.activeUntil <= now) {
@@ -115,7 +115,7 @@ function GameApp() {
       gatheringSkills.forEach(skillType => {
         gather(skillType);
       });
-    }, 500);
+    }, 200);
 
     return () => clearInterval(interval);
   }, [state.spells, state.skills, gather]);
