@@ -17,6 +17,7 @@ import { SpellsPanel } from './components/ui/SpellsPanel';
 import { InventoryPanel } from './components/ui/InventoryPanel';
 import { CharacterPanel } from './components/ui/CharacterPanel';
 import { AchievementsPanel } from './components/ui/AchievementsPanel';
+import { ActiveSpellsBar } from './components/ui/ActiveSpellsBar';
 import { AuthProvider } from './contexts/AuthContext';
 import { formatGold } from './utils/math';
 
@@ -203,6 +204,9 @@ function GameApp() {
           </div>
         </div>
       </header>
+
+      {/* Active Spells Indicator */}
+      <ActiveSpellsBar />
 
       {/* Main Content */}
       <main className="main-content">
