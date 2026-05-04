@@ -196,6 +196,9 @@ function GameApp() {
             <div className="header-gold">
               <span>💰</span>
               <span>{formatGold(state.gold)}g</span>
+              {state.goldPerSecond > 0 && (
+                <span className="gold-per-second">(+{formatGold(state.goldPerSecond)}/s)</span>
+              )}
             </div>
           </div>
         </div>

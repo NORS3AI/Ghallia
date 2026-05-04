@@ -1122,6 +1122,7 @@ export interface GatherResult {
 
 export interface GameState {
   gold: number;
+  goldPerSecond: number; // passive gold income from achievements
   mana: number;
   maxMana: number;
   manaRegen: number; // per second
@@ -1260,6 +1261,7 @@ const initialCharacter: CharacterState = {
 
 const initialState: GameState = {
   gold: 0,
+  goldPerSecond: 0,
   mana: 0,
   maxMana: 50,
   manaRegen: 0.1,
@@ -1921,14 +1923,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
+      // Calculate passive gold income
+      const goldIncome = state.goldPerSecond * deltaSeconds;
+
       return {
         ...state,
+        gold: state.gold + goldIncome,
         characterUnlocked: state.characterUnlocked || shouldUnlockCharacter,
         mana: state.spellsUnlocked ? newMana : state.mana,
         stats: {
           ...state.stats,
           totalPlayTime: state.stats.totalPlayTime + deltaSeconds,
           sessionPlayTime: state.stats.sessionPlayTime + deltaSeconds,
+          totalGoldEarned: state.stats.totalGoldEarned + goldIncome,
         },
         craftingQueue: remainingQueue,
         craftedItems: newCraftedItems,
@@ -2083,14 +2090,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (!state.unlockedAchievements.includes(action.achievementId)) {
         return state;
       }
+      // Achievement rewards add to gold per second, not instant gold
       return {
         ...state,
-        gold: state.gold + action.reward,
+        goldPerSecond: state.goldPerSecond + action.reward,
         claimedAchievements: [...state.claimedAchievements, action.achievementId],
-        stats: {
-          ...state.stats,
-          totalGoldEarned: state.stats.totalGoldEarned + action.reward,
-        },
       };
     }
 
