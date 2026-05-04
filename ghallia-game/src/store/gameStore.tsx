@@ -1297,6 +1297,8 @@ export interface GameState {
   // Crafting system
   craftingQueue: CraftingQueueItem[];
   craftedItems: Record<string, number>; // recipeId -> quantity crafted
+  // Dev tools
+  devInstantCraft: boolean;
 }
 
 // ============================================
@@ -1327,6 +1329,7 @@ type GameAction =
   | { type: 'DEV_UNLOCK_SPELLS' }
   | { type: 'DEV_ADD_CHAOS_POINTS'; amount: number }
   | { type: 'DEV_SET_PRESTIGE'; count: number }
+  | { type: 'DEV_TOGGLE_INSTANT_CRAFT' }
   // Achievements
   | { type: 'UNLOCK_ACHIEVEMENT'; achievementId: string }
   | { type: 'CLAIM_ACHIEVEMENT'; achievementId: string; reward: number }
@@ -1431,6 +1434,7 @@ const initialState: GameState = {
   lastGatherResult: null,
   craftingQueue: [],
   craftedItems: {},
+  devInstantCraft: false,
 };
 
 // ============================================
@@ -2212,6 +2216,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'DEV_TOGGLE_INSTANT_CRAFT': {
+      return {
+        ...state,
+        devInstantCraft: !state.devInstantCraft,
+      };
+    }
+
     // Achievements
     case 'UNLOCK_ACHIEVEMENT': {
       if (state.unlockedAchievements.includes(action.achievementId)) {
@@ -2334,6 +2345,30 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const newResources = { ...state.resources };
       for (const mat of recipe.materials) {
         newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) - (mat.quantity * quantity);
+      }
+
+      // If instant craft is enabled, skip queue and add directly to crafted items
+      if (state.devInstantCraft) {
+        const newSkillState = { ...state.skills };
+        const currentSkill = newSkillState[recipe.craftingSkill];
+        const xpGained = recipe.xpReward * quantity;
+        const newTotalXp = currentSkill.totalXp + xpGained;
+        const newLevel = levelFromTotalXp(newTotalXp);
+        newSkillState[recipe.craftingSkill] = {
+          ...currentSkill,
+          totalXp: newTotalXp,
+          level: newLevel,
+        };
+
+        return {
+          ...state,
+          resources: newResources,
+          skills: newSkillState,
+          craftedItems: {
+            ...state.craftedItems,
+            [action.recipeId]: (state.craftedItems[action.recipeId] || 0) + quantity,
+          },
+        };
       }
 
       // Get talent craft speed bonus
@@ -2542,6 +2577,7 @@ interface GameContextType {
   devUnlockSpells: () => void;
   devAddChaosPoints: (amount: number) => void;
   devSetPrestige: (count: number) => void;
+  devToggleInstantCraft: () => void;
   // Achievements
   unlockAchievement: (achievementId: string) => void;
   claimAchievement: (achievementId: string, reward: number) => void;
@@ -2707,6 +2743,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'DEV_SET_PRESTIGE', count });
   }, []);
 
+  const devToggleInstantCraft = useCallback(() => {
+    dispatch({ type: 'DEV_TOGGLE_INSTANT_CRAFT' });
+  }, []);
+
   // Achievements
   const unlockAchievement = useCallback((achievementId: string) => {
     dispatch({ type: 'UNLOCK_ACHIEVEMENT', achievementId });
@@ -2779,6 +2819,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       devUnlockSpells,
       devAddChaosPoints,
       devSetPrestige,
+      devToggleInstantCraft,
       unlockAchievement,
       claimAchievement,
       checkAchievements,
