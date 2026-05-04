@@ -447,18 +447,39 @@ export function SkillDetail({ skillType, onBack, onSwipeToNext, onSwipeToPrev }:
                           x1
                         </button>
                         <button
-                          className={`qty-btn ${selectedQty === 5 ? 'active' : ''}`}
-                          onClick={() => setQuantity(recipe.id, Math.min(5, maxCraftable || 5))}
-                          disabled={!meetsLevel || maxCraftable < 5}
-                        >
-                          x5
-                        </button>
-                        <button
                           className={`qty-btn ${selectedQty === 10 ? 'active' : ''}`}
                           onClick={() => setQuantity(recipe.id, Math.min(10, maxCraftable || 10))}
                           disabled={!meetsLevel || maxCraftable < 10}
                         >
                           x10
+                        </button>
+                        <button
+                          className={`qty-btn ${selectedQty === 100 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, Math.min(100, maxCraftable || 100))}
+                          disabled={!meetsLevel || maxCraftable < 100}
+                        >
+                          x100
+                        </button>
+                        <button
+                          className={`qty-btn ${selectedQty === 500 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, Math.min(500, maxCraftable || 500))}
+                          disabled={!meetsLevel || maxCraftable < 500}
+                        >
+                          x500
+                        </button>
+                        <button
+                          className={`qty-btn ${selectedQty === 1000 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, Math.min(1000, maxCraftable || 1000))}
+                          disabled={!meetsLevel || maxCraftable < 1000}
+                        >
+                          x1K
+                        </button>
+                        <button
+                          className={`qty-btn ${selectedQty === 5000 ? 'active' : ''}`}
+                          onClick={() => setQuantity(recipe.id, Math.min(5000, maxCraftable || 5000))}
+                          disabled={!meetsLevel || maxCraftable < 5000}
+                        >
+                          x5K
                         </button>
                         <input
                           type="number"
