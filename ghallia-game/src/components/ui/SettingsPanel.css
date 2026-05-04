@@ -445,6 +445,104 @@
   }
 }
 
+/* Data Tab - Save/Load */
+.save-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: var(--color-bg-dark, #1a1410);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #a89880);
+}
+
+.save-icon {
+  font-size: 1.3rem;
+}
+
+.save-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--color-gold-dark, #8a7235) 0%, var(--color-gold, #d4a853) 100%);
+  border: none;
+  border-radius: 10px;
+  color: var(--color-bg-dark, #1a1410);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.save-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.save-button.success {
+  background: var(--color-accent-green, #4a7c59);
+  color: #fff;
+}
+
+.save-button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.save-note {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #6b5d4d);
+  text-align: center;
+  font-style: italic;
+}
+
+.backup-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.export-button,
+.import-button {
+  flex: 1;
+  padding: 14px 12px;
+  background: var(--color-bg-light, #3d3228);
+  border: 2px solid var(--color-border, #4a3f32);
+  border-radius: 10px;
+  color: var(--color-text-primary, #e8dcc4);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-align: center;
+}
+
+.export-button:active,
+.import-button:active {
+  transform: scale(0.98);
+  background: var(--color-bg-medium, #2a2218);
+}
+
+.import-error {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid #ff6b6b;
+  border-radius: 8px;
+  color: #ff8a8a;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.backup-note {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #6b5d4d);
+  text-align: center;
+  font-style: italic;
+}
+
 /* Tab Navigation */
 .settings-tabs {
   display: flex;
