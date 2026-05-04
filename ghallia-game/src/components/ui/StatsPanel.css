@@ -311,3 +311,92 @@
   border-color: #ff6b6b;
   color: #ff6b6b;
 }
+
+/* Tappable stat items */
+.stat-item.tappable {
+  cursor: pointer;
+  transition: all 200ms ease;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  margin: -4px;
+  padding: 8px;
+}
+
+.stat-item.tappable:active {
+  background: rgba(212, 168, 83, 0.1);
+  border-color: var(--color-gold, #d4a853);
+  transform: scale(0.98);
+}
+
+.info-icon {
+  font-size: 0.75rem;
+  color: var(--color-gold, #d4a853);
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+/* Stat Tooltip Popup */
+.stat-tooltip-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+.stat-tooltip-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-bg-medium, #2a2218);
+  border: 2px solid var(--color-gold, #d4a853);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  z-index: 201;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.stat-tooltip-popup h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  color: var(--color-gold, #d4a853);
+}
+
+.stat-tooltip-popup p {
+  margin: 0 0 20px 0;
+  font-size: 0.95rem;
+  color: var(--color-text-primary, #e8dcc4);
+  line-height: 1.5;
+}
+
+.tooltip-close-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--color-gold-dark, #8a7235) 0%, var(--color-gold, #d4a853) 100%);
+  border: none;
+  border-radius: 10px;
+  color: var(--color-bg-dark, #1a1410);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.tooltip-close-btn:active {
+  transform: scale(0.98);
+}
