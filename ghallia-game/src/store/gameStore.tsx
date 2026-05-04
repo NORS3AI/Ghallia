@@ -2347,7 +2347,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         newResources[mat.resourceId] = (newResources[mat.resourceId] || 0) - (mat.quantity * quantity);
       }
 
-      // If instant craft is enabled, skip queue and add directly to crafted items
+      // If instant craft is enabled, skip queue and add directly
       if (state.devInstantCraft) {
         const newSkillState = { ...state.skills };
         const currentSkill = newSkillState[recipe.craftingSkill];
@@ -2359,6 +2359,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           totalXp: newTotalXp,
           level: newLevel,
         };
+
+        // If recipe produces a resource (like plates/ingots), add to resources
+        // Otherwise add to craftedItems (final sellable items)
+        if (recipe.produces) {
+          return {
+            ...state,
+            resources: {
+              ...newResources,
+              [recipe.produces.resourceId]: (newResources[recipe.produces.resourceId] || 0) + (recipe.produces.quantity * quantity),
+            },
+            skills: newSkillState,
+          };
+        }
 
         return {
           ...state,
