@@ -136,4 +136,17 @@ Project location: `./ghallia-game/`
 
 ---
 
-*Last Updated: January 29, 2026*
+## Developer Notes
+
+### Patch Notes
+**IMPORTANT**: After every game change, update the patch notes in `ghallia-game/src/components/ui/SettingsPanel.tsx`. The `PATCH_NOTES` array at the top of the file contains the version history. Add new changes to the latest version or create a new version entry if needed.
+
+### File Locations
+- **Patch Notes**: `ghallia-game/src/components/ui/SettingsPanel.tsx` - `PATCH_NOTES` array
+- **Game State**: `ghallia-game/src/store/gameStore.tsx`
+- **Character Panel**: `ghallia-game/src/components/ui/CharacterPanel.tsx`
+- **Spells Panel**: `ghallia-game/src/components/ui/SpellsPanel.tsx`
+
+---
+
+*Last Updated: May 5, 2026*

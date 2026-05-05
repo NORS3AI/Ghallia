@@ -371,3 +371,72 @@
 .available-items {
   margin-top: 8px;
 }
+
+/* Tappable Stat Cards */
+.stat-card.tappable {
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.stat-card.tappable:active {
+  transform: scale(0.95);
+}
+
+.stat-card .info-icon {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  margin-left: 2px;
+}
+
+/* Stat Tooltip Popup */
+.stat-tooltip-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+}
+
+.stat-tooltip-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-bg-medium, #2a2218);
+  border: 2px solid var(--color-gold, #d4a853);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  z-index: 201;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.stat-tooltip-popup h3 {
+  margin: 0 0 12px 0;
+  color: var(--color-gold, #d4a853);
+  font-size: 1.2rem;
+}
+
+.stat-tooltip-popup p {
+  margin: 0 0 20px 0;
+  color: var(--color-text-primary, #e8dcc4);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tooltip-close-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--color-gold, #d4a853), #c4983f);
+  border: none;
+  border-radius: 8px;
+  color: var(--color-bg-dark, #1a1410);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.tooltip-close-btn:active {
+  transform: scale(0.97);
+}

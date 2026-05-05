@@ -968,3 +968,71 @@
     font-size: 0.75rem;
   }
 }
+
+/* Patch Notes Styles */
+.patch-notes-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.patch-note {
+  background: var(--color-bg-light, #3d3228);
+  border: 1px solid var(--color-border, #4a3f32);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.patch-note.latest {
+  border-color: var(--color-gold, #d4a853);
+  background: rgba(212, 168, 83, 0.1);
+}
+
+.patch-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.patch-version {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-gold, #d4a853);
+}
+
+.patch-date {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #a89880);
+}
+
+.patch-badge {
+  background: var(--color-gold, #d4a853);
+  color: var(--color-bg-dark, #1a1410);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.patch-changes {
+  margin: 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.patch-changes li {
+  position: relative;
+  padding: 4px 0;
+  font-size: 0.9rem;
+  color: var(--color-text-primary, #e8dcc4);
+}
+
+.patch-changes li::before {
+  content: '•';
+  position: absolute;
+  left: -15px;
+  color: var(--color-gold, #d4a853);
+}

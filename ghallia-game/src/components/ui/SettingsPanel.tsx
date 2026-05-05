@@ -15,7 +15,82 @@ interface SettingsPanelProps {
 }
 
 type TextSize = 'small' | 'medium' | 'large' | 'huge';
-type SettingsTab = 'general' | 'data' | 'account';
+type SettingsTab = 'general' | 'data' | 'account' | 'patchnotes';
+
+interface PatchNote {
+  version: string;
+  date: string;
+  changes: string[];
+}
+
+const PATCH_NOTES: PatchNote[] = [
+  {
+    version: '0.1.5',
+    date: '2026-05-05',
+    changes: [
+      'Added Cast All button in Magic panel',
+      'Added Instant Craft toggle in dev tools',
+      'Fixed instant craft for intermediate items (plates, ingots)',
+      'Auto-equip items when clicking Equip button',
+      'Tap equipped items to unequip them',
+      'Added stat info popups (HP, STR, INT, AGI, STA)',
+      'Added Patch Notes tab in Settings',
+    ],
+  },
+  {
+    version: '0.1.4',
+    date: '2026-05-04',
+    changes: [
+      'Added ability to equip crafted gear',
+      'Added more crafting quantity options (x100, x500, x1K, x5K)',
+      'Added tiered mana regen upgrades (Common, Rare, Epic)',
+      'Extended buff spell durations to 90 seconds',
+      'Added notification badges for Upgrades and Achievements',
+    ],
+  },
+  {
+    version: '0.1.3',
+    date: '2026-05-03',
+    changes: [
+      'Improved crafting speed (10 items = 1 second)',
+      'Added Auto Harvest spell (15 mana, 60s, 100 taps/sec)',
+      'Added floating active spells bar',
+      'Settings panel defaults to Data tab',
+      'Added stat tooltips for Crit and Luck',
+    ],
+  },
+  {
+    version: '0.1.2',
+    date: '2026-05-02',
+    changes: [
+      'Added Character panel with equipment slots',
+      'Added equipment stat bonuses',
+      'Implemented crafting queue system',
+      'Added prestige system with Chaos Points',
+    ],
+  },
+  {
+    version: '0.1.1',
+    date: '2026-05-01',
+    changes: [
+      'Added Magic system with 5 spells',
+      'Added mana resource and regeneration',
+      'Added upgrades system',
+      'Added achievements system',
+    ],
+  },
+  {
+    version: '0.1.0',
+    date: '2026-04-30',
+    changes: [
+      'Initial game release',
+      'Core gathering skills (Logging, Mining, Fishing, etc.)',
+      'Core crafting skills (Sawmill, Smithing, Cooking, etc.)',
+      'Basic resource and gold economy',
+      'Skill leveling system',
+    ],
+  },
+];
 
 const NOTATION_OPTIONS: { value: NumberNotation; label: string; example: string }[] = [
   { value: 'standard', label: 'Standard', example: '1K, 1M, 1B, 1T' },
@@ -379,6 +454,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           >
             👤 Account
           </button>
+          <button
+            className={`settings-tab ${activeTab === 'patchnotes' ? 'active' : ''}`}
+            onClick={() => setActiveTab('patchnotes')}
+          >
+            📜 Patch Notes
+          </button>
         </div>
 
         <div className="settings-content">
@@ -738,6 +819,25 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 </div>
               )}
             </>
+          )}
+
+          {activeTab === 'patchnotes' && (
+            <div className="patch-notes-content">
+              {PATCH_NOTES.map((patch, index) => (
+                <div key={patch.version} className={`patch-note ${index === 0 ? 'latest' : ''}`}>
+                  <div className="patch-header">
+                    <span className="patch-version">v{patch.version}</span>
+                    <span className="patch-date">{patch.date}</span>
+                    {index === 0 && <span className="patch-badge">Latest</span>}
+                  </div>
+                  <ul className="patch-changes">
+                    {patch.changes.map((change, i) => (
+                      <li key={i}>{change}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

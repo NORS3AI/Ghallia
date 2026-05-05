@@ -15,6 +15,31 @@ interface CharacterPanelProps {
   onClose: () => void;
 }
 
+type StatTooltipType = 'hp' | 'str' | 'int' | 'agi' | 'sta' | null;
+
+const STAT_TOOLTIPS: Record<string, { title: string; description: string }> = {
+  hp: {
+    title: 'Health Points (HP)',
+    description: 'Your total health pool. When your HP reaches 0, you\'re defeated. Stamina increases your max HP by 10 per point.',
+  },
+  str: {
+    title: 'Strength (STR)',
+    description: 'Increases your tap power. Each point of Strength gives +1% bonus to all resource gathering from taps.',
+  },
+  int: {
+    title: 'Intellect (INT)',
+    description: 'Boosts your magical abilities. Each point of Intellect increases mana regeneration by +2%.',
+  },
+  agi: {
+    title: 'Agility (AGI)',
+    description: 'Improves your finesse and reflexes. Each point gives +0.5% Luck (bonus resource chance) and +0.25% Dodge chance.',
+  },
+  sta: {
+    title: 'Stamina (STA)',
+    description: 'Increases your durability. Each point of Stamina adds +10 to your maximum HP.',
+  },
+};
+
 const SLOT_CONFIG: { slot: EquipmentSlot; icon: string; label: string }[] = [
   { slot: EquipmentSlot.HEAD, icon: '🪖', label: 'Head' },
   { slot: EquipmentSlot.SHOULDERS, icon: '🦺', label: 'Shoulders' },
@@ -36,6 +61,7 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
   const { state, equipItem, unequipItem } = useGame();
   const { character, equipmentInventory } = state;
   const [selectedSlot, setSelectedSlot] = useState<EquipmentSlot | null>(null);
+  const [activeTooltip, setActiveTooltip] = useState<StatTooltipType>(null);
 
   const getRarityColor = (rarity: Rarity) => {
     return RARITY_DATA[rarity]?.color || '#ffffff';
@@ -47,6 +73,15 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
     : [];
 
   const handleSlotClick = (slot: EquipmentSlot) => {
+    const equipped = character.equipment[slot];
+
+    // If item is equipped, tap to unequip directly
+    if (equipped) {
+      unequipItem(slot);
+      return;
+    }
+
+    // If no item equipped, show available items for this slot
     if (selectedSlot === slot) {
       setSelectedSlot(null);
     } else {
@@ -85,30 +120,30 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
         <div className="character-content">
           {/* Stats Summary */}
           <div className="stats-summary">
-            <div className="stat-card">
+            <div className="stat-card tappable" onClick={() => setActiveTooltip('hp')}>
               <span className="stat-icon">❤️</span>
               <span className="stat-value">{character.currentHp}/{character.maxHp}</span>
-              <span className="stat-label">HP</span>
+              <span className="stat-label">HP <span className="info-icon">ⓘ</span></span>
             </div>
-            <div className="stat-card str">
+            <div className="stat-card str tappable" onClick={() => setActiveTooltip('str')}>
               <span className="stat-icon">💪</span>
               <span className="stat-value">{character.totalStrength}</span>
-              <span className="stat-label">STR</span>
+              <span className="stat-label">STR <span className="info-icon">ⓘ</span></span>
             </div>
-            <div className="stat-card int">
+            <div className="stat-card int tappable" onClick={() => setActiveTooltip('int')}>
               <span className="stat-icon">🧠</span>
               <span className="stat-value">{character.totalIntellect}</span>
-              <span className="stat-label">INT</span>
+              <span className="stat-label">INT <span className="info-icon">ⓘ</span></span>
             </div>
-            <div className="stat-card agi">
+            <div className="stat-card agi tappable" onClick={() => setActiveTooltip('agi')}>
               <span className="stat-icon">🏃</span>
               <span className="stat-value">{character.totalAgility}</span>
-              <span className="stat-label">AGI</span>
+              <span className="stat-label">AGI <span className="info-icon">ⓘ</span></span>
             </div>
-            <div className="stat-card sta">
+            <div className="stat-card sta tappable" onClick={() => setActiveTooltip('sta')}>
               <span className="stat-icon">🛡️</span>
               <span className="stat-value">{character.totalStamina}</span>
-              <span className="stat-label">STA</span>
+              <span className="stat-label">STA <span className="info-icon">ⓘ</span></span>
             </div>
           </div>
 
@@ -247,6 +282,20 @@ export function CharacterPanel({ isOpen, onClose }: CharacterPanelProps) {
           )}
         </div>
       </div>
+
+      {/* Stat Tooltip Popup */}
+      {activeTooltip && (
+        <>
+          <div className="stat-tooltip-backdrop" onClick={() => setActiveTooltip(null)} />
+          <div className="stat-tooltip-popup">
+            <h3>{STAT_TOOLTIPS[activeTooltip].title}</h3>
+            <p>{STAT_TOOLTIPS[activeTooltip].description}</p>
+            <button className="tooltip-close-btn" onClick={() => setActiveTooltip(null)}>
+              Got it!
+            </button>
+          </div>
+        </>
+      )}
     </>
   );
 }

@@ -2464,20 +2464,40 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const equipment = createEquipmentFromRecipe(action.recipeId);
       if (!equipment) return state;
 
-      // Add to equipment inventory and reduce crafted count
-      return {
+      // Auto-equip: move any currently equipped item to inventory
+      const currentlyEquipped = state.character.equipment[equipment.slot];
+      const newInventory = currentlyEquipped
+        ? [...state.equipmentInventory, currentlyEquipped]
+        : [...state.equipmentInventory];
+
+      // Update equipment slots
+      const newEquipment = {
+        ...state.character.equipment,
+        [equipment.slot]: equipment,
+      };
+
+      // Recalculate character stats with new equipment
+      const newCharacter = recalculateCharacterStats({
+        ...state,
+        character: { ...state.character, equipment: newEquipment },
+      });
+
+      const newState = {
         ...state,
         craftedItems: {
           ...state.craftedItems,
           [action.recipeId]: currentCount - 1,
         },
-        equipmentInventory: [...state.equipmentInventory, equipment],
-        characterUnlocked: true, // Unlock character when getting equipment
+        equipmentInventory: newInventory,
+        character: newCharacter,
+        characterUnlocked: true,
         stats: {
           ...state.stats,
           totalEquipmentObtained: state.stats.totalEquipmentObtained + 1,
         },
       };
+
+      return recalculateBonuses(newState);
     }
 
     case 'LOAD_GAME': {
